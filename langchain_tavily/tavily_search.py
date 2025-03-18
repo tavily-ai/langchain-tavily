@@ -16,6 +16,10 @@ class TavilyInput(BaseModel):
     """Input for [TavilySearchResults]"""
 
     query: str = Field(description=("Search query to look up"))
+    topic: Literal["general", "news", "finance"] = Field(
+        default="general",
+        description="The category of the search. Can be 'general', 'news', or 'finance'",
+    )
     include_domains: Optional[List[str]] = Field(
         default=[],
         description="A list of domains to specifically include in the search results",
@@ -150,6 +154,7 @@ class TavilySearchResults(BaseTool):  # type: ignore[override]
     """  # noqa: E501
 
     name: str = "tavily_search_results_json"
+
     description: str = (
         "A search engine optimized for comprehensive, accurate, and trusted results. "
         "Useful for when you need to answer questions about current events. "
@@ -192,8 +197,8 @@ class TavilySearchResults(BaseTool):  # type: ignore[override]
     
     default is 5
     """
-    topic: Optional[Literal["general", "news"]] = "general"
-    """The category of the search. Can be "general" or "news".
+    topic: Literal["general", "news", "finance"] = "general"
+    """The category of the search. Can be "general", "news", or "finance".
     
     Default is "general".
     """
@@ -227,6 +232,7 @@ class TavilySearchResults(BaseTool):  # type: ignore[override]
     def _run(
         self,
         query: str,
+        topic: Literal["general", "news", "finance"] = "general",
         include_domains: Optional[List[str]] = None,
         exclude_domains: Optional[List[str]] = None,
         search_depth: Optional[Literal["basic", "advanced"]] = "advanced",
