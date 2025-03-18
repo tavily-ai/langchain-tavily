@@ -62,7 +62,7 @@ tool = TavilySearch(
 )
 ```
 
-### [Invoke directly with args](/docs/concepts/tools)
+### Invoke directly with args
 
 The Tavily search tool accepts the following arguments during invocation:
 - `query` (required): A natural language search query
@@ -164,7 +164,7 @@ tool = TavilyExtract(
 )
 ```
 
-### [Invoke directly with args](/docs/concepts/tools)
+### Invoke directly with args
 
 The Tavily extract tool accepts the following arguments during invocation:
 - `urls` (required): A list of URLs to extract content from. 
