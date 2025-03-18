@@ -2,17 +2,17 @@ from typing import Type
 
 from langchain_tests.integration_tests import ToolsIntegrationTests
 
-from langchain_tavily.tavily_search import TavilySearchResults
+from langchain_tavily.tavily_search import TavilySearch
 
 
 class TestTavilySearchToolIntegration(ToolsIntegrationTests):
     @property
-    def tool_constructor(self) -> Type[TavilySearchResults]:
-        return TavilySearchResults
+    def tool_constructor(self) -> Type[TavilySearch]:
+        return TavilySearch
 
     @property
     def tool_constructor_params(self) -> dict:
-        # Parameters for initializing the TavilySearchResults tool
+        # Parameters for initializing the TavilySearch tool
         return {
             "max_results": 5,
             "search_depth": "basic",
