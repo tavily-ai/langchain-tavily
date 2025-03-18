@@ -4,6 +4,8 @@ This package contains the LangChain integration with Tavily
 
 [langchain-tavily](https://pypi.org/project/langchain-tavily/)
 
+[Tavily website](https://tavily.com/)
+
 ## Installation
 
 ```bash
@@ -32,12 +34,12 @@ The tool accepts various parameters during instantiation:
 
 - `max_results` (optional, int): Maximum number of search results to return. Default is 5.
 - `topic` (optional, str): Category of the search. Can be "general" or "news". Default is "general".
-- `include_answer` (optional, bool): Include a short answer to original query in results. Default is False.
+- `include_answer` (optional, bool): Include an answer to original query in results. Default is False.
 - `include_raw_content` (optional, bool): Include cleaned and parsed HTML of each search result. Default is False.
-- `include_images` (optional, bool): Include query-related images in response. Default is False.
+- `include_images` (optional, bool): Include a list of query related images in the response. Default is False.
 - `include_image_descriptions` (optional, bool): Include descriptive text for each image. Default is False.
 - `search_depth` (optional, str): Depth of the search, either "basic" or "advanced". Default is "advanced".
-- `time_range` (optional, str): Time filter for results - "day", "week", "month", or "year". Default is None.
+- `time_range` (optional, str): The time range back from the current date to filter results - "day", "week", "month", or "year". Default is None.
 - `include_domains` (optional, List[str]): List of domains to specifically include. Default is None.
 - `exclude_domains` (optional, List[str]): List of domains to specifically exclude. Default is None.
 
@@ -65,10 +67,10 @@ tool = TavilySearch(
 The Tavily search tool accepts the following arguments during invocation:
 - `query` (required): A natural language search query
 - The following arguments can also be set during invokation : `include_images`, `search_depth` , `time_range`, `include_domains`, `exclude_domains`, `include_images`
-- For reliability and performance reasons, certain parameters that affect response size cannot be modified during invocation: `include_answer`, `include_raw_content`, and `search_depth`. These limitations prevent unexpected context window issues and ensure consistent results.
+- For reliability and performance reasons, certain parameters that affect response size cannot be modified during invocation: `include_answer` and `include_raw_content`. These limitations prevent unexpected context window issues and ensure consistent results.
 
 
-NOTE: The optional arguments are available for ReAct agents to dynamically set, if you set a argument during instantiation and then invoke the tool with a different value, the tool will use the value you passed during invokation. To read more about ReAct agents, check out the [ReAct agent](https://python.langchain.com/v0.1/docs/modules/agents/agent_types/react/) documentation.
+NOTE: The optional arguments are available for agents to dynamically set, if you set a argument during instantiation and then invoke the tool with a different value, the tool will use the value you passed during invokation.
 
 ```python
 # Basic query
@@ -96,6 +98,49 @@ output:
   'response_time': 2.3
 }
 ```
+### Chaining
+
+We can use our tool in a chain by first binding it to a [tool-calling model](/docs/how_to/tool_calling/) and then calling it. This gives the agent the ability to dynamically set the available arguments to the Tavily search tool.
+
+In the below example when we ask the agent to find "Latest news on the stock market from the New York Times" the agent will dynamically set the argments for the Tavily search tool to {'arguments': '{"query":"latest stock market news","include_domains":["nytimes.com"],"time_range":"day"}'}
+
+
+```python
+# !pip install -qU langchain langchain-openai langchain-tavily
+import datetime
+
+from langchain.chat_models import init_chat_model
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.runnables import RunnableConfig, chain
+
+llm = init_chat_model(model="gpt-4o", model_provider="openai", temperature=0)
+
+today = datetime.datetime.today().strftime("%D")
+prompt = ChatPromptTemplate(
+    [
+        ("system", f"You are a helpful assistant. The date today is {today}."),
+        ("human", "{user_input}"),
+        ("placeholder", "{messages}"),
+    ]
+)
+
+# specifying tool_choice will force the model to call this tool.
+llm_with_tools = llm.bind_tools([tool])
+
+llm_chain = prompt | llm_with_tools
+
+
+@chain
+def tool_chain(user_input: str, config: RunnableConfig):
+    input_ = {"user_input": user_input}
+    ai_msg = llm_chain.invoke(input_, config=config)
+    tool_msgs = tool.batch(ai_msg.tool_calls, config=config)
+    return llm_chain.invoke({**input_, "messages": [ai_msg, *tool_msgs]}, config=config)
+
+
+tool_chain.invoke("who won the super bowl this year")
+```
+
 
 ## Tavily Extract
 
@@ -125,7 +170,7 @@ The Tavily extract tool accepts the following arguments during invocation:
 - `urls` (required): A list of URLs to extract content from. 
 - Both `extract_depth` and `include_images` can also be set during invokation
 
-NOTE: The optional arguments are available for ReAct agents to dynamically set, if you set a argument during instantiation and then invoke the tool with a different value, the tool will use the value you passed during invokation. To read more about ReAct agents, check out the [ReAct agent](https://python.langchain.com/v0.1/docs/modules/agents/agent_types/react/) documentation.
+NOTE: The optional arguments are available for agents to dynamically set, if you set a argument during instantiation and then invoke the tool with a different value, the tool will use the value you passed during invokation. 
 
 ```python
 # Extract content from a URL

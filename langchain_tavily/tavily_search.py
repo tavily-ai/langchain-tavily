@@ -18,23 +18,67 @@ class TavilyInput(BaseModel):
     query: str = Field(description=("Search query to look up"))
     include_domains: Optional[List[str]] = Field(
         default=[],
-        description="A list of domains to specifically include in the search results",
+        description="""A list of domains to restrict search results to.
+
+        Use this parameter when:
+        1. The user explicitly requests information from specific websites (e.g., "Find climate data from nasa.gov")
+        2. The user mentions an organization or company without specifying the domain (e.g., "Find information about iPhones from Apple")
+
+        In both cases, you should determine the appropriate domains (e.g., ["nasa.gov"] or ["apple.com"]) and set this parameter.
+
+        Results will ONLY come from the specified domains - no other sources will be included.
+        Default is None (no domain restriction).
+        """,  # noqa: E501
     )
     exclude_domains: Optional[List[str]] = Field(
         default=[],
-        description="A list of domains to specifically exclude from the search results",
+        description="""A list of domains to exclude from search results.
+
+        Use this parameter when:
+        1. The user explicitly requests to avoid certain websites (e.g., "Find information about climate change but not from twitter.com")
+        2. The user mentions not wanting results from specific organizations without naming the domain (e.g., "Find phone reviews but nothing from Apple")
+
+        In both cases, you should determine the appropriate domains to exclude (e.g., ["twitter.com"] or ["apple.com"]) and set this parameter.
+
+        Results will filter out all content from the specified domains.
+        Default is None (no domain exclusion).
+        """,  # noqa: E501
     )
     search_depth: Optional[Literal["basic", "advanced"]] = Field(
         default="advanced",
-        description="The depth of the search. It can be 'basic' or 'advanced'",
+        description="""Controls search thoroughness and result comprehensiveness.
+    
+        Use "basic" for simple queries requiring quick, straightforward answers.
+        
+        Use "advanced" (default) for complex queries, specialized topics, 
+        rare information, or when in-depth analysis is needed.
+        """,  # noqa: E501
     )
     include_images: Optional[bool] = Field(
         default=False,
-        description="Include a list of query related images in the response",
+        description="""Determines if the search returns relevant images along with text results.
+   
+        Set to True when the user explicitly requests visuals or when images would 
+        significantly enhance understanding (e.g., "Show me what black holes look like," 
+        "Find pictures of Renaissance art").
+        
+        Leave as False (default) for most informational queries where text is sufficient.
+        """,  # noqa: E501
     )
     time_range: Optional[Literal["day", "week", "month", "year"]] = Field(
         default=None,
-        description="The time range back from the current date to filter results",
+        description="""Limits results to content published within a specific timeframe.
+        
+        ONLY set this when the user explicitly mentions a time period 
+        (e.g., "latest AI news," "articles from last week").
+        
+        For less popular or niche topics, use broader time ranges 
+        ("month" or "year") to ensure sufficient relevant results.
+   
+        Options: "day" (24h), "week" (7d), "month" (30d), "year" (365d).
+        
+        Default is None.
+        """,  # noqa: E501
     )
 
 
@@ -62,10 +106,6 @@ def _generate_suggestions(params: dict) -> list:
 
 
 class TavilySearch(BaseTool):  # type: ignore[override]
-    """
-    UPDATE THIS CODE BLOCK EXAMPLE !!!!!!!!!!!!!!!!!!
-    """
-
     """Tool that queries the Tavily Search API and gets back json.
 
     Setup:
@@ -85,7 +125,7 @@ class TavilySearch(BaseTool):  # type: ignore[override]
                 max_results=1,
                 topic="general",
                 # include_answer=False,
-                # include_raw_content=False, 
+                # include_raw_content=False,
                 # include_images=False,
                 # include_image_descriptions=False,
                 # search_depth="advanced",
@@ -144,7 +184,7 @@ class TavilySearch(BaseTool):  # type: ignore[override]
     search_depth: Optional[Literal["basic", "advanced"]] = "advanced"
     """The depth of the search. It can be 'basic' or 'advanced'
     
-    default is "basic"
+    default is "advanced"
     """
     include_images: Optional[bool] = False
     """Include a list of query related images in the response
@@ -202,7 +242,19 @@ class TavilySearch(BaseTool):  # type: ignore[override]
         time_range: Optional[Literal["day", "week", "month", "year"]] = None,
         run_manager: Optional[CallbackManagerForToolRun] = None,
     ) -> Dict[str, Any]:
-        """Use the tool."""
+        """Execute a search query using the Tavily Search API.
+
+        Returns:
+            Dict[str, Any]: Search results containing:
+                - query: Original search query
+                - results: List of search results, each with:
+                    - title: Title of the page
+                    - url: URL of the page
+                    - content: Relevant content snippet
+                    - score: Relevance score
+                - images: List of relevant images (if include_images=True)
+                - response_time: Time taken for the search
+        """
         try:
             # Execute search with parameters directly
             raw_results = self.api_wrapper.raw_results(
