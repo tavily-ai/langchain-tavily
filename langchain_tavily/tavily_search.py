@@ -12,7 +12,7 @@ from pydantic import BaseModel, Field
 from langchain_tavily._utilities import TavilySearchAPIWrapper
 
 
-class TavilyInput(BaseModel):
+class TavilySearchInput(BaseModel):
     """Input for [TavilySearchResults]"""
 
     query: str = Field(description=("Search query to look up"))
@@ -181,7 +181,7 @@ class TavilySearch(BaseTool):  # type: ignore[override]
         "Input should be a search query."
     )
 
-    args_schema: Type[BaseModel] = TavilyInput
+    args_schema: Type[BaseModel] = TavilySearchInput
     handle_tool_error: bool = True
 
     include_domains: Optional[List[str]] = None
