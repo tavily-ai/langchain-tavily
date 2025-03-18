@@ -38,7 +38,7 @@ The tool accepts various parameters during instantiation:
 - `include_raw_content` (optional, bool): Include cleaned and parsed HTML of each search result. Default is False.
 - `include_images` (optional, bool): Include a list of query related images in the response. Default is False.
 - `include_image_descriptions` (optional, bool): Include descriptive text for each image. Default is False.
-- `search_depth` (optional, str): Depth of the search, either "basic" or "advanced". Default is "advanced".
+- `search_depth` (optional, str): Depth of the search, either "basic" or "advanced". Default is "basic".
 - `time_range` (optional, str): The time range back from the current date to filter results - "day", "week", "month", or "year". Default is None.
 - `include_domains` (optional, List[str]): List of domains to specifically include. Default is None.
 - `exclude_domains` (optional, List[str]): List of domains to specifically exclude. Default is None.
@@ -55,7 +55,7 @@ tool = TavilySearch(
     # include_raw_content=False, 
     # include_images=False,
     # include_image_descriptions=False,
-    # search_depth="advanced",
+    # search_depth="basic",
     # time_range="day",
     # include_domains=None,
     # exclude_domains=None
