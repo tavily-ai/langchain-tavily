@@ -2,7 +2,7 @@
 
 This package contains the LangChain integration with Tavily
 
-[langchain-tavily](https://pypi.org/project/langchain-{tavily}/)
+[langchain-tavily](https://pypi.org/project/langchain-tavily/)
 
 ## Installation
 
@@ -22,72 +22,91 @@ if not os.environ.get("TAVILY_API_KEY"):
 ```
 
 
-## Tavily Search Results
+## Tavily Search
 
 Here we show how to instantiate an instance of the Tavily search tool. The tool accepts various parameters to customize the search. After instantiation we invoke the tool with a simple query. This tool allows you to complete search queries using Tavily's Search API endpoint.
 
-### [Invoke directly with args](/docs/concepts/tools)
+### Instantiation
 
-The `TavilySearchResults` tool accepts the following arguments during invocation:
-- `query` (required): A natural language search query
-- `search_depth` (optional): The depth of the search ("basic" or "advanced")
-- `time_range` (optional): Time range filter ("day", "week", "month", "year")
-- `include_domains` (optional): List of domains to limit search results to
-- `exclude_domains` (optional): List of domains to exclude from search results
-- `include_images` (optional): Whether to include query-related images in response
+The tool accepts various parameters during instantiation:
 
-NOTE: The optional arguments are available for ReAct agents to dynamically set, if you set a argument during instantiation and then Invoke the tool with a different value, the tool will use the value you passed during invokation. To read more about ReAct agents, check out the [ReAct agent](https://python.langchain.com/v0.1/docs/modules/agents/agent_types/react/) documentation.
+- `max_results` (optional, int): Maximum number of search results to return. Default is 5.
+- `topic` (optional, str): Category of the search. Can be "general" or "news". Default is "general".
+- `include_answer` (optional, bool): Include a short answer to original query in results. Default is False.
+- `include_raw_content` (optional, bool): Include cleaned and parsed HTML of each search result. Default is False.
+- `include_images` (optional, bool): Include query-related images in response. Default is False.
+- `include_image_descriptions` (optional, bool): Include descriptive text for each image. Default is False.
+- `search_depth` (optional, str): Depth of the search, either "basic" or "advanced". Default is "advanced".
+- `time_range` (optional, str): Time filter for results - "day", "week", "month", or "year". Default is None.
+- `include_domains` (optional, List[str]): List of domains to specifically include. Default is None.
+- `exclude_domains` (optional, List[str]): List of domains to specifically exclude. Default is None.
 
 For a comprehensive overview of the available parameters, refer to the [Tavily Search API documentation](https://docs.tavily.com/documentation/api-reference/endpoint/search)
 
 ```python
-from langchain_tavily import TavilySearchResults
+from langchain_tavily import TavilySearch
 
-tool = TavilySearchResults(
+tool = TavilySearch(
     max_results=5,
     topic="general",
-    include_answer=False,
-    include_raw_content=False, 
-    # include_images=True,
-    # include_image_descriptions=True
+    # include_answer=False,
+    # include_raw_content=False, 
+    # include_images=False,
+    # include_image_descriptions=False,
+    # search_depth="advanced",
     # time_range="day",
-    # include_domains=[...],
-    # exclude_domains=[...],
+    # include_domains=None,
+    # exclude_domains=None
 )
+```
 
+### [Invoke directly with args](/docs/concepts/tools)
+
+The Tavily search tool accepts the following arguments during invocation:
+- `query` (required): A natural language search query
+- The following arguments can also be set during invokation : `include_images`, `search_depth` , `time_range`, `include_domains`, `exclude_domains`, `include_images`
+- For reliability and performance reasons, certain parameters that affect response size cannot be modified during invocation: `include_answer`, `include_raw_content`, and `search_depth`. These limitations prevent unexpected context window issues and ensure consistent results.
+
+
+NOTE: The optional arguments are available for ReAct agents to dynamically set, if you set a argument during instantiation and then invoke the tool with a different value, the tool will use the value you passed during invokation. To read more about ReAct agents, check out the [ReAct agent](https://python.langchain.com/v0.1/docs/modules/agents/agent_types/react/) documentation.
+
+```python
 # Basic query
 tool.invoke({"query": "What happened at the last wimbledon"})
 ```
 output:
 ```bash
-[{'title': "Andy Murray pulls out of the men's singles draw at his last Wimbledon",
-  'url': 'https://www.nbcnews.com/news/sports/andy-murray-wimbledon-tennis-singles-draw-rcna159912',
-  'content': "NBC News Now LONDON — Andy Murray, one of the last decade's...",
-  'score': 0.6755297},
- {'title': "He beat Roger Federer in his last ever match at Wimbledon and now he's ...",
-  'url': 'https://www.thetennisgazette.com/features/i-beat-roger-federer-in-his-last-ever-match-at-wimbledon-and-now-ive-won-eight-atp-titles/',
-  'content': "He beat Roger Federer in his last ever match at Wimbledon...",
-  'score': 0.64128816},
+{
+ 'query': 'What happened at the last wimbledon', 
+ 'follow_up_questions': None, 
+ 'answer': None, 
+ 'images': [], 
+ 'results': 
+ [{'url': 'https://en.wikipedia.org/wiki/Wimbledon_Championships', 
+   'title': 'Wimbledon Championships - Wikipedia', 
+   'content': 'Due to the COVID-19 pandemic, Wimbledon 2020 was cancelled ...',
+   'score': 0.62365627198, 
+   'raw_content': None}, 
     ......................................................................
- {'title': "Murray's Wimbledon farewell: The man 'who left no stone unturned'",
-  'url': 'https://www.atptour.com/en/news/murray-wimbledon-2024-reflections',
-  'content': "It was a moment nobody in the tennis world will soon ...",
-  'score': 0.59061456}]
+    {'url': 'https://www.cbsnews.com/news/wimbledon-men-final-carlos-alcaraz-novak-djokovic/', 
+    'title': "Carlos Alcaraz beats Novak Djokovic at Wimbledon men's final to ...", 
+    'content': 'In attendance on Sunday was Catherine, the Princess of Wales ...',
+    'score': 0.5154731446, 
+    'raw_content': None}],
+  'response_time': 2.3
+}
 ```
 
 ## Tavily Extract
 
-Here we show how to instantiate an instance of the Tavily extract tool. After instantiation we invoke the tool with a single URL. Note, the tools supports invokation with a list of multiple URLs. This tool allows you to extract content from URLs using Tavily's Extract API endpoint.
+Here we show how to instantiate an instance of the Tavily extract tool. After instantiation we invoke the tool with a list of URLs. This tool allows you to extract content from URLs using Tavily's Extract API endpoint.
 
-### [Invoke directly with args](/docs/concepts/tools)
+### Instantiation
 
-The `TavilyExtract` tool accepts the following arguments:
+The tool accepts various parameters during instantiation:
 
-- `urls` (required): A list of URLs to extract content from.
-- `extract_depth` (optional): The depth of the extraction.
-- `include_images` (optional): Whether to include images in the extraction.
-
-NOTE: The optional arguments are available for ReAct agents to dynamically set, if you set a argument during instantiation and then Invoke the tool with a different value, the tool will use the value you passed during invokation. To read more about ReAct agents, check out the [ReAct agent](https://python.langchain.com/v0.1/docs/modules/agents/agent_types/react/) documentation.
+- `extract_depth` (optional, str): The depth of the extraction, either "basic" or "advanced". Default is "advanced".
+- `include_images` (optional, bool): Whether to include images in the extraction. Default is False.
 
 For a comprehensive overview of the available parameters, refer to the [Tavily Extract API documentation](https://docs.tavily.com/documentation/api-reference/endpoint/extract)
 
@@ -95,10 +114,20 @@ For a comprehensive overview of the available parameters, refer to the [Tavily E
 from langchain_tavily import TavilyExtract
 
 tool = TavilyExtract(
-    extract_depth="basic",
+    extract_depth="advanced",
     include_images=False,
 )
+```
 
+### [Invoke directly with args](/docs/concepts/tools)
+
+The Tavily extract tool accepts the following arguments during invocation:
+- `urls` (required): A list of URLs to extract content from. 
+- Both `extract_depth` and `include_images` can also be set during invokation
+
+NOTE: The optional arguments are available for ReAct agents to dynamically set, if you set a argument during instantiation and then invoke the tool with a different value, the tool will use the value you passed during invokation. To read more about ReAct agents, check out the [ReAct agent](https://python.langchain.com/v0.1/docs/modules/agents/agent_types/react/) documentation.
+
+```python
 # Extract content from a URL
 result = tool.invoke({
     "urls": ["https://en.wikipedia.org/wiki/Lionel_Messi"]
@@ -118,3 +147,78 @@ output:
 }
 ```
 
+## Tavily Research Agent
+
+This example demonstrates how to build a powerful web research agent using Tavily's search and extract capabilities integrated with LangChain's OpenAIFunctionsAgent.
+
+### Features
+
+- Internet Search: Query the web for up-to-date information using Tavily's search API
+- Content Extraction: Extract and analyze specific content from web pages
+- Seamless Integration: Works with OpenAI's function calling capability for reliable tool use
+- Source Citation: Automatically includes sources with links in responses
+
+```python
+# !pip install -qU langchain langchain-openai langchain-tavily
+"""Test Tavily search and extract with OpenAIFunctionsAgent."""
+from langchain_tavily import TavilySearch, TavilyExtract
+from langchain_openai import ChatOpenAI
+from langchain.agents import AgentExecutor, OpenAIFunctionsAgent
+from langchain_core.messages import SystemMessage
+from langchain_core.tools import tool
+import os
+
+@tool
+def tavily_search(query: str) -> str:
+    """Search the internet for information. 
+    Input should be a search query string."""
+    search = TavilySearch(max_results=3)
+    return search.invoke(query)
+
+@tool
+def tavily_extract(urls: list) -> str:
+    """Extract content from specified URLs.
+    Input should be a list of URLs to extract content from."""
+    extract = TavilyExtract(extract_depth="basic")
+    return extract.invoke({"urls": urls})
+
+def test_tavily_agent(query="What are the latest developments in quantum computing?"):
+    """Test Tavily search and extract with OpenAIFunctionsAgent."""
+    # Initialize tools
+    tools = [tavily_search, tavily_extract]
+    
+    # Create the system message
+    system_message = SystemMessage(
+        content="""You are a web researcher who answers user questions by looking up information 
+        on the internet and retrieving contents of helpful documents.
+        
+        When using the extract tool, provide a list of URLs directly.
+        
+        Always cite your sources with links."""
+    )
+    
+    try:
+        # Create OpenAI Functions agent
+        llm = ChatOpenAI(temperature=0, model="gpt-4-turbo-preview")
+        agent_prompt = OpenAIFunctionsAgent.create_prompt(system_message)
+        agent = OpenAIFunctionsAgent(llm=llm, tools=tools, prompt=agent_prompt)
+        
+        # Create agent executor
+        agent_executor = AgentExecutor(
+            agent=agent, 
+            tools=tools, 
+            verbose=True,
+            max_iterations=10
+        )
+        
+        # Run query
+        result = agent_executor.invoke({"input": query})
+        print("\nFinal Answer:", result["output"])
+        return result["output"]
+    except Exception as e:
+        print(f"Error: {e}")
+        raise
+
+if __name__ == "__main__":
+    test_tavily_agent()
+```
