@@ -38,6 +38,7 @@ class TavilySearchAPIWrapper(BaseModel):
     def raw_results(
         self,
         query: str,
+        topic: Literal["general", "news", "finance"] = "general",
         max_results: Optional[int] = 5,
         search_depth: Optional[Literal["basic", "advanced"]] = "advanced",
         include_domains: Optional[List[str]] = None,
@@ -46,7 +47,6 @@ class TavilySearchAPIWrapper(BaseModel):
         include_raw_content: Optional[bool] = False,
         include_images: Optional[bool] = False,
         include_image_descriptions: Optional[bool] = False,
-        topic: Optional[Literal["general", "news"]] = "general",
         time_range: Optional[Literal["day", "week", "month", "year"]] = None,
     ) -> Dict:
         params = {
@@ -83,6 +83,7 @@ class TavilySearchAPIWrapper(BaseModel):
     def results(
         self,
         query: str,
+        topic: Literal["general", "news", "finance"] = "general",
         max_results: Optional[int] = 5,
         search_depth: Optional[Literal["basic", "advanced"]] = "advanced",
         include_domains: Optional[List[str]] = [],
@@ -93,6 +94,7 @@ class TavilySearchAPIWrapper(BaseModel):
     ) -> List[Dict]:
         raw_search_results = self.raw_results(
             query,
+            topic=topic,
             max_results=max_results,
             search_depth=search_depth,
             include_domains=include_domains,
@@ -106,6 +108,7 @@ class TavilySearchAPIWrapper(BaseModel):
     async def raw_results_async(
         self,
         query: str,
+        topic: Literal["general", "news", "finance"] = "general",
         max_results: Optional[int] = 5,
         search_depth: Optional[Literal["basic", "advanced"]] = "advanced",
         include_domains: Optional[List[str]] = None,
@@ -153,6 +156,7 @@ class TavilySearchAPIWrapper(BaseModel):
     async def results_async(
         self,
         query: str,
+        topic: Literal["general", "news", "finance"] = "general",
         max_results: Optional[int] = 5,
         search_depth: Optional[Literal["basic", "advanced"]] = "advanced",
         include_domains: Optional[List[str]] = [],
@@ -163,6 +167,7 @@ class TavilySearchAPIWrapper(BaseModel):
     ) -> List[Dict]:
         results_json = await self.raw_results_async(
             query=query,
+            topic=topic,
             max_results=max_results,
             search_depth=search_depth,
             include_domains=include_domains,
