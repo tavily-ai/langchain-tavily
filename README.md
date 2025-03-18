@@ -33,7 +33,7 @@ Here we show how to instantiate an instance of the Tavily search tool. The tool 
 The tool accepts various parameters during instantiation:
 
 - `max_results` (optional, int): Maximum number of search results to return. Default is 5.
-- `topic` (optional, str): Category of the search. Can be "general" or "news". Default is "general".
+- `topic` (optional, str): Category of the search. Can be "general", "news", or "finance". Default is "general".
 - `include_answer` (optional, bool): Include an answer to original query in results. Default is False.
 - `include_raw_content` (optional, bool): Include cleaned and parsed HTML of each search result. Default is False.
 - `include_images` (optional, bool): Include a list of query related images in the response. Default is False.
@@ -98,47 +98,57 @@ output:
   'response_time': 2.3
 }
 ```
-### Chaining
+### Agent Tool Calling
 
-We can use our tool in a chain by first binding it to a [tool-calling model](/docs/how_to/tool_calling/) and then calling it. This gives the agent the ability to dynamically set the available arguments to the Tavily search tool.
+We can use our tools directly with an agent executor by binding the tool to the agent. This gives the agent the ability to dynamically set the available arguments to the Tavily search tool.
 
-In the below example when we ask the agent to find "Latest news on the stock market from the New York Times" the agent will dynamically set the argments for the Tavily search tool to {'arguments': '{"query":"latest stock market news","include_domains":["nytimes.com"],"time_range":"day"}'}
+In the below example when we ask the agent to find "What is the most popular sport in the world? include only wikipedia sources" the agent will dynamically set the argments and invoke Tavily search tool : Invoking `tavily_search` with `{'query': 'most popular sport in the world', 'include_domains': ['wikipedia.org'], 'search_depth': 'basic'}`
 
 
 ```python
 # !pip install -qU langchain langchain-openai langchain-tavily
+from typing import Any, Dict, Optional
 import datetime
 
+from langchain.agents import create_openai_tools_agent, AgentExecutor
 from langchain.chat_models import init_chat_model
-from langchain_core.prompts import ChatPromptTemplate
-from langchain_core.runnables import RunnableConfig, chain
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+from langchain_openai import ChatOpenAI
+from langchain_tavily import TavilySearch
+from langchain.schema import HumanMessage, SystemMessage
 
+# Initialize LLM
 llm = init_chat_model(model="gpt-4o", model_provider="openai", temperature=0)
 
-today = datetime.datetime.today().strftime("%D")
-prompt = ChatPromptTemplate(
-    [
-        ("system", f"You are a helpful assistant. The date today is {today}."),
-        ("human", "{user_input}"),
-        ("placeholder", "{messages}"),
-    ]
+# Initialize Tavily Search Tool
+tavily_search_tool = TavilySearch(
+    max_results=5,
+    topic="general",
 )
 
-# specifying tool_choice will force the model to call this tool.
-llm_with_tools = llm.bind_tools([tool])
+# Set up Prompt with 'agent_scratchpad'
+today = datetime.datetime.today().strftime("%D")
+prompt = ChatPromptTemplate.from_messages([
+    ("system", f"""You are a helpful reaserch assistant, you will be given a query and you will need to 
+    search the web for the most relevant information. The date today is {today}."""),
+    MessagesPlaceholder(variable_name="messages"),
+    MessagesPlaceholder(variable_name="agent_scratchpad"),  # Required for tool calls
+])
 
-llm_chain = prompt | llm_with_tools
+# Create an agent that can use tools
+agent = create_openai_tools_agent(
+    llm=llm,
+    tools=[tavily_search_tool],
+    prompt=prompt
+)
 
+# Create an Agent Executor to handle tool execution
+agent_executor = AgentExecutor(agent=agent, tools=[tavily_search_tool], verbose=True)
 
-@chain
-def tool_chain(user_input: str, config: RunnableConfig):
-    input_ = {"user_input": user_input}
-    ai_msg = llm_chain.invoke(input_, config=config)
-    tool_msgs = tool.batch(ai_msg.tool_calls, config=config)
-    return llm_chain.invoke({**input_, "messages": [ai_msg, *tool_msgs]}, config=config)
+user_input =  "What is the most popular sport in the world? include only wikipedia sources"
 
-
-tool_chain.invoke("who won the super bowl this year")
+# Construct input properly as a dictionary
+response = agent_executor.invoke({"messages": [HumanMessage(content=user_input)]})
 ```
 
 
@@ -150,7 +160,7 @@ Here we show how to instantiate an instance of the Tavily extract tool. After in
 
 The tool accepts various parameters during instantiation:
 
-- `extract_depth` (optional, str): The depth of the extraction, either "basic" or "advanced". Default is "advanced".
+- `extract_depth` (optional, str): The depth of the extraction, either "basic" or "advanced". Default is "basic ".
 - `include_images` (optional, bool): Whether to include images in the extraction. Default is False.
 
 For a comprehensive overview of the available parameters, refer to the [Tavily Extract API documentation](https://docs.tavily.com/documentation/api-reference/endpoint/extract)
@@ -194,76 +204,61 @@ output:
 
 ## Tavily Research Agent
 
-This example demonstrates how to build a powerful web research agent using Tavily's search and extract capabilities integrated with LangChain's OpenAIFunctionsAgent.
+This example demonstrates how to build a powerful web research agent using Tavily's search and extract Langchain tools.
 
 ### Features
 
 - Internet Search: Query the web for up-to-date information using Tavily's search API
 - Content Extraction: Extract and analyze specific content from web pages
 - Seamless Integration: Works with OpenAI's function calling capability for reliable tool use
-- Source Citation: Automatically includes sources with links in responses
 
 ```python
 # !pip install -qU langchain langchain-openai langchain-tavily
-"""Test Tavily search and extract with OpenAIFunctionsAgent."""
-from langchain_tavily import TavilySearch, TavilyExtract
+from typing import Any, Dict, Optional
+import datetime
+
+from langchain.agents import create_openai_tools_agent, AgentExecutor
+from langchain.chat_models import init_chat_model
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_openai import ChatOpenAI
-from langchain.agents import AgentExecutor, OpenAIFunctionsAgent
-from langchain_core.messages import SystemMessage
-from langchain_core.tools import tool
-import os
+from langchain_tavily import TavilySearch, TavilyExtract
+from langchain.schema import HumanMessage, SystemMessage
 
-@tool
-def tavily_search(query: str) -> str:
-    """Search the internet for information. 
-    Input should be a search query string."""
-    search = TavilySearch(max_results=3)
-    return search.invoke(query)
+# Initialize LLM
+llm = ChatOpenAI(temperature=0, model="gpt-4o")
 
-@tool
-def tavily_extract(urls: list) -> str:
-    """Extract content from specified URLs.
-    Input should be a list of URLs to extract content from."""
-    extract = TavilyExtract(extract_depth="basic")
-    return extract.invoke({"urls": urls})
+# Initialize Tavily Search Tool
+tavily_search_tool = TavilySearch(
+    max_results=5,
+    topic="general",
+)
+# Initialize Tavily Extract Tool
+tavily_extract_tool = TavilyExtract()
 
-def test_tavily_agent(query="What are the latest developments in quantum computing?"):
-    """Test Tavily search and extract with OpenAIFunctionsAgent."""
-    # Initialize tools
-    tools = [tavily_search, tavily_extract]
-    
-    # Create the system message
-    system_message = SystemMessage(
-        content="""You are a web researcher who answers user questions by looking up information 
-        on the internet and retrieving contents of helpful documents.
-        
-        When using the extract tool, provide a list of URLs directly.
-        
-        Always cite your sources with links."""
-    )
-    
-    try:
-        # Create OpenAI Functions agent
-        llm = ChatOpenAI(temperature=0, model="gpt-4-turbo-preview")
-        agent_prompt = OpenAIFunctionsAgent.create_prompt(system_message)
-        agent = OpenAIFunctionsAgent(llm=llm, tools=tools, prompt=agent_prompt)
-        
-        # Create agent executor
-        agent_executor = AgentExecutor(
-            agent=agent, 
-            tools=tools, 
-            verbose=True,
-            max_iterations=10
-        )
-        
-        # Run query
-        result = agent_executor.invoke({"input": query})
-        print("\nFinal Answer:", result["output"])
-        return result["output"]
-    except Exception as e:
-        print(f"Error: {e}")
-        raise
+tools = [tavily_search_tool, tavily_extract_tool]
 
-if __name__ == "__main__":
-    test_tavily_agent()
+# Set up Prompt with 'agent_scratchpad'
+today = datetime.datetime.today().strftime("%D")
+prompt = ChatPromptTemplate.from_messages([
+    ("system", f"""You are a helpful reaserch assistant, you will be given a query and you will need to 
+    search the web for the most relevant information then extract content to gain more insights. The date today is {today}."""),
+    MessagesPlaceholder(variable_name="messages"),
+    MessagesPlaceholder(variable_name="agent_scratchpad"),  # Required for tool calls
+])
+# Create an agent that can use tools
+agent = create_openai_tools_agent(
+    llm=llm,
+    tools=tools,
+    prompt=prompt
+)
+
+# Create an Agent Executor to handle tool execution
+agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=True)
+
+user_input =  "Research the latest developments in quantum computing and provide a detailed summary of how it might impact cybersecurity in the next decade."
+
+# Construct input properly as a dictionary
+response = agent_executor.invoke({"messages": [HumanMessage(content=user_input)]})
+
+
 ```

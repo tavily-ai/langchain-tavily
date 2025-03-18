@@ -45,7 +45,7 @@ class TavilyInput(BaseModel):
         """,  # noqa: E501
     )
     search_depth: Optional[Literal["basic", "advanced"]] = Field(
-        default="advanced",
+        default="basic",
         description="""Controls search thoroughness and result comprehensiveness.
     
         Use "basic" for simple queries requiring quick, straightforward answers.
@@ -78,6 +78,19 @@ class TavilyInput(BaseModel):
         Options: "day" (24h), "week" (7d), "month" (30d), "year" (365d).
         
         Default is None.
+        """,  # noqa: E501
+    )
+    topic: Optional[Literal["general", "news", "finance"]] = Field(
+        default="general",
+        description="""Specifies search category for optimized results.
+   
+        Use "general" (default) for most queries, INCLUDING those with terms like 
+        "latest," "newest," or "recent" when referring to general information.
+
+        Use "finance" for markets, investments, economic data, or financial news.
+
+        Use "news" ONLY for politics, sports, or major current events covered by 
+        mainstream media - NOT simply because a query asks for "new" information.
         """,  # noqa: E501
     )
 
@@ -128,7 +141,7 @@ class TavilySearch(BaseTool):  # type: ignore[override]
                 # include_raw_content=False,
                 # include_images=False,
                 # include_image_descriptions=False,
-                # search_depth="advanced",
+                # search_depth="basic",
                 # time_range="day",
                 # include_domains=None,
                 # exclude_domains=None
@@ -181,10 +194,10 @@ class TavilySearch(BaseTool):  # type: ignore[override]
 
     default is None
     """
-    search_depth: Optional[Literal["basic", "advanced"]] = "advanced"
+    search_depth: Optional[Literal["basic", "advanced"]] = "basic"
     """The depth of the search. It can be 'basic' or 'advanced'
     
-    default is "advanced"
+    default is "basic"
     """
     include_images: Optional[bool] = False
     """Include a list of query related images in the response
@@ -201,8 +214,8 @@ class TavilySearch(BaseTool):  # type: ignore[override]
     
     default is 5
     """
-    topic: Optional[Literal["general", "news"]] = "general"
-    """The category of the search. Can be "general" or "news".
+    topic: Optional[Literal["general", "news", "finance"]] = "general"
+    """The category of the search. Can be "general", "news", or "finance".
     
     Default is "general".
     """
@@ -237,9 +250,10 @@ class TavilySearch(BaseTool):  # type: ignore[override]
         query: str,
         include_domains: Optional[List[str]] = None,
         exclude_domains: Optional[List[str]] = None,
-        search_depth: Optional[Literal["basic", "advanced"]] = "advanced",
+        search_depth: Optional[Literal["basic", "advanced"]] = "basic",
         include_images: Optional[bool] = False,
         time_range: Optional[Literal["day", "week", "month", "year"]] = None,
+        topic: Optional[Literal["general", "news", "finance"]] = "general",
         run_manager: Optional[CallbackManagerForToolRun] = None,
     ) -> Dict[str, Any]:
         """Execute a search query using the Tavily Search API.
@@ -270,11 +284,11 @@ class TavilySearch(BaseTool):  # type: ignore[override]
                 if include_images
                 else self.include_images,
                 time_range=time_range if time_range else self.time_range,
+                topic=topic if topic else self.topic,
                 max_results=self.max_results,
                 include_answer=self.include_answer,
                 include_raw_content=self.include_raw_content,
                 include_image_descriptions=self.include_image_descriptions,
-                topic=self.topic,
             )
 
             # Check if results are empty and raise a specific exception
@@ -306,9 +320,10 @@ class TavilySearch(BaseTool):  # type: ignore[override]
         query: str,
         include_domains: Optional[List[str]] = None,
         exclude_domains: Optional[List[str]] = None,
-        search_depth: Optional[Literal["basic", "advanced"]] = "advanced",
+        search_depth: Optional[Literal["basic", "advanced"]] = "basic",
         include_images: Optional[bool] = False,
         time_range: Optional[Literal["day", "week", "month", "year"]] = None,
+        topic: Optional[Literal["general", "news", "finance"]] = "general",
         run_manager: Optional[AsyncCallbackManagerForToolRun] = None,
     ) -> Dict[str, Any]:
         """Use the tool asynchronously."""
@@ -326,11 +341,11 @@ class TavilySearch(BaseTool):  # type: ignore[override]
                 if include_images
                 else self.include_images,
                 time_range=time_range if time_range else self.time_range,
+                topic=topic if topic else self.topic,
                 max_results=self.max_results,
                 include_answer=self.include_answer,
                 include_raw_content=self.include_raw_content,
                 include_image_descriptions=self.include_image_descriptions,
-                topic=self.topic,
             )
 
             # Check if results are empty and raise a specific exception

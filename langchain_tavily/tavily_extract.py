@@ -20,7 +20,7 @@ class TavilyExtractInput(BaseModel):
 
     urls: List[str] = Field(description="list of urls to extract")
     extract_depth: Optional[Literal["basic", "advanced"]] = Field(
-        default="advanced",
+        default="basic",
         description="""Controls the thoroughness of web content extraction.
         
         Use "basic" for faster extraction of main text content.
@@ -73,7 +73,7 @@ class TavilyExtract(BaseTool):  # type: ignore[override, override]
     handle_tool_error: bool = True
 
     # Default parameters
-    extract_depth: Optional[Literal["basic", "advanced"]] = "advanced"
+    extract_depth: Optional[Literal["basic", "advanced"]] = "basic"
     """The depth of the extraction process. 
     'advanced' extraction retrieves more data than 'basic',
     with higher success but may increase latency.
