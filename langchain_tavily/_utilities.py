@@ -180,7 +180,7 @@ class TavilyExtractAPIWrapper(BaseModel):
             json=params,
             headers=headers,
         )
-        breakpoint()
+
         if response.status_code != 200:
             detail = response.json().get("detail", {})
             error_message = (

@@ -13,7 +13,7 @@ from langchain_tavily._utilities import TavilySearchAPIWrapper
 
 
 class TavilySearchInput(BaseModel):
-    """Input for [TavilySearchResults]"""
+    """Input for [TavilySearch]"""
 
     query: str = Field(description=("Search query to look up"))
     include_domains: Optional[List[str]] = Field(
@@ -103,17 +103,18 @@ def _generate_suggestions(params: dict) -> list:
     exclude_domains = params.get("exclude_domains")
     include_domains = params.get("include_domains")
     time_range = params.get("time_range")
+    topic = params.get("topic")
 
     if time_range:
         suggestions.append("Remove time_range argument")
-    elif include_domains:
+    if include_domains:
         suggestions.append("Remove include_domains argument")
-    elif exclude_domains:
+    if exclude_domains:
         suggestions.append("Remove exclude_domains argument")
-    elif search_depth == "basic":
+    if search_depth == "basic":
         suggestions.append("Try a more detailed search using 'advanced' search_depth")
-    else:
-        suggestions.append("Try alternative search terms")
+    if topic != "general":
+        suggestions.append("Try a general search using 'general' topic")
 
     return suggestions
 
@@ -298,6 +299,7 @@ class TavilySearch(BaseTool):  # type: ignore[override]
                     "include_domains": include_domains,
                     "search_depth": search_depth,
                     "exclude_domains": exclude_domains,
+                    "topic": topic,
                 }
                 suggestions = _generate_suggestions(search_params)
 
@@ -355,6 +357,7 @@ class TavilySearch(BaseTool):  # type: ignore[override]
                     "include_domains": include_domains,
                     "search_depth": search_depth,
                     "exclude_domains": exclude_domains,
+                    "topic": topic,
                 }
                 suggestions = _generate_suggestions(search_params)
 
