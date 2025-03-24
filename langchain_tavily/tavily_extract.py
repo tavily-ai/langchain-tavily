@@ -20,19 +20,26 @@ class TavilyExtractInput(BaseModel):
 
     urls: List[str] = Field(description="list of urls to extract")
     extract_depth: Optional[Literal["basic", "advanced"]] = Field(
-        default="advanced",
-        description=(
-            "The depth of the extraction process. 'advanced' extraction "
-            "retrieves more data than 'basic', including tables and embedded content, "
-            "with higher success but may increase latency. Default is 'advanced'"
-        ),
+        default="basic",
+        description="""Controls the thoroughness of web content extraction.
+        
+        Use "basic" for faster extraction of main text content.
+        
+        Use "advanced" (default) to retrieve comprehensive content including 
+        tables and embedded elements. Always use "advanced" for LinkedIn 
+        and YouTube URLs for optimal results.
+        
+        Better for complex websites but may increase response time.
+        """,  # noqa: E501
     )
     include_images: Optional[bool] = Field(
         default=False,
-        description=(
-            "Include a list of images extracted from the URLs in the response. "
-            "Default is False"
-        ),
+        description="""Determines whether to extract and include images from the source URLs.
+   
+        Set to True when visualizations are needed for better context or understanding.
+    
+        Default is False (extracts text content only).
+        """,  # noqa: E501
     )
 
 
@@ -66,7 +73,7 @@ class TavilyExtract(BaseTool):  # type: ignore[override, override]
     handle_tool_error: bool = True
 
     # Default parameters
-    extract_depth: Optional[Literal["basic", "advanced"]] = "advanced"
+    extract_depth: Optional[Literal["basic", "advanced"]] = "basic"
     """The depth of the extraction process. 
     'advanced' extraction retrieves more data than 'basic',
     with higher success but may increase latency.

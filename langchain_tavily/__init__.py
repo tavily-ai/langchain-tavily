@@ -1,7 +1,7 @@
 from importlib import metadata
 
 from langchain_tavily.tavily_extract import TavilyExtract
-from langchain_tavily.tavily_search import TavilySearchResults
+from langchain_tavily.tavily_search import TavilySearch
 
 try:
     __version__ = metadata.version(__package__)
@@ -11,7 +11,7 @@ except metadata.PackageNotFoundError:
 del metadata  # optional, avoids polluting the results of dir(__package__)
 
 __all__ = [
-    "TavilySearchResults",
+    "TavilySearch",
     "TavilyExtract",
     "__version__",
 ]

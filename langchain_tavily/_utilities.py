@@ -50,7 +50,6 @@ class TavilySearchAPIWrapper(BaseModel):
         time_range: Optional[Literal["day", "week", "month", "year"]] = None,
     ) -> Dict:
         params = {
-            "api_key": self.tavily_api_key.get_secret_value(),
             "query": query,
             "max_results": max_results,
             "search_depth": search_depth,
@@ -67,10 +66,16 @@ class TavilySearchAPIWrapper(BaseModel):
         # Remove None values
         params = {k: v for k, v in params.items() if v is not None}
 
+        headers = {
+            "Authorization": f"Bearer {self.tavily_api_key.get_secret_value()}",
+            "Content-Type": "application/json"
+        }
+
         response = requests.post(
             # type: ignore
             f"{TAVILY_API_URL}/search",
             json=params,
+            headers=headers,
         )
         if response.status_code != 200:
             detail = response.json().get("detail", {})
@@ -79,6 +84,58 @@ class TavilySearchAPIWrapper(BaseModel):
             )
             raise ValueError(f"Error {response.status_code}: {error_message}")
         return response.json()
+
+    async def raw_results_async(
+        self,
+        query: str,
+        topic: Literal["general", "news", "finance"] = "general",
+        max_results: Optional[int] = 5,
+        search_depth: Optional[Literal["basic", "advanced"]] = "advanced",
+        include_domains: Optional[List[str]] = None,
+        exclude_domains: Optional[List[str]] = None,
+        include_answer: Optional[bool] = False,
+        include_raw_content: Optional[bool] = False,
+        include_images: Optional[bool] = False,
+        include_image_descriptions: Optional[bool] = False,
+        topic: Optional[Literal["general", "news"]] = "general",
+        time_range: Optional[Literal["day", "week", "month", "year"]] = None,
+    ) -> Dict:
+        """Get results from the Tavily Search API asynchronously."""
+
+        # Function to perform the API call
+        async def fetch() -> str:
+            params = {
+                "query": query,
+                "max_results": max_results,
+                "search_depth": search_depth,
+                "include_domains": include_domains,
+                "exclude_domains": exclude_domains,
+                "include_answer": include_answer,
+                "include_raw_content": include_raw_content,
+                "include_images": include_images,
+                "include_image_descriptions": include_image_descriptions,
+                "topic": topic,
+                "time_range": time_range,
+            }
+
+            params = {k: v for k, v in params.items() if v is not None}
+
+
+            headers = {
+                "Authorization": f"Bearer {self.tavily_api_key.get_secret_value()}",
+                "Content-Type": "application/json"
+            }
+            async with aiohttp.ClientSession() as session:
+                async with session.post(f"{TAVILY_API_URL}/search", json=params, headers=headers) as res:
+                    if res.status == 200:
+                        data = await res.text()
+                        return data
+                    else:
+                        raise Exception(f"Error {res.status}: {res.reason}")
+
+        results_json_str = await fetch()
+
+        return json.loads(results_json_str)
 
     def results(
         self,
@@ -104,54 +161,6 @@ class TavilySearchAPIWrapper(BaseModel):
             include_images=include_images,
         )
         return self.clean_results(raw_search_results["results"])
-
-    async def raw_results_async(
-        self,
-        query: str,
-        topic: Literal["general", "news", "finance"] = "general",
-        max_results: Optional[int] = 5,
-        search_depth: Optional[Literal["basic", "advanced"]] = "advanced",
-        include_domains: Optional[List[str]] = None,
-        exclude_domains: Optional[List[str]] = None,
-        include_answer: Optional[bool] = False,
-        include_raw_content: Optional[bool] = False,
-        include_images: Optional[bool] = False,
-        include_image_descriptions: Optional[bool] = False,
-        topic: Optional[Literal["general", "news"]] = "general",
-        time_range: Optional[Literal["day", "week", "month", "year"]] = None,
-    ) -> Dict:
-        """Get results from the Tavily Search API asynchronously."""
-
-        # Function to perform the API call
-        async def fetch() -> str:
-            params = {
-                "api_key": self.tavily_api_key.get_secret_value(),
-                "query": query,
-                "max_results": max_results,
-                "search_depth": search_depth,
-                "include_domains": include_domains,
-                "exclude_domains": exclude_domains,
-                "include_answer": include_answer,
-                "include_raw_content": include_raw_content,
-                "include_images": include_images,
-                "include_image_descriptions": include_image_descriptions,
-                "topic": topic,
-                "time_range": time_range,
-            }
-
-            params = {k: v for k, v in params.items() if v is not None}
-
-            async with aiohttp.ClientSession() as session:
-                async with session.post(f"{TAVILY_API_URL}/search", json=params) as res:
-                    if res.status == 200:
-                        data = await res.text()
-                        return data
-                    else:
-                        raise Exception(f"Error {res.status}: {res.reason}")
-
-        results_json_str = await fetch()
-
-        return json.loads(results_json_str)
 
     async def results_async(
         self,
@@ -221,17 +230,23 @@ class TavilyExtractAPIWrapper(BaseModel):
         include_images: Optional[bool] = False,
     ) -> Dict:
         params = {
-            "api_key": self.tavily_api_key.get_secret_value(),
             "urls": urls,
             "include_images": include_images,
             "extract_depth": extract_depth,
+        }
+
+        headers = {
+            "Authorization": f"Bearer {self.tavily_api_key.get_secret_value()}",
+            "Content-Type": "application/json"
         }
 
         response = requests.post(
             # type: ignore
             f"{TAVILY_API_URL}/extract",
             json=params,
+            headers=headers,
         )
+
         if response.status_code != 200:
             detail = response.json().get("detail", {})
             error_message = (
@@ -251,14 +266,17 @@ class TavilyExtractAPIWrapper(BaseModel):
         # Function to perform the API call
         async def fetch() -> str:
             params = {
-                "api_key": self.tavily_api_key.get_secret_value(),
                 "urls": urls,
                 "include_images": include_images,
                 "extract_depth": extract_depth,
             }
+            headers = {
+                "Authorization": f"Bearer {self.tavily_api_key.get_secret_value()}",
+                "Content-Type": "application/json"
+            }
             async with aiohttp.ClientSession() as session:
                 async with session.post(
-                    f"{TAVILY_API_URL}/extract", json=params
+                    f"{TAVILY_API_URL}/extract", json=params, headers=headers
                 ) as res:
                     if res.status == 200:
                         data = await res.text()

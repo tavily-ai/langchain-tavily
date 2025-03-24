@@ -1,6 +1,6 @@
 """Tavily tools."""
 
-from typing import Any, Dict, List, Literal, Optional, Tuple, Type, Union
+from typing import Any, Dict, List, Literal, Optional, Type
 
 from langchain_core.callbacks import (
     AsyncCallbackManagerForToolRun,
@@ -12,8 +12,8 @@ from pydantic import BaseModel, Field
 from langchain_tavily._utilities import TavilySearchAPIWrapper
 
 
-class TavilyInput(BaseModel):
-    """Input for [TavilySearchResults]"""
+class TavilySearchInput(BaseModel):
+    """Input for [TavilySearch]"""
 
     query: str = Field(description=("Search query to look up"))
     topic: Literal["general", "news", "finance"] = Field(
@@ -22,23 +22,80 @@ class TavilyInput(BaseModel):
     )
     include_domains: Optional[List[str]] = Field(
         default=[],
-        description="A list of domains to specifically include in the search results",
+        description="""A list of domains to restrict search results to.
+
+        Use this parameter when:
+        1. The user explicitly requests information from specific websites (e.g., "Find climate data from nasa.gov")
+        2. The user mentions an organization or company without specifying the domain (e.g., "Find information about iPhones from Apple")
+
+        In both cases, you should determine the appropriate domains (e.g., ["nasa.gov"] or ["apple.com"]) and set this parameter.
+
+        Results will ONLY come from the specified domains - no other sources will be included.
+        Default is None (no domain restriction).
+        """,  # noqa: E501
     )
     exclude_domains: Optional[List[str]] = Field(
         default=[],
-        description="A list of domains to specifically exclude from the search results",
+        description="""A list of domains to exclude from search results.
+
+        Use this parameter when:
+        1. The user explicitly requests to avoid certain websites (e.g., "Find information about climate change but not from twitter.com")
+        2. The user mentions not wanting results from specific organizations without naming the domain (e.g., "Find phone reviews but nothing from Apple")
+
+        In both cases, you should determine the appropriate domains to exclude (e.g., ["twitter.com"] or ["apple.com"]) and set this parameter.
+
+        Results will filter out all content from the specified domains.
+        Default is None (no domain exclusion).
+        """,  # noqa: E501
     )
     search_depth: Optional[Literal["basic", "advanced"]] = Field(
-        default="advanced",
-        description="The depth of the search. It can be 'basic' or 'advanced'",
+        default="basic",
+        description="""Controls search thoroughness and result comprehensiveness.
+    
+        Use "basic" for simple queries requiring quick, straightforward answers.
+        
+        Use "advanced" (default) for complex queries, specialized topics, 
+        rare information, or when in-depth analysis is needed.
+        """,  # noqa: E501
     )
     include_images: Optional[bool] = Field(
         default=False,
-        description="Include a list of query related images in the response",
+        description="""Determines if the search returns relevant images along with text results.
+   
+        Set to True when the user explicitly requests visuals or when images would 
+        significantly enhance understanding (e.g., "Show me what black holes look like," 
+        "Find pictures of Renaissance art").
+        
+        Leave as False (default) for most informational queries where text is sufficient.
+        """,  # noqa: E501
     )
     time_range: Optional[Literal["day", "week", "month", "year"]] = Field(
         default=None,
-        description="The time range back from the current date to filter results",
+        description="""Limits results to content published within a specific timeframe.
+        
+        ONLY set this when the user explicitly mentions a time period 
+        (e.g., "latest AI news," "articles from last week").
+        
+        For less popular or niche topics, use broader time ranges 
+        ("month" or "year") to ensure sufficient relevant results.
+   
+        Options: "day" (24h), "week" (7d), "month" (30d), "year" (365d).
+        
+        Default is None.
+        """,  # noqa: E501
+    )
+    topic: Optional[Literal["general", "news", "finance"]] = Field(
+        default="general",
+        description="""Specifies search category for optimized results.
+   
+        Use "general" (default) for most queries, INCLUDING those with terms like 
+        "latest," "newest," or "recent" when referring to general information.
+
+        Use "finance" for markets, investments, economic data, or financial news.
+
+        Use "news" ONLY for politics, sports, or major current events covered by 
+        mainstream media - NOT simply because a query asks for "new" information.
+        """,  # noqa: E501
     )
 
 
@@ -50,49 +107,49 @@ def _generate_suggestions(params: dict) -> list:
     exclude_domains = params.get("exclude_domains")
     include_domains = params.get("include_domains")
     time_range = params.get("time_range")
+    topic = params.get("topic")
 
     if time_range:
         suggestions.append("Remove time_range argument")
-    elif include_domains:
+    if include_domains:
         suggestions.append("Remove include_domains argument")
-    elif exclude_domains:
+    if exclude_domains:
         suggestions.append("Remove exclude_domains argument")
-    elif search_depth == "basic":
+    if search_depth == "basic":
         suggestions.append("Try a more detailed search using 'advanced' search_depth")
-    else:
-        suggestions.append("Try alternative search terms")
+    if topic != "general":
+        suggestions.append("Try a general search using 'general' topic")
 
     return suggestions
 
 
-class TavilySearchResults(BaseTool):  # type: ignore[override]
+class TavilySearch(BaseTool):  # type: ignore[override]
     """Tool that queries the Tavily Search API and gets back json.
 
     Setup:
-        Install ``langchain-openai`` and ``tavily-python``, and set environment variable ``TAVILY_API_KEY``.
+        Install ``langchain-tavily`` and set environment variable ``TAVILY_API_KEY``.
 
         .. code-block:: bash
 
-            pip install -U langchain-community tavily-python
+            pip install -U langchain-tavily
             export TAVILY_API_KEY="your-api-key"
 
     Instantiate:
 
         .. code-block:: python
+            from langchain_tavily import TavilySearch
 
-            from langchain_community.tools import TavilySearchResults
-
-            tool = TavilySearchResults(
-                max_results=5,
+            tool = TavilySearch(
+                max_results=1,
                 topic="general",
-                include_answer=False,
-                include_raw_content=True,           # including raw content may lead to hitting context length limits
-                # include_domains=[],
-                # exclude_domains=[],
-                # search_depth="advanced"
-                # include_images=True,
-                # include_image_descriptions=True
+                # include_answer=False,
+                # include_raw_content=False,
+                # include_images=False,
+                # include_image_descriptions=False,
+                # search_depth="basic",
                 # time_range="day",
+                # include_domains=None,
+                # exclude_domains=None
             )
 
     Invoke directly with args:
@@ -112,49 +169,14 @@ class TavilySearchResults(BaseTool):  # type: ignore[override]
                             'url': 'https://www.nbcnews.com/news/sports/andy-murray-wimbledon-tennis-singles-draw-rcna159912',
                             'content': "NBC News Now LONDON — Andy Murray, one of the last decade's most successful ..."
                             'score': 0.6755297,
-                            'raw_content': "Andy Murray pulls out of the men's singles draw at his last Wimbledon ....."
+                            'raw_content': None
                             }],
-                'response_time': 2.92
+                'response_time': 1.31
             }
-
-    Invoke with tool call:
-
-        .. code-block:: python
-
-            tool.invoke({"args": {'query': 'who won the last french open'}, "type": "tool_call", "id": "foo", "name": "tavily"})
-
-        .. code-block:: python
-
-            ToolMessage(
-                content='{ "url": "https://www.nytimes.com...", "content": "Novak Djokovic won the last French Open by beating Casper Ruud ..." }',
-                artifact={
-                    'query': 'who won the last french open',
-                    'follow_up_questions': None,
-                    'answer': 'Novak ...',
-                    'images': [
-                        'https://www.amny.com/wp-content/uploads/2023/06/AP23162622181176-1200x800.jpg',
-                        ...
-                        ],
-                    'results': [
-                        {
-                            'title': 'Djokovic ...',
-                            'url': 'https://www.nytimes.com...',
-                            'content': "Novak...",
-                            'score': 0.99505633,
-                            'raw_content': 'Tennis\nNovak ...'
-                        },
-                        ...
-                    ],
-                    'response_time': 2.92
-                },
-                tool_call_id='1',
-                name='tavily_search_results_json',
-            )
 
     """  # noqa: E501
 
-    name: str = "tavily_search_results_json"
-
+    name: str = "tavily_search"
     description: str = (
         "A search engine optimized for comprehensive, accurate, and trusted results. "
         "Useful for when you need to answer questions about current events. "
@@ -164,7 +186,7 @@ class TavilySearchResults(BaseTool):  # type: ignore[override]
         "Input should be a search query."
     )
 
-    args_schema: Type[BaseModel] = TavilyInput
+    args_schema: Type[BaseModel] = TavilySearchInput
     handle_tool_error: bool = True
 
     include_domains: Optional[List[str]] = None
@@ -177,7 +199,7 @@ class TavilySearchResults(BaseTool):  # type: ignore[override]
 
     default is None
     """
-    search_depth: Optional[Literal["basic", "advanced"]] = "advanced"
+    search_depth: Optional[Literal["basic", "advanced"]] = "basic"
     """The depth of the search. It can be 'basic' or 'advanced'
     
     default is "basic"
@@ -218,7 +240,6 @@ class TavilySearchResults(BaseTool):  # type: ignore[override]
     Default is False.
     """
     api_wrapper: TavilySearchAPIWrapper = Field(default_factory=TavilySearchAPIWrapper)  # type: ignore[arg-type]
-    response_format: Literal["content_and_artifact"] = "content_and_artifact"
 
     def __init__(self, **kwargs: Any) -> None:
         # Create api_wrapper with tavily_api_key if provided
@@ -235,12 +256,25 @@ class TavilySearchResults(BaseTool):  # type: ignore[override]
         topic: Literal["general", "news", "finance"] = "general",
         include_domains: Optional[List[str]] = None,
         exclude_domains: Optional[List[str]] = None,
-        search_depth: Optional[Literal["basic", "advanced"]] = "advanced",
+        search_depth: Optional[Literal["basic", "advanced"]] = "basic",
         include_images: Optional[bool] = False,
         time_range: Optional[Literal["day", "week", "month", "year"]] = None,
+        topic: Literal["general", "news", "finance"] = "general",
         run_manager: Optional[CallbackManagerForToolRun] = None,
-    ) -> Tuple[Union[List[Dict[str, str]], str], Dict]:
-        """Use the tool."""
+    ) -> Dict[str, Any]:
+        """Execute a search query using the Tavily Search API.
+
+        Returns:
+            Dict[str, Any]: Search results containing:
+                - query: Original search query
+                - results: List of search results, each with:
+                    - title: Title of the page
+                    - url: URL of the page
+                    - content: Relevant content snippet
+                    - score: Relevance score
+                - images: List of relevant images (if include_images=True)
+                - response_time: Time taken for the search
+        """
         try:
             # Execute search with parameters directly
             raw_results = self.api_wrapper.raw_results(
@@ -256,11 +290,11 @@ class TavilySearchResults(BaseTool):  # type: ignore[override]
                 if include_images
                 else self.include_images,
                 time_range=time_range if time_range else self.time_range,
+                topic=topic if topic else self.topic,
                 max_results=self.max_results,
                 include_answer=self.include_answer,
                 include_raw_content=self.include_raw_content,
                 include_image_descriptions=self.include_image_descriptions,
-                topic=self.topic,
             )
 
             # Check if results are empty and raise a specific exception
@@ -270,6 +304,7 @@ class TavilySearchResults(BaseTool):  # type: ignore[override]
                     "include_domains": include_domains,
                     "search_depth": search_depth,
                     "exclude_domains": exclude_domains,
+                    "topic": topic,
                 }
                 suggestions = _generate_suggestions(search_params)
 
@@ -280,23 +315,24 @@ class TavilySearchResults(BaseTool):  # type: ignore[override]
                     f"Try modifying your search parameters with one of these approaches."  # noqa: E501
                 )
                 raise ToolException(error_message)
-            return self.api_wrapper.clean_results(raw_results["results"]), raw_results
+            return raw_results
         except ToolException:
             # Re-raise tool exceptions
             raise
         except Exception as e:
-            return repr(e), {}
+            return {"error": e}
 
     async def _arun(
         self,
         query: str,
         include_domains: Optional[List[str]] = None,
         exclude_domains: Optional[List[str]] = None,
-        search_depth: Optional[Literal["basic", "advanced"]] = "advanced",
+        search_depth: Optional[Literal["basic", "advanced"]] = "basic",
         include_images: Optional[bool] = False,
         time_range: Optional[Literal["day", "week", "month", "year"]] = None,
+        topic: Literal["general", "news", "finance"] = "general",
         run_manager: Optional[AsyncCallbackManagerForToolRun] = None,
-    ) -> Tuple[Union[List[Dict[str, str]], str], Dict]:
+    ) -> Dict[str, Any]:
         """Use the tool asynchronously."""
         try:
             raw_results = await self.api_wrapper.raw_results_async(
@@ -312,11 +348,11 @@ class TavilySearchResults(BaseTool):  # type: ignore[override]
                 if include_images
                 else self.include_images,
                 time_range=time_range if time_range else self.time_range,
+                topic=topic if topic else self.topic,
                 max_results=self.max_results,
                 include_answer=self.include_answer,
                 include_raw_content=self.include_raw_content,
                 include_image_descriptions=self.include_image_descriptions,
-                topic=self.topic,
             )
 
             # Check if results are empty and raise a specific exception
@@ -326,6 +362,7 @@ class TavilySearchResults(BaseTool):  # type: ignore[override]
                     "include_domains": include_domains,
                     "search_depth": search_depth,
                     "exclude_domains": exclude_domains,
+                    "topic": topic,
                 }
                 suggestions = _generate_suggestions(search_params)
 
@@ -336,9 +373,9 @@ class TavilySearchResults(BaseTool):  # type: ignore[override]
                     f"Try modifying your search parameters with one of these approaches."  # noqa: E501
                 )
                 raise ToolException(error_message)
-            return self.api_wrapper.clean_results(raw_results["results"]), raw_results
+            return raw_results
         except ToolException:
             # Re-raise tool exceptions
             raise
         except Exception as e:
-            return repr(e), {}
+            return {"error": e}
