@@ -38,6 +38,7 @@ class TavilySearchAPIWrapper(BaseModel):
     def raw_results(
         self,
         query: str,
+        topic: Literal["general", "news", "finance"] = "general",
         max_results: Optional[int] = 5,
         search_depth: Optional[Literal["basic", "advanced"]] = "advanced",
         include_domains: Optional[List[str]] = None,
@@ -46,7 +47,6 @@ class TavilySearchAPIWrapper(BaseModel):
         include_raw_content: Optional[bool] = False,
         include_images: Optional[bool] = False,
         include_image_descriptions: Optional[bool] = False,
-        topic: Optional[Literal["general", "news"]] = "general",
         time_range: Optional[Literal["day", "week", "month", "year"]] = None,
     ) -> Dict:
         params = {
@@ -88,6 +88,7 @@ class TavilySearchAPIWrapper(BaseModel):
     async def raw_results_async(
         self,
         query: str,
+        topic: Literal["general", "news", "finance"] = "general",
         max_results: Optional[int] = 5,
         search_depth: Optional[Literal["basic", "advanced"]] = "advanced",
         include_domains: Optional[List[str]] = None,
@@ -135,6 +136,71 @@ class TavilySearchAPIWrapper(BaseModel):
         results_json_str = await fetch()
 
         return json.loads(results_json_str)
+
+    def results(
+        self,
+        query: str,
+        topic: Literal["general", "news", "finance"] = "general",
+        max_results: Optional[int] = 5,
+        search_depth: Optional[Literal["basic", "advanced"]] = "advanced",
+        include_domains: Optional[List[str]] = [],
+        exclude_domains: Optional[List[str]] = [],
+        include_answer: Optional[bool] = False,
+        include_raw_content: Optional[bool] = False,
+        include_images: Optional[bool] = False,
+    ) -> List[Dict]:
+        raw_search_results = self.raw_results(
+            query,
+            topic=topic,
+            max_results=max_results,
+            search_depth=search_depth,
+            include_domains=include_domains,
+            exclude_domains=exclude_domains,
+            include_answer=include_answer,
+            include_raw_content=include_raw_content,
+            include_images=include_images,
+        )
+        return self.clean_results(raw_search_results["results"])
+
+    async def results_async(
+        self,
+        query: str,
+        topic: Literal["general", "news", "finance"] = "general",
+        max_results: Optional[int] = 5,
+        search_depth: Optional[Literal["basic", "advanced"]] = "advanced",
+        include_domains: Optional[List[str]] = [],
+        exclude_domains: Optional[List[str]] = [],
+        include_answer: Optional[bool] = False,
+        include_raw_content: Optional[bool] = False,
+        include_images: Optional[bool] = False,
+    ) -> List[Dict]:
+        results_json = await self.raw_results_async(
+            query=query,
+            topic=topic,
+            max_results=max_results,
+            search_depth=search_depth,
+            include_domains=include_domains,
+            exclude_domains=exclude_domains,
+            include_answer=include_answer,
+            include_raw_content=include_raw_content,
+            include_images=include_images,
+        )
+        return self.clean_results(results_json["results"])
+
+    def clean_results(self, results: List[Dict]) -> List[Dict]:
+        """Clean results from Tavily Search API."""
+        clean_results = []
+        for result in results:
+            clean_result = {
+                "title": result["title"],
+                "url": result["url"],
+                "content": result["content"],
+                "score": result["score"],
+            }
+            if raw_content := result.get("raw_content"):
+                clean_result["raw_content"] = raw_content
+            clean_results.append(clean_result)
+        return clean_results
 
 
 class TavilyExtractAPIWrapper(BaseModel):

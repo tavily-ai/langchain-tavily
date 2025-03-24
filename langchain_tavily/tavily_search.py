@@ -16,6 +16,10 @@ class TavilySearchInput(BaseModel):
     """Input for [TavilySearch]"""
 
     query: str = Field(description=("Search query to look up"))
+    topic: Literal["general", "news", "finance"] = Field(
+        default="general",
+        description="The category of the search. Can be 'general', 'news', or 'finance'",
+    )
     include_domains: Optional[List[str]] = Field(
         default=[],
         description="""A list of domains to restrict search results to.
@@ -215,7 +219,7 @@ class TavilySearch(BaseTool):  # type: ignore[override]
     
     default is 5
     """
-    topic: Optional[Literal["general", "news", "finance"]] = "general"
+    topic: Literal["general", "news", "finance"] = "general"
     """The category of the search. Can be "general", "news", or "finance".
     
     Default is "general".
@@ -249,12 +253,13 @@ class TavilySearch(BaseTool):  # type: ignore[override]
     def _run(
         self,
         query: str,
+        topic: Literal["general", "news", "finance"] = "general",
         include_domains: Optional[List[str]] = None,
         exclude_domains: Optional[List[str]] = None,
         search_depth: Optional[Literal["basic", "advanced"]] = "basic",
         include_images: Optional[bool] = False,
         time_range: Optional[Literal["day", "week", "month", "year"]] = None,
-        topic: Optional[Literal["general", "news", "finance"]] = "general",
+        topic: Literal["general", "news", "finance"] = "general",
         run_manager: Optional[CallbackManagerForToolRun] = None,
     ) -> Dict[str, Any]:
         """Execute a search query using the Tavily Search API.
@@ -325,7 +330,7 @@ class TavilySearch(BaseTool):  # type: ignore[override]
         search_depth: Optional[Literal["basic", "advanced"]] = "basic",
         include_images: Optional[bool] = False,
         time_range: Optional[Literal["day", "week", "month", "year"]] = None,
-        topic: Optional[Literal["general", "news", "finance"]] = "general",
+        topic: Literal["general", "news", "finance"] = "general",
         run_manager: Optional[AsyncCallbackManagerForToolRun] = None,
     ) -> Dict[str, Any]:
         """Use the tool asynchronously."""
