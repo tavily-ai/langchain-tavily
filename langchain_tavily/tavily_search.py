@@ -1,6 +1,6 @@
 """Tavily tools."""
 
-from typing import Any, Dict, List, Literal, Optional, Type
+from typing import Any, Dict, List, Literal, Optional, Type, Union
 
 from langchain_core.callbacks import (
     AsyncCallbackManagerForToolRun,
@@ -220,7 +220,7 @@ class TavilySearch(BaseTool):  # type: ignore[override]
     
     Default is "general".
     """
-    include_answer: Optional[bool] = False
+    include_answer: Optional[Union[bool, Literal["basic", "advanced"]]] = False
     """Include a short answer to original query in the search results. 
     
     Default is False.
