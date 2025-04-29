@@ -5,7 +5,7 @@ https://docs.tavily.com/docs/tavily-api/introduction
 """
 
 import json
-from typing import Any, Dict, List, Literal, Optional
+from typing import Any, Dict, List, Literal, Optional, Union
 
 import aiohttp
 import requests
@@ -42,11 +42,11 @@ class TavilySearchAPIWrapper(BaseModel):
         search_depth: Optional[Literal["basic", "advanced"]] = "advanced",
         include_domains: Optional[List[str]] = None,
         exclude_domains: Optional[List[str]] = None,
-        include_answer: Optional[bool] = False,
+        include_answer: Optional[Union[bool, Literal["basic", "advanced"]]] = False,
         include_raw_content: Optional[bool] = False,
         include_images: Optional[bool] = False,
         include_image_descriptions: Optional[bool] = False,
-        topic: Optional[Literal["general", "news"]] = "general",
+        topic: Optional[Literal["general", "news", "finance"]] = "general",
         time_range: Optional[Literal["day", "week", "month", "year"]] = None,
     ) -> Dict:
         params = {
@@ -68,7 +68,7 @@ class TavilySearchAPIWrapper(BaseModel):
 
         headers = {
             "Authorization": f"Bearer {self.tavily_api_key.get_secret_value()}",
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
         }
 
         response = requests.post(
@@ -92,11 +92,11 @@ class TavilySearchAPIWrapper(BaseModel):
         search_depth: Optional[Literal["basic", "advanced"]] = "advanced",
         include_domains: Optional[List[str]] = None,
         exclude_domains: Optional[List[str]] = None,
-        include_answer: Optional[bool] = False,
+        include_answer: Optional[Union[bool, Literal["basic", "advanced"]]] = False,
         include_raw_content: Optional[bool] = False,
         include_images: Optional[bool] = False,
         include_image_descriptions: Optional[bool] = False,
-        topic: Optional[Literal["general", "news"]] = "general",
+        topic: Optional[Literal["general", "news", "finance"]] = "general",
         time_range: Optional[Literal["day", "week", "month", "year"]] = None,
     ) -> Dict:
         """Get results from the Tavily Search API asynchronously."""
@@ -119,13 +119,14 @@ class TavilySearchAPIWrapper(BaseModel):
 
             params = {k: v for k, v in params.items() if v is not None}
 
-
             headers = {
                 "Authorization": f"Bearer {self.tavily_api_key.get_secret_value()}",
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
             }
             async with aiohttp.ClientSession() as session:
-                async with session.post(f"{TAVILY_API_URL}/search", json=params, headers=headers) as res:
+                async with session.post(
+                    f"{TAVILY_API_URL}/search", json=params, headers=headers
+                ) as res:
                     if res.status == 200:
                         data = await res.text()
                         return data
@@ -171,7 +172,7 @@ class TavilyExtractAPIWrapper(BaseModel):
 
         headers = {
             "Authorization": f"Bearer {self.tavily_api_key.get_secret_value()}",
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
         }
 
         response = requests.post(
@@ -206,7 +207,7 @@ class TavilyExtractAPIWrapper(BaseModel):
             }
             headers = {
                 "Authorization": f"Bearer {self.tavily_api_key.get_secret_value()}",
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
             }
             async with aiohttp.ClientSession() as session:
                 async with session.post(

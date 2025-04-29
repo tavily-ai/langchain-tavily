@@ -35,7 +35,7 @@ The tool accepts various parameters during instantiation:
 - `max_results` (optional, int): Maximum number of search results to return. Default is 5.
 - `topic` (optional, str): Category of the search. Can be "general", "news", or "finance". Default is "general".
 - `include_answer` (optional, bool): Include an answer to original query in results. Default is False.
-- `include_raw_content` (optional, bool): Include cleaned and parsed HTML of each search result. Default is False.
+- `include_raw_content` (optional, bool | str): Include cleaned and parsed HTML of each search result. Cen be bool, "basic" or "advanced". Default is False.
 - `include_images` (optional, bool): Include a list of query related images in the response. Default is False.
 - `include_image_descriptions` (optional, bool): Include descriptive text for each image. Default is False.
 - `search_depth` (optional, str): Depth of the search, either "basic" or "advanced". Default is "basic".

@@ -4,19 +4,15 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "langchain-tavily"
-version = "0.1.5"
+version = "0.1.6"
 description = "An integration package connecting Tavily and LangChain"
 authors = []
 readme = "README.md"
-repository = "https://github.com/langchain-ai/langchain"
+repository = "https://github.com/tavily-ai/langchain-tavily"
 license = "MIT"
 
 [tool.mypy]
 disallow_untyped_defs = "True"
-
-[tool.poetry.urls]
-"Source Code" = "https://github.com/langchain-ai/langchain/tree/master/libs/partners/tavily"
-"Release Notes" = "https://github.com/langchain-ai/langchain/releases?q=tag%3A%22tavily%3D%3D0%22&expanded=true"
 
 [tool.poetry.dependencies]
 python = ">=3.9,<4.0"
@@ -24,6 +20,7 @@ langchain-core = "^0.3.15"
 mypy = "^1.15.0"
 langchain = "^0.3.20"
 aiohttp = "^3.11.14"
+requests = "^2.32.3"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "T201"]
@@ -57,6 +54,7 @@ optional = true
 ruff = "0.5.0"
 codespell = "^2.4.1"
 mypy = "^1.15.0"
+types-requests = "^2.32.0.20250328"
 
 [tool.poetry.group.test.dependencies]
 pytest = "^7.4.3"
