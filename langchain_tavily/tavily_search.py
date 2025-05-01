@@ -285,7 +285,7 @@ class TavilySearch(BaseTool):  # type: ignore[override]
                 if include_images
                 else self.include_images,
                 time_range=time_range if time_range else self.time_range,
-                topic=topic if topic else self.topic,
+                topic=self.topic if self.topic else topic,
                 max_results=self.max_results,
                 include_answer=self.include_answer,
                 include_raw_content=self.include_raw_content,

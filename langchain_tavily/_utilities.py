@@ -222,3 +222,228 @@ class TavilyExtractAPIWrapper(BaseModel):
         results_json_str = await fetch()
 
         return json.loads(results_json_str)
+
+class TavilyCrawlAPIWrapper(BaseModel):
+    """Wrapper for Tavily Crawl API."""
+
+    tavily_api_key: SecretStr
+
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+
+    @model_validator(mode="before")
+    @classmethod
+    def validate_environment(cls, values: Dict) -> Any:
+        """Validate that api key and endpoint exists in environment."""
+        tavily_api_key = get_from_dict_or_env(
+            values, "tavily_api_key", "TAVILY_API_KEY"
+        )
+        values["tavily_api_key"] = tavily_api_key
+
+        return values
+
+    def raw_results(
+        self,
+        url: str,
+        max_depth: Optional[int],
+        max_breadth: Optional[int],
+        limit: Optional[int],
+        query: Optional[str],
+        select_paths: Optional[List[str]],
+        select_domains: Optional[List[str]],
+        allow_external: Optional[bool],
+        include_images: Optional[bool],
+        categories: Optional[List[Literal["Careers", "Blog", "Documentation", "About", "Pricing", "Community", "Developers", "Contact", "Media"]]],
+        extract_depth: Optional[Literal["basic", "advanced"]]
+    ) -> Dict:
+        params = {
+            "url": url,
+            "max_depth": max_depth,
+            "max_breadth": max_breadth,
+            "limit": limit,
+            "query": query,
+            "select_paths": select_paths,
+            "select_domains": select_domains,
+            "allow_external": allow_external,
+            "categories": categories,
+            "extract_depth": extract_depth,
+            "include_images": include_images,
+        }
+
+        headers = {
+            "Authorization": f"Bearer {self.tavily_api_key.get_secret_value()}",
+            "Content-Type": "application/json",
+        }
+        response = requests.post(f"{TAVILY_API_URL}/crawl",json=params,headers=headers)
+
+        if response.status_code != 200:
+            detail = response.json().get("detail", {})
+            error_message = (
+                detail.get("error") if isinstance(detail, dict) else "Unknown error"
+            )
+            raise ValueError(f"Error {response.status_code}: {error_message}")
+        return response.json()
+
+    async def raw_results_async(
+        self,
+        url: str,
+        max_depth: Optional[int],
+        max_breadth: Optional[int],
+        limit: Optional[int],
+        query: Optional[str],
+        select_paths: Optional[List[str]],
+        select_domains: Optional[List[str]],
+        allow_external: Optional[bool],
+        include_images: Optional[bool],
+        categories: Optional[List[Literal["Careers", "Blog", "Documentation", "About", "Pricing", "Community", "Developers", "Contact", "Media"]]],
+        extract_depth: Optional[Literal["basic", "advanced"]]
+    ) -> Dict:
+        """Get results from the Tavily Crawl API asynchronously."""
+
+        # Function to perform the API call
+        async def fetch() -> str:
+            params = {
+                "url": url,
+                "max_depth": max_depth,
+                "max_breadth": max_breadth,
+                "limit": limit,
+                "query": query,
+                "select_paths": select_paths,
+                "select_domains": select_domains,
+                "allow_external": allow_external,
+                "categories": categories,
+                "include_images": include_images,
+                "extract_depth": extract_depth,
+            }
+            headers = {
+                "Authorization": f"Bearer {self.tavily_api_key.get_secret_value()}",
+                "Content-Type": "application/json",
+            }
+            async with aiohttp.ClientSession() as session:
+                async with session.post(
+                    f"{TAVILY_API_URL}/crawl", json=params, headers=headers
+                ) as res:
+                    if res.status == 200:
+                        data = await res.text()
+                        return data
+                    else:
+                        raise Exception(f"Error {res.status}: {res.reason}")
+
+        results_json_str = await fetch()
+
+        return json.loads(results_json_str)
+
+
+class TavilyMapAPIWrapper(BaseModel):
+    """Wrapper for Tavily Map API."""
+
+    tavily_api_key: SecretStr
+
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+
+    @model_validator(mode="before")
+    @classmethod
+    def validate_environment(cls, values: Dict) -> Any:
+        """Validate that api key and endpoint exists in environment."""
+        tavily_api_key = get_from_dict_or_env(
+            values, "tavily_api_key", "TAVILY_API_KEY"
+        )
+        values["tavily_api_key"] = tavily_api_key
+
+        return values
+
+    def raw_results(
+        self,
+        url: str,
+        max_depth: Optional[int],
+        max_breadth: Optional[int],
+        limit: Optional[int],
+        query: Optional[str],
+        select_paths: Optional[List[str]],
+        select_domains: Optional[List[str]],
+        allow_external: Optional[bool],
+        categories: Optional[List[Literal["Careers", "Blog", "Documentation", "About", "Pricing", "Community", "Developers", "Contact", "Media"]]],
+        extract_depth: Optional[Literal["basic", "advanced"]],
+    ) -> Dict:
+        params = {
+            "url": url,
+            "max_depth": max_depth,
+            "max_breadth": max_breadth,
+            "limit": limit,
+            "query": query,
+            "select_paths": select_paths,
+            "select_domains": select_domains,
+            "allow_external": allow_external,
+            "categories": categories,
+            "extract_depth": extract_depth,
+        }
+
+        headers = {
+            "Authorization": f"Bearer {self.tavily_api_key.get_secret_value()}",
+            "Content-Type": "application/json",
+        }
+
+        response = requests.post(
+            # type: ignore
+            f"{TAVILY_API_URL}/map",
+            json=params,
+            headers=headers,
+        )
+
+        if response.status_code != 200:
+            detail = response.json().get("detail", {})
+            error_message = (
+                detail.get("error") if isinstance(detail, dict) else "Unknown error"
+            )
+            raise ValueError(f"Error {response.status_code}: {error_message}")
+        return response.json()
+
+    async def raw_results_async(
+        self,
+        url: str,
+        max_depth: Optional[int],
+        max_breadth: Optional[int],
+        limit: Optional[int],
+        query: Optional[str],
+        select_paths: Optional[List[str]],
+        select_domains: Optional[List[str]],
+        allow_external: Optional[bool],
+        categories: Optional[List[Literal["Careers", "Blog", "Documentation", "About", "Pricing", "Community", "Developers", "Contact", "Media"]]],
+        extract_depth: Optional[Literal["basic", "advanced"]],
+    ) -> Dict:
+        """Get results from the Tavily Map API asynchronously."""
+
+        # Function to perform the API call
+        async def fetch() -> str:
+            params = {
+                "url": url,
+                "max_depth": max_depth,
+                "max_breadth": max_breadth,
+                "limit": limit,
+                "query": query,
+                "select_paths": select_paths,
+                "select_domains": select_domains,
+                "allow_external": allow_external,
+                "categories": categories,
+                "extract_depth": extract_depth,
+            }
+            headers = {
+                "Authorization": f"Bearer {self.tavily_api_key.get_secret_value()}",
+                "Content-Type": "application/json",
+            }
+            async with aiohttp.ClientSession() as session:
+                async with session.post(
+                    f"{TAVILY_API_URL}/map", json=params, headers=headers
+                ) as res:
+                    if res.status == 200:
+                        data = await res.text()
+                        return data
+                    else:
+                        raise Exception(f"Error {res.status}: {res.reason}")
+
+        results_json_str = await fetch()
+
+        return json.loads(results_json_str)
