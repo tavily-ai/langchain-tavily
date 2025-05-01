@@ -1,10 +1,19 @@
 # 🦜️🔗 LangChain Tavily
 
-This package contains the LangChain integration with Tavily
+[![PyPI version](https://badge.fury.io/py/langchain-tavily.svg)](https://badge.fury.io/py/langchain-tavily)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Downloads](https://static.pepy.tech/badge/langchain-tavily)](https://pepy.tech/project/langchain-tavily)
 
-[langchain-tavily](https://pypi.org/project/langchain-tavily/)
+This package contains the LangChain integration with [Tavily](https://tavily.com/)
 
-[Tavily website](https://tavily.com/)
+# 🎉 **Introducing [tavily-crawl](https://docs.tavily.com/documentation/api-reference/endpoint/crawl) + [tavily-map](https://docs.tavily.com/documentation/api-reference/endpoint/map) in v0.2.0!** 🎉
+Two powerful new tools have joined the Tavily family! Upgrade now to access:
+```bash
+pip install -U langchain-tavily
+```
+Don't miss out on these exciting new features! Check out the [full documentation](https://docs.tavily.com/) to learn more.
+
+---
 
 ## Installation
 
@@ -201,6 +210,143 @@ output:
     'response_time': 0.79
 }
 ```
+
+## Tavily Crawl
+
+Here we show how to instantiate an instance of the Tavily crawl tool. After instantiation we invoke the tool with a URL. This tool allows you to crawl websites using Tavily's Crawl API endpoint.
+
+### Instantiation
+
+The tool accepts various parameters during instantiation:
+
+- `max_depth` (optional, int): Max depth of the crawl from base URL. Default is 1.
+- `max_breadth` (optional, int): Max number of links to follow per page. Default is 20.
+- `limit` (optional, int): Total number of links to process before stopping. Default is 50.
+- `query` (optional, str): Natural language instructions to guide the crawler. Default is None.
+- `select_paths` (optional, List[str]): Regex patterns to select specific URL paths. Default is None.
+- `select_domains` (optional, List[str]): Regex patterns to select specific domains. Default is None.
+- `allow_external` (optional, bool): Allow following external domain links. Default is False.
+- `include_images` (optional, bool): Whether to include images in the crawl results.
+- `categories` (optional, str): Filter URLs by predefined categories. Can be "Careers", "Blog", "Documentation", "About", "Pricing", "Community", "Developers", "Contact", or "Media". Default is None.
+- `extract_depth` (optional, str): Depth of content extraction, either "basic" or "advanced". Default is "basic".
+
+For a comprehensive overview of the available parameters, refer to the [Tavily Crawl API documentation](https://docs.tavily.com/documentation/api-reference/endpoint/crawl)
+
+```python
+from langchain_tavily import TavilyCrawl
+
+tool = TavilyCrawl(
+    max_depth=1,
+    max_breadth=20,
+    limit=50,
+    # query=None,
+    # select_paths=None,
+    # select_domains=None,
+    # allow_external=False,
+    # include_images=False,
+    # categories=None,
+    # extract_depth="basic"
+)
+```
+
+### Invoke directly with args
+
+The Tavily crawl tool accepts the following arguments during invocation:
+- `url` (required): The root URL to begin the crawl.
+- All other parameters can also be set during invocation: `max_depth`, `max_breadth`, `limit`, `query`, `select_paths`, `select_domains`, `allow_external`, `include_images`, `categories`, and `extract_depth`
+
+NOTE: The optional arguments are available for agents to dynamically set, if you set an argument during instantiation and then invoke the tool with a different value, the tool will use the value you passed during invocation.
+
+```python
+# Basic crawl of a website
+result = tool.invoke({
+    "url": "https://docs.tavily.com",
+    "query": "Find SDK documentation",
+    "categories": "Documentation"
+})
+```
+
+output:
+```bash
+{
+    'base_url': 'https://docs.tavily.com',
+    'results': [{
+        'url': 'https://docs.tavily.com/sdk/python',
+        'raw_content': 'Python SDK Documentation...',
+        'images': []
+    },
+    {
+        'url': 'https://docs.tavily.com/sdk/javascript',
+        'raw_content': 'JavaScript SDK Documentation...',
+        'images': []
+    }],
+    'response_time': 10.28
+}
+```
+
+## Tavily Map
+
+Here we show how to instantiate an instance of the Tavily Map tool. After instantiation we invoke the tool with a URL. This tool allows you to create a structured map of website URLs using Tavily's Map API endpoint.
+
+### Instantiation
+
+The tool accepts various parameters during instantiation:
+
+- `max_depth` (optional, int): Max depth of the mapping from base URL. Default is 1.
+- `max_breadth` (optional, int): Max number of links to follow per page. Default is 20.
+- `limit` (optional, int): Total number of links to process before stopping. Default is 50.
+- `query` (optional, str): Natural language instructions to guide the mapping.
+- `select_paths` (optional, List[str]): Regex patterns to select specific URL paths.
+- `select_domains` (optional, List[str]): Regex patterns to select specific domains.
+- `allow_external` (optional, bool): Allow following external domain links. Default is False.
+- `categories` (optional, str): Filter URLs by predefined categories ("Careers", "Blog", "Documentation", "About", "Pricing", "Community", "Developers", "Contact", "Media").
+- `extract_depth` (optional, str): Depth of content extraction, either "basic" or "advanced". Default is "basic".
+
+For a comprehensive overview of the available parameters, refer to the [Tavily Map API documentation](https://docs.tavily.com/documentation/api-reference/endpoint/map)
+
+```python
+from langchain_tavily import TavilyMap
+
+tool = TavilyMap(
+    max_depth=1,
+    max_breadth=20,
+    limit=50,
+    # query=None,
+    # select_paths=None,
+    # select_domains=None,
+    # allow_external=False,
+    # categories=None,
+    # extract_depth="basic"
+)
+```
+
+### Invoke directly with args
+
+The Tavily map tool accepts the following arguments during invocation:
+- `url` (required): The root URL to begin the mapping.
+- All other parameters can also be set during invocation: `max_depth`, `max_breadth`, `limit`, `query`, `select_paths`, `select_domains`, `allow_external`, `categories`, and `extract_depth`
+
+NOTE: The optional arguments are available for agents to dynamically set, if you set an argument during instantiation and then invoke the tool with a different value, the tool will use the value you passed during invocation.
+
+```python
+# Basic mapping of a website
+result = tool.invoke({
+    "url": "https://docs.tavily.com",
+    "query": "Find SDK documentation",
+    "categories": "Documentation"
+})
+```
+
+output:
+```bash
+{
+    'base_url': 'https://docs.tavily.com',
+    'results': ['https://docs.tavily.com/sdk', 'https://docs.tavily.com/sdk/python/reference', 'https://docs.tavily.com/sdk/javascript/reference', 'https://docs.tavily.com/sdk/python/quick-start', 'https://docs.tavily.com/sdk/javascript/quick-start']
+    'response_time': 10.28
+}
+```
+
+
 
 ## Tavily Research Agent
 
