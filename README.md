@@ -20,6 +20,7 @@ Don't miss out on these exciting new features! Check out the [full documentation
 ```bash
 pip install -U langchain-tavily
 ```
+
 ### Credentials
 
 We also need to set our Tavily API key. You can get an API key by visiting [this site](https://app.tavily.com/sign-in) and creating an account.
@@ -32,7 +33,6 @@ if not os.environ.get("TAVILY_API_KEY"):
     os.environ["TAVILY_API_KEY"] = getpass.getpass("Tavily API key:\n")
 ```
 
-
 ## Tavily Search
 
 Here we show how to instantiate an instance of the Tavily search tool. The tool accepts various parameters to customize the search. After instantiation we invoke the tool with a simple query. This tool allows you to complete search queries using Tavily's Search API endpoint.
@@ -43,8 +43,8 @@ The tool accepts various parameters during instantiation:
 
 - `max_results` (optional, int): Maximum number of search results to return. Default is 5.
 - `topic` (optional, str): Category of the search. Can be "general", "news", or "finance". Default is "general".
-- `include_answer` (optional, bool): Include an answer to original query in results. Default is False.
-- `include_raw_content` (optional, bool | str): Include cleaned and parsed HTML of each search result. Cen be bool, "basic" or "advanced". Default is False.
+- `include_answer` (optional, bool | str): Include an answer to original query in results. Default is False. String options include "basic" (quick answer) or "advanced" (detailed answer). If True, defaults to "basic".
+- `include_raw_content` (optional, bool): Include cleaned and parsed HTML of each search result.
 - `include_images` (optional, bool): Include a list of query related images in the response. Default is False.
 - `include_image_descriptions` (optional, bool): Include descriptive text for each image. Default is False.
 - `search_depth` (optional, str): Depth of the search, either "basic" or "advanced". Default is "basic".
@@ -61,7 +61,7 @@ tool = TavilySearch(
     max_results=5,
     topic="general",
     # include_answer=False,
-    # include_raw_content=False, 
+    # include_raw_content=False,
     # include_images=False,
     # include_image_descriptions=False,
     # search_depth="basic",
@@ -74,45 +74,47 @@ tool = TavilySearch(
 ### Invoke directly with args
 
 The Tavily search tool accepts the following arguments during invocation:
+
 - `query` (required): A natural language search query
-- The following arguments can also be set during invokation : `include_images`, `search_depth` , `time_range`, `include_domains`, `exclude_domains`, `include_images`
+- The following arguments can also be set during invocation : `include_images`, `search_depth` , `time_range`, `include_domains`, `exclude_domains`, `include_images`
 - For reliability and performance reasons, certain parameters that affect response size cannot be modified during invocation: `include_answer` and `include_raw_content`. These limitations prevent unexpected context window issues and ensure consistent results.
 
-
-NOTE: The optional arguments are available for agents to dynamically set, if you set a argument during instantiation and then invoke the tool with a different value, the tool will use the value you passed during invokation.
+NOTE: The optional arguments are available for agents to dynamically set, if you set a argument during instantiation and then invoke the tool with a different value, the tool will use the value you passed during invocation.
 
 ```python
 # Basic query
 tool.invoke({"query": "What happened at the last wimbledon"})
 ```
+
 output:
+
 ```bash
 {
- 'query': 'What happened at the last wimbledon', 
- 'follow_up_questions': None, 
- 'answer': None, 
- 'images': [], 
- 'results': 
- [{'url': 'https://en.wikipedia.org/wiki/Wimbledon_Championships', 
-   'title': 'Wimbledon Championships - Wikipedia', 
+ 'query': 'What happened at the last wimbledon',
+ 'follow_up_questions': None,
+ 'answer': None,
+ 'images': [],
+ 'results':
+ [{'url': 'https://en.wikipedia.org/wiki/Wimbledon_Championships',
+   'title': 'Wimbledon Championships - Wikipedia',
    'content': 'Due to the COVID-19 pandemic, Wimbledon 2020 was cancelled ...',
-   'score': 0.62365627198, 
-   'raw_content': None}, 
+   'score': 0.62365627198,
+   'raw_content': None},
     ......................................................................
-    {'url': 'https://www.cbsnews.com/news/wimbledon-men-final-carlos-alcaraz-novak-djokovic/', 
-    'title': "Carlos Alcaraz beats Novak Djokovic at Wimbledon men's final to ...", 
+    {'url': 'https://www.cbsnews.com/news/wimbledon-men-final-carlos-alcaraz-novak-djokovic/',
+    'title': "Carlos Alcaraz beats Novak Djokovic at Wimbledon men's final to ...",
     'content': 'In attendance on Sunday was Catherine, the Princess of Wales ...',
-    'score': 0.5154731446, 
+    'score': 0.5154731446,
     'raw_content': None}],
   'response_time': 2.3
 }
 ```
+
 ### Agent Tool Calling
 
 We can use our tools directly with an agent executor by binding the tool to the agent. This gives the agent the ability to dynamically set the available arguments to the Tavily search tool.
 
 In the below example when we ask the agent to find "What is the most popular sport in the world? include only wikipedia sources" the agent will dynamically set the argments and invoke Tavily search tool : Invoking `tavily_search` with `{'query': 'most popular sport in the world', 'include_domains': ['wikipedia.org'], 'search_depth': 'basic'}`
-
 
 ```python
 # !pip install -qU langchain langchain-openai langchain-tavily
@@ -138,7 +140,7 @@ tavily_search_tool = TavilySearch(
 # Set up Prompt with 'agent_scratchpad'
 today = datetime.datetime.today().strftime("%D")
 prompt = ChatPromptTemplate.from_messages([
-    ("system", f"""You are a helpful reaserch assistant, you will be given a query and you will need to 
+    ("system", f"""You are a helpful reaserch assistant, you will be given a query and you will need to
     search the web for the most relevant information. The date today is {today}."""),
     MessagesPlaceholder(variable_name="messages"),
     MessagesPlaceholder(variable_name="agent_scratchpad"),  # Required for tool calls
@@ -159,7 +161,6 @@ user_input =  "What is the most popular sport in the world? include only wikiped
 # Construct input properly as a dictionary
 response = agent_executor.invoke({"messages": [HumanMessage(content=user_input)]})
 ```
-
 
 ## Tavily Extract
 
@@ -186,10 +187,11 @@ tool = TavilyExtract(
 ### Invoke directly with args
 
 The Tavily extract tool accepts the following arguments during invocation:
-- `urls` (required): A list of URLs to extract content from. 
-- Both `extract_depth` and `include_images` can also be set during invokation
 
-NOTE: The optional arguments are available for agents to dynamically set, if you set a argument during instantiation and then invoke the tool with a different value, the tool will use the value you passed during invokation. 
+- `urls` (required): A list of URLs to extract content from.
+- Both `extract_depth` and `include_images` can also be set during invocation
+
+NOTE: The optional arguments are available for agents to dynamically set, if you set a argument during instantiation and then invoke the tool with a different value, the tool will use the value you passed during invocation.
 
 ```python
 # Extract content from a URL
@@ -199,6 +201,7 @@ result = tool.invoke({
 ```
 
 output:
+
 ```bash
 {
     'results': [{
@@ -386,7 +389,7 @@ tools = [tavily_search_tool, tavily_extract_tool]
 # Set up Prompt with 'agent_scratchpad'
 today = datetime.datetime.today().strftime("%D")
 prompt = ChatPromptTemplate.from_messages([
-    ("system", f"""You are a helpful reaserch assistant, you will be given a query and you will need to 
+    ("system", f"""You are a helpful reaserch assistant, you will be given a query and you will need to
     search the web for the most relevant information then extract content to gain more insights. The date today is {today}."""),
     MessagesPlaceholder(variable_name="messages"),
     MessagesPlaceholder(variable_name="agent_scratchpad"),  # Required for tool calls
