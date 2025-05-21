@@ -222,7 +222,7 @@ The tool accepts various parameters during instantiation:
 - `max_depth` (optional, int): Max depth of the crawl from base URL. Default is 1.
 - `max_breadth` (optional, int): Max number of links to follow per page. Default is 20.
 - `limit` (optional, int): Total number of links to process before stopping. Default is 50.
-- `query` (optional, str): Natural language instructions to guide the crawler. Default is None.
+- `instructions` (optional, str): Natural language instructions to guide the crawler. Default is None.
 - `select_paths` (optional, List[str]): Regex patterns to select specific URL paths. Default is None.
 - `select_domains` (optional, List[str]): Regex patterns to select specific domains. Default is None.
 - `allow_external` (optional, bool): Allow following external domain links. Default is False.
@@ -239,7 +239,7 @@ tool = TavilyCrawl(
     max_depth=1,
     max_breadth=20,
     limit=50,
-    # query=None,
+    # instructions=None,
     # select_paths=None,
     # select_domains=None,
     # allow_external=False,
@@ -253,7 +253,7 @@ tool = TavilyCrawl(
 
 The Tavily crawl tool accepts the following arguments during invocation:
 - `url` (required): The root URL to begin the crawl.
-- All other parameters can also be set during invocation: `max_depth`, `max_breadth`, `limit`, `query`, `select_paths`, `select_domains`, `allow_external`, `include_images`, `categories`, and `extract_depth`
+- All other parameters can also be set during invocation: `max_depth`, `max_breadth`, `limit`, `instructions`, `select_paths`, `select_domains`, `allow_external`, `include_images`, `categories`, and `extract_depth`
 
 NOTE: The optional arguments are available for agents to dynamically set, if you set an argument during instantiation and then invoke the tool with a different value, the tool will use the value you passed during invocation.
 
@@ -261,7 +261,7 @@ NOTE: The optional arguments are available for agents to dynamically set, if you
 # Basic crawl of a website
 result = tool.invoke({
     "url": "https://docs.tavily.com",
-    "query": "Find SDK documentation",
+    "instructions": "Find SDK documentation",
     "categories": "Documentation"
 })
 ```
@@ -295,7 +295,7 @@ The tool accepts various parameters during instantiation:
 - `max_depth` (optional, int): Max depth of the mapping from base URL. Default is 1.
 - `max_breadth` (optional, int): Max number of links to follow per page. Default is 20.
 - `limit` (optional, int): Total number of links to process before stopping. Default is 50.
-- `query` (optional, str): Natural language instructions to guide the mapping.
+- `instructions` (optional, str): Natural language instructions to guide the mapping.
 - `select_paths` (optional, List[str]): Regex patterns to select specific URL paths.
 - `select_domains` (optional, List[str]): Regex patterns to select specific domains.
 - `allow_external` (optional, bool): Allow following external domain links. Default is False.
@@ -311,7 +311,7 @@ tool = TavilyMap(
     max_depth=1,
     max_breadth=20,
     limit=50,
-    # query=None,
+    # instructions=None,
     # select_paths=None,
     # select_domains=None,
     # allow_external=False,
@@ -324,7 +324,7 @@ tool = TavilyMap(
 
 The Tavily map tool accepts the following arguments during invocation:
 - `url` (required): The root URL to begin the mapping.
-- All other parameters can also be set during invocation: `max_depth`, `max_breadth`, `limit`, `query`, `select_paths`, `select_domains`, `allow_external`, `categories`, and `extract_depth`
+- All other parameters can also be set during invocation: `max_depth`, `max_breadth`, `limit`, `instructions`, `select_paths`, `select_domains`, `allow_external`, `categories`, and `extract_depth`
 
 NOTE: The optional arguments are available for agents to dynamically set, if you set an argument during instantiation and then invoke the tool with a different value, the tool will use the value you passed during invocation.
 
@@ -332,7 +332,7 @@ NOTE: The optional arguments are available for agents to dynamically set, if you
 # Basic mapping of a website
 result = tool.invoke({
     "url": "https://docs.tavily.com",
-    "query": "Find SDK documentation",
+    "instructions": "Find SDK documentation",
     "categories": "Documentation"
 })
 ```

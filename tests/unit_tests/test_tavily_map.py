@@ -33,7 +33,7 @@ class TestTavilyMapToolUnit(ToolsUnitTests):  # Fixed class name to match its pu
             "max_depth": 1,
             "max_breadth": 20,
             "limit": 50,
-            "query": "best time to visit japan",
+            "instructions": "best time to visit japan",
             "select_paths": None,
             "select_domains": None,
             "allow_external": False,

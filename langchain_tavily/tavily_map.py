@@ -52,14 +52,14 @@ class TavilyMapInput(BaseModel):
         limit must be greater than 0
         """,  # noqa: E501
     )
-    query: Optional[str] = Field(
+    instructions: Optional[str] = Field(
         default=None,
         description="""Natural language instructions for the crawler.
 
-        The query parameter allows the crawler to intelligently navigate through a website using natural language.
-        Take the users request to set the query parameter to guide the crawler in the direction of the users request.
+        The instructions parameter allows the crawler to intelligently navigate through a website using natural language.
+        Take the users request to set the instructions parameter to guide the crawler in the direction of the users request.
         
-        ex. "I want to find all the Javascript SDK documentation from Tavily" ---> query = "Javascript SDK documentation"
+        ex. "I want to find all the Javascript SDK documentation from Tavily" ---> instructions = "Javascript SDK documentation"
         """,  # noqa: E501
     )
     select_paths: Optional[List[str]] = Field(
@@ -122,13 +122,13 @@ def _generate_suggestions(params: dict) -> list:
     """
     suggestions = []
 
-    query = params.get("query")
+    instructions = params.get("instructions")
     select_paths = params.get("select_paths")
     select_domains = params.get("select_domains")
     categories = params.get("categories")
 
-    if query:
-        suggestions.append("Try a more consice query")
+    if instructions:
+        suggestions.append("Try a more consice instructions")
     if select_paths:
         suggestions.append("Remove select_paths argument")
     if select_domains:
@@ -168,7 +168,7 @@ class TavilyMap(BaseTool):  # type: ignore[override]
 
     limit must be greater than 0
     """
-    query: Optional[str] = None
+    instructions: Optional[str] = None
     """Natural language instructions for the crawler.
 
     ex. "Python SDK"
@@ -211,7 +211,7 @@ class TavilyMap(BaseTool):  # type: ignore[override]
         max_depth: Optional[int] = None,
         max_breadth: Optional[int] = None,
         limit: Optional[int] = None,
-        query: Optional[str] = None,
+        instructions: Optional[str] = None,
         select_paths: Optional[List[str]] = None,
         select_domains: Optional[List[str]] = None,
         allow_external: Optional[bool] = None,
@@ -239,7 +239,7 @@ class TavilyMap(BaseTool):  # type: ignore[override]
                 max_depth=max_depth if max_depth else self.max_depth,   
                 max_breadth=max_breadth if max_breadth else self.max_breadth,
                 limit=limit if limit else self.limit,
-                query=query if query else self.query,
+                instructions=instructions if instructions else self.instructions,
                 select_paths=select_paths if select_paths else self.select_paths,
                 select_domains=select_domains if select_domains else self.select_domains,
                 allow_external=allow_external if allow_external else self.allow_external,
@@ -250,7 +250,7 @@ class TavilyMap(BaseTool):  # type: ignore[override]
             # Check if results are empty and raise a specific exception
             if not raw_results.get("results", []):
                 search_params = {
-                    "query": query,
+                    "instructions": instructions,
                     "select_paths": select_paths,
                     "select_domains": select_domains,
                     "categories": categories,
@@ -277,7 +277,7 @@ class TavilyMap(BaseTool):  # type: ignore[override]
         max_depth: Optional[int] = None,
         max_breadth: Optional[int] = None,
         limit: Optional[int] = None,
-        query: Optional[str] = None,
+        instructions: Optional[str] = None,
         select_paths: Optional[List[str]] = None,
         select_domains: Optional[List[str]] = None,
         allow_external: Optional[bool] = None,
@@ -292,7 +292,7 @@ class TavilyMap(BaseTool):  # type: ignore[override]
                 max_depth=max_depth if max_depth else self.max_depth,   
                 max_breadth=max_breadth if max_breadth else self.max_breadth,
                 limit=limit if limit else self.limit,
-                query=query if query else self.query,
+                instructions=instructions if instructions else self.instructions,
                 select_paths=select_paths if select_paths else self.select_paths,
                 select_domains=select_domains if select_domains else self.select_domains,
                 allow_external=allow_external if allow_external else self.allow_external,
@@ -303,7 +303,7 @@ class TavilyMap(BaseTool):  # type: ignore[override]
             # Check if results are empty and raise a specific exception
             if not raw_results.get("results", []):
                 search_params = {
-                    "query": query,
+                    "instructions": instructions,
                     "select_paths": select_paths,
                     "select_domains": select_domains,
                     "categories": categories,
