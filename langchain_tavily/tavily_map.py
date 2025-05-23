@@ -21,13 +21,12 @@ class TavilyMapInput(BaseModel):
         description="""Max depth of the mapping. Defines how far from the base URL the crawler can explore.
 
         Increase this parameter when:
-        1. To crawl large websites and get a comprehensive overview of its structure.
-        2. To crawl a website that has a lot of links to other pages.
+        1. To map large websites and get a comprehensive overview of its structure.
+        2. To map a website that has a lot of links to other pages.
 
         Set this parameter to 1 when:
         1. To stay local to the base_url
-        2. To crawl a single page
-
+        2. To map a single page
 
         max_depth must be greater than 0
         """,  # noqa: E501
@@ -36,28 +35,28 @@ class TavilyMapInput(BaseModel):
         default=20,
         description="""Max number of links to follow per level of the tree (i.e., per page).
 
-        tavily-map uses a BFS Depth: refering to the number of link hops from the root URL. 
+        tavily-map uses a BFS Depth: referring to the number of link hops from the root URL. 
         A page directly linked from the root is at BFS depth 1, regardless of its URL structure.
 
         Increase this parameter when:
-        1. You want many links from each page to be crawled.
+        1. You want many links from each page to be mapped.
 
         max_breadth must be greater than 0
         """,  # noqa: E501
     )
     limit: Optional[int] = Field(
         default=50,
-        description="""Total number of links the crawler will process before stopping.
+        description="""Total number of links the mapper will process before stopping.
         
         limit must be greater than 0
         """,  # noqa: E501
     )
     instructions: Optional[str] = Field(
         default=None,
-        description="""Natural language instructions for the crawler.
+        description="""Natural language instructions for the mapper.
 
-        The instructions parameter allows the crawler to intelligently navigate through a website using natural language.
-        Take the users request to set the instructions parameter to guide the crawler in the direction of the users request.
+        The instructions parameter allows the mapper to intelligently navigate through a website using natural language.
+        Take the users request to set the instructions parameter to guide the mapper in the direction of the users request.
         
         ex. "I want to find all the Javascript SDK documentation from Tavily" ---> instructions = "Javascript SDK documentation"
         """,  # noqa: E501
@@ -66,26 +65,45 @@ class TavilyMapInput(BaseModel):
         default=None,
         description="""Regex patterns to select only URLs with specific path patterns.
 
-        Use when the user explcitily asks from a specific path from a website.
+        Use when the user explicitly asks for a specific path from a website.
         
-        ex. "Only crawl the /api/v1 path" ---> ["/api/v1.*"] 
-        ex. "Only crawl the /documentation path" ---> ["/documentation/.*"]
+        ex. "Only map the /api/v1 path" ---> ["/api/v1.*"] 
+        ex. "Only map the /documentation path" ---> ["/documentation/.*"]
         """,  # noqa: E501
     )
     select_domains: Optional[List[str]] = Field(
         default=None,
         description="""Regex patterns to select only URLs from specific domains or subdomains.
    
-        Use when the user explcitily asks from a specific subdomains from a website.
+        Use when the user explicitly asks for a specific domain or subdomain from a website.
 
-        ex. "Crawl only the docs.tavily.com subdomain" ---> ["^docs\.tavily\.com$"]
+        ex. "Map only the docs.tavily.com subdomain" ---> ["^docs\.tavily\.com$"]
+        """,  # noqa: E501
+    )
+    exclude_paths: Optional[List[str]] = Field(
+        default=None,
+        description="""Regex patterns to exclude URLs from the map with specific path patterns.
+
+        Use when the user explicitly asks to exclude a specific path from a website.
+
+        ex. "Map example.com but exclude the /api/v1 path form the map" ---> ["/api/v1.*"] 
+        ex. "Map example.com but exclude the /documentation path from the map" ---> ["/documentation/.*"]
+        """,  # noqa: E501
+    )
+    exclude_domains: Optional[List[str]] = Field(
+        default=None,
+        description="""Regex patterns to exclude URLs from specific domains or subdomains.
+
+        Use when the user explicitly asks to exclude a specific domain or subdomain from a website.
+
+        ex. "Map tavily.com but exclude the docs.tavily.com subdomain from the map" ---> ["^docs\.tavily\.com$"]
         """,  # noqa: E501
     )
     allow_external: Optional[bool] = Field(
         default=False,
         description="""Allow the crawler to follow external links.
 
-        Use when the user explcitily asks to allow or deny external links.
+        Use when the user explicitly asks to allow or deny external links.
         """,  # noqa: E501
     )
     categories: Optional[List[Literal["Careers", "Blog", "Documentation", "About", "Pricing", "Community", "Developers", "Contact", "Media"]]] = Field(
@@ -105,7 +123,7 @@ class TavilyMapInput(BaseModel):
             Media: Crawl press releases, media kits, newsrooms, and multimedia content.
 
 
-        ex. "Crawl apple.com for carrer opportunities" ---> categories="Careers"
+        ex. "Crawl apple.com for career opportunities" ---> categories="Careers"
         ex. "Crawl tavily.com for API documentation" ---> categories="Documentation"
     """
     )
@@ -125,6 +143,8 @@ def _generate_suggestions(params: dict) -> list:
     instructions = params.get("instructions")
     select_paths = params.get("select_paths")
     select_domains = params.get("select_domains")
+    exclude_paths = params.get("exclude_paths")
+    exclude_domains = params.get("exclude_domains")
     categories = params.get("categories")
 
     if instructions:
@@ -133,6 +153,10 @@ def _generate_suggestions(params: dict) -> list:
         suggestions.append("Remove select_paths argument")
     if select_domains:
         suggestions.append("Remove select_domains argument")
+    if exclude_paths:
+        suggestions.append("Remove exclude_paths argument")
+    if exclude_domains:
+        suggestions.append("Remove exclude_domains argument")
     if categories:
         suggestions.append("Remove categories argument")
 
@@ -183,6 +207,16 @@ class TavilyMap(BaseTool):  # type: ignore[override]
 
     ex. ["^docs\.example\.com$"]
     """
+    exclude_paths: Optional[List[str]] = None
+    """
+    Regex patterns to exclude URLs with specific path patterns 
+    ex.  [/private/.*, /admin/.*]
+    """
+    exclude_domains: Optional[List[str]] = None
+    """
+    Regex patterns to exclude specific domains or subdomains from mapping 
+    ex. [^private\.example\.com$]
+    """
     allow_external: Optional[bool] = False
     """Whether to allow following links that go to external domains.
     """
@@ -214,6 +248,8 @@ class TavilyMap(BaseTool):  # type: ignore[override]
         instructions: Optional[str] = None,
         select_paths: Optional[List[str]] = None,
         select_domains: Optional[List[str]] = None,
+        exclude_paths: Optional[List[str]] = None,
+        exclude_domains: Optional[List[str]] = None,
         allow_external: Optional[bool] = None,
         categories: Optional[List[Literal["Careers", "Blog", "Documentation", "About", "Pricing", "Community", "Developers", "Contact", "Media"]]] = None,
         extract_depth: Optional[Literal["basic", "advanced"]] = None,
@@ -242,6 +278,8 @@ class TavilyMap(BaseTool):  # type: ignore[override]
                 instructions=instructions if instructions else self.instructions,
                 select_paths=select_paths if select_paths else self.select_paths,
                 select_domains=select_domains if select_domains else self.select_domains,
+                exclude_paths=exclude_paths if exclude_paths else self.exclude_paths,
+                exclude_domains=exclude_domains if exclude_domains else self.exclude_domains,
                 allow_external=allow_external if allow_external else self.allow_external,
                 categories=categories if categories else self.categories,
                 extract_depth=extract_depth if extract_depth else self.extract_depth,
@@ -253,6 +291,8 @@ class TavilyMap(BaseTool):  # type: ignore[override]
                     "instructions": instructions,
                     "select_paths": select_paths,
                     "select_domains": select_domains,
+                    "exclude_paths": exclude_paths,
+                    "exclude_domains": exclude_domains,
                     "categories": categories,
                 }
                 suggestions = _generate_suggestions(search_params)
@@ -280,6 +320,8 @@ class TavilyMap(BaseTool):  # type: ignore[override]
         instructions: Optional[str] = None,
         select_paths: Optional[List[str]] = None,
         select_domains: Optional[List[str]] = None,
+        exclude_paths: Optional[List[str]] = None,
+        exclude_domains: Optional[List[str]] = None,
         allow_external: Optional[bool] = None,
         categories: Optional[List[Literal["Careers", "Blog", "Documentation", "About", "Pricing", "Community", "Developers", "Contact", "Media"]]] = None,
         extract_depth: Optional[Literal["basic", "advanced"]] = None,
@@ -295,6 +337,8 @@ class TavilyMap(BaseTool):  # type: ignore[override]
                 instructions=instructions if instructions else self.instructions,
                 select_paths=select_paths if select_paths else self.select_paths,
                 select_domains=select_domains if select_domains else self.select_domains,
+                exclude_paths=exclude_paths if exclude_paths else self.exclude_paths,
+                exclude_domains=exclude_domains if exclude_domains else self.exclude_domains,
                 allow_external=allow_external if allow_external else self.allow_external,
                 categories=categories if categories else self.categories,
                 extract_depth=extract_depth if extract_depth else self.extract_depth,

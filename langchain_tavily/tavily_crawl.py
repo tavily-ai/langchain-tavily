@@ -35,7 +35,7 @@ class TavilyCrawlInput(BaseModel):
         default=20,
         description="""Max number of links to follow per level of the tree (i.e., per page).
 
-        tavily-crawl uses a BFS Depth: refering to the number of link hops from the root URL. 
+        tavily-crawl uses a BFS Depth: referring to the number of link hops from the root URL. 
         A page directly linked from the root is at BFS depth 1, regardless of its URL structure.
 
         Increase this parameter when:
@@ -51,7 +51,7 @@ class TavilyCrawlInput(BaseModel):
         limit must be greater than 0
         """,  # noqa: E501
     )
-    Instructions: Optional[str] = Field(
+    instructions: Optional[str] = Field(
         default=None,
         description="""Natural language instructions for the crawler.
 
@@ -65,7 +65,7 @@ class TavilyCrawlInput(BaseModel):
         default=None,
         description="""Regex patterns to select only URLs with specific path patterns.
 
-        Use when the user explcitily asks from a specific path from a website.
+        Use when the user explicitly asks for a specific path from a website.
         
         ex. "Only crawl the /api/v1 path" ---> ["/api/v1.*"] 
         ex. "Only crawl the /documentation path" ---> ["/documentation/.*"]
@@ -75,16 +75,35 @@ class TavilyCrawlInput(BaseModel):
         default=None,
         description="""Regex patterns to select only URLs from specific domains or subdomains.
    
-        Use when the user explcitily asks from a specific subdomains from a website.
+        Use when the user explicitly asks for a specific domain or subdomain from a website.
 
         ex. "Crawl only the docs.tavily.com subdomain" ---> ["^docs\.tavily\.com$"]
+        """,  # noqa: E501
+    )
+    exclude_paths: Optional[List[str]] = Field(
+        default=None,
+        description="""Regex patterns to exclude URLs from the crawl with specific path patterns.
+
+        Use when the user explicitly asks to exclude a specific path from a website.
+
+        ex. "Crawl example.com but exclude the /api/v1 path form the crawl" ---> ["/api/v1.*"] 
+        ex. "Crawl example.com but exclude the /documentation path from the crawl" ---> ["/documentation/.*"]
+        """,  # noqa: E501
+    )
+    exclude_domains: Optional[List[str]] = Field(
+        default=None,
+        description="""Regex patterns to exclude URLs from specific domains or subdomains.
+
+        Use when the user explicitly asks to exclude a specific domain or subdomain from a website.
+
+        ex. "Crawl tavily.com but exclude the docs.tavily.com subdomain from the crawl" ---> ["^docs\.tavily\.com$"]
         """,  # noqa: E501
     )
     allow_external: Optional[bool] = Field(
         default=False,
         description="""Allow the crawler to follow external links.
 
-        Use when the user explcitily asks to allow or deny external links.
+        Use when the user explicitly asks to allow or deny external links.
         """,  # noqa: E501
     )
     include_images: Optional[bool] = Field(
@@ -109,7 +128,7 @@ class TavilyCrawlInput(BaseModel):
             Media: Crawl press releases, media kits, newsrooms, and multimedia content.
 
 
-        ex. "Crawl apple.com for carrer opportunities" ---> categories="Careers"
+        ex. "Crawl apple.com for career opportunities" ---> categories="Careers"
         ex. "Crawl tavily.com for API documentation" ---> categories="Documentation"
     """
     )
@@ -129,6 +148,8 @@ def _generate_suggestions(params: dict) -> list:
     instructions = params.get("instructions")
     select_paths = params.get("select_paths")
     select_domains = params.get("select_domains")
+    exclude_paths = params.get("exclude_paths")
+    exclude_domains = params.get("exclude_domains")
     categories = params.get("categories")
 
     if instructions:
@@ -137,6 +158,10 @@ def _generate_suggestions(params: dict) -> list:
         suggestions.append("Remove select_paths argument")
     if select_domains:
         suggestions.append("Remove select_domains argument")
+    if exclude_paths:
+        suggestions.append("Remove exclude_paths argument")
+    if exclude_domains:
+        suggestions.append("Remove exclude_domains argument")
     if categories:
         suggestions.append("Remove categories argument")
 
@@ -188,6 +213,16 @@ class TavilyCrawl(BaseTool):  # type: ignore[override]
 
     ex. ["^docs\.example\.com$"]
     """
+    exclude_paths: Optional[List[str]] = None
+    """
+    Regex patterns to exclude URLs with specific path patterns 
+    ex.  [/private/.*, /admin/.*]
+    """
+    exclude_domains: Optional[List[str]] = None
+    """
+    Regex patterns to exclude specific domains or subdomains from crawling 
+    ex. [^private\.example\.com$]
+    """
     allow_external: Optional[bool] = False
     """Whether to allow following links that go to external domains.
     """
@@ -222,6 +257,8 @@ class TavilyCrawl(BaseTool):  # type: ignore[override]
         instructions: Optional[str] = None,
         select_paths: Optional[List[str]] = None,
         select_domains: Optional[List[str]] = None,
+        exclude_paths: Optional[List[str]] = None,
+        exclude_domains: Optional[List[str]] = None,
         allow_external: Optional[bool] = None,
         include_images: Optional[bool] = None,
         categories: Optional[List[Literal["Careers", "Blog", "Documentation", "About", "Pricing", "Community", "Developers", "Contact", "Media"]]] = None,
@@ -253,6 +290,8 @@ class TavilyCrawl(BaseTool):  # type: ignore[override]
                 instructions=instructions if instructions else self.instructions,
                 select_paths=select_paths if select_paths else self.select_paths,
                 select_domains=select_domains if select_domains else self.select_domains,
+                exclude_paths=exclude_paths if exclude_paths else self.exclude_paths,
+                exclude_domains=exclude_domains if exclude_domains else self.exclude_domains,
                 allow_external=allow_external if allow_external else self.allow_external,
                 include_images=include_images if include_images else self.include_images,
                 categories=categories if categories else self.categories,
@@ -265,6 +304,8 @@ class TavilyCrawl(BaseTool):  # type: ignore[override]
                     "instructions": instructions,
                     "select_paths": select_paths,
                     "select_domains": select_domains,
+                    "exclude_paths": exclude_paths,
+                    "exclude_domains": exclude_domains,
                     "categories": categories,
                 }
                 suggestions = _generate_suggestions(search_params)
@@ -292,6 +333,8 @@ class TavilyCrawl(BaseTool):  # type: ignore[override]
         instructions: Optional[str] = None,
         select_paths: Optional[List[str]] = None,
         select_domains: Optional[List[str]] = None,
+        exclude_paths: Optional[List[str]] = None,
+        exclude_domains: Optional[List[str]] = None,
         allow_external: Optional[bool] = None,
         include_images: Optional[bool] = None,
         categories: Optional[List[Literal["Careers", "Blog", "Documentation", "About", "Pricing", "Community", "Developers", "Contact", "Media"]]] = None,
@@ -308,6 +351,8 @@ class TavilyCrawl(BaseTool):  # type: ignore[override]
                 instructions=instructions if instructions else self.instructions,
                 select_paths=select_paths if select_paths else self.select_paths,
                 select_domains=select_domains if select_domains else self.select_domains,
+                exclude_paths=exclude_paths if exclude_paths else self.exclude_paths,
+                exclude_domains=exclude_domains if exclude_domains else self.exclude_domains,
                 allow_external=allow_external if allow_external else self.allow_external,
                 include_images=include_images if include_images else self.include_images,
                 categories=categories if categories else self.categories,

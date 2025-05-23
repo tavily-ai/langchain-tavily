@@ -249,22 +249,28 @@ class TavilyCrawlAPIWrapper(BaseModel):
         max_depth: Optional[int],
         max_breadth: Optional[int],
         limit: Optional[int],
-        query: Optional[str],
+        instructions: Optional[str],
         select_paths: Optional[List[str]],
         select_domains: Optional[List[str]],
+        exclude_paths: Optional[List[str]],
+        exclude_domains: Optional[List[str]],
         allow_external: Optional[bool],
+        include_images: Optional[bool],
         categories: Optional[Literal["Careers", "Blog", "Documentation", "About", "Pricing", "Community", "Developers", "Contact", "Media"]],
-        extract_depth: Optional[Literal["basic", "advanced"]] = "advanced",
+        extract_depth: Optional[Literal["basic", "advanced"]],
     ) -> Dict:
         params = {
             "url": url,
             "max_depth": max_depth,
             "max_breadth": max_breadth,
             "limit": limit,
-            "query": query,
+            "query": instructions,
             "select_paths": select_paths,
             "select_domains": select_domains,
+            "exclude_paths": exclude_paths,
+            "exclude_domains": exclude_domains,
             "allow_external": allow_external,
+            "include_images": include_images,
             "categories": categories,
             "extract_depth": extract_depth,
         }
@@ -295,11 +301,15 @@ class TavilyCrawlAPIWrapper(BaseModel):
         max_depth: Optional[int],
         max_breadth: Optional[int],
         limit: Optional[int],
-        query: Optional[str],
+        instructions: Optional[str],
         select_paths: Optional[List[str]],
         select_domains: Optional[List[str]],
-        include_images: Optional[bool] = False,
-        extract_depth: Optional[Literal["basic", "advanced"]] = "advanced",
+        exclude_paths: Optional[List[str]],
+        exclude_domains: Optional[List[str]],
+        allow_external: Optional[bool],
+        include_images: Optional[bool],
+        categories: Optional[Literal["Careers", "Blog", "Documentation", "About", "Pricing", "Community", "Developers", "Contact", "Media"]],
+        extract_depth: Optional[Literal["basic", "advanced"]],
     ) -> Dict:
         """Get results from the Tavily Crawl API asynchronously."""
 
@@ -310,10 +320,14 @@ class TavilyCrawlAPIWrapper(BaseModel):
                 "max_depth": max_depth,
                 "max_breadth": max_breadth,
                 "limit": limit,
-                "query": query,
+                "instructions": instructions,
                 "select_paths": select_paths,
                 "select_domains": select_domains,
+                "exclude_paths": exclude_paths,
+                "exclude_domains": exclude_domains,
+                "allow_external": allow_external,
                 "include_images": include_images,
+                "categories": categories,
                 "extract_depth": extract_depth,
             }
             headers = {
@@ -361,24 +375,26 @@ class TavilyMapAPIWrapper(BaseModel):
         max_depth: Optional[int],
         max_breadth: Optional[int],
         limit: Optional[int],
-        query: Optional[str],
+        instructions: Optional[str],
         select_paths: Optional[List[str]],
         select_domains: Optional[List[str]],
+        exclude_paths: Optional[List[str]],
+        exclude_domains: Optional[List[str]],
         allow_external: Optional[bool],
-        categories: Optional[Literal["Careers", "Blog", "Documentation", "About", "Pricing", "Community", "Developers", "Contact", "Media"]],
-        extract_depth: Optional[Literal["basic", "advanced"]] = "advanced",
+        categories: Optional[Literal[ "Careers", "Blog", "Documentation", "About", "Pricing", "Community", "Developers", "Contact", "Media"]]
     ) -> Dict:
         params = {
             "url": url,
             "max_depth": max_depth,
             "max_breadth": max_breadth,
             "limit": limit,
-            "query": query,
+            "instructions": instructions,
             "select_paths": select_paths,
             "select_domains": select_domains,
+            "exclude_paths": exclude_paths,
+            "exclude_domains": exclude_domains,
             "allow_external": allow_external,
-            "categories": categories,
-            "extract_depth": extract_depth,
+            "categories": categories
         }
 
         headers = {
@@ -407,11 +423,13 @@ class TavilyMapAPIWrapper(BaseModel):
         max_depth: Optional[int],
         max_breadth: Optional[int],
         limit: Optional[int],
-        query: Optional[str],
+        instructions: Optional[str],
         select_paths: Optional[List[str]],
         select_domains: Optional[List[str]],
-        include_images: Optional[bool] = False,
-        extract_depth: Optional[Literal["basic", "advanced"]] = "advanced",
+        exclude_paths: Optional[List[str]],
+        exclude_domains: Optional[List[str]],
+        allow_external: Optional[bool],
+        categories: Optional[Literal[ "Careers", "Blog", "Documentation", "About", "Pricing", "Community", "Developers", "Contact", "Media"]]
     ) -> Dict:
         """Get results from the Tavily Map API asynchronously."""
 
@@ -422,11 +440,13 @@ class TavilyMapAPIWrapper(BaseModel):
                 "max_depth": max_depth,
                 "max_breadth": max_breadth,
                 "limit": limit,
-                "query": query,
+                "instructions": instructions,
                 "select_paths": select_paths,
                 "select_domains": select_domains,
-                "include_images": include_images,
-                "extract_depth": extract_depth,
+                "exclude_paths": exclude_paths,
+                "exclude_domains": exclude_domains,
+                "allow_external": allow_external,
+                "categories": categories,
             }
             headers = {
                 "Authorization": f"Bearer {self.tavily_api_key.get_secret_value()}",
