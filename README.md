@@ -228,6 +228,8 @@ The tool accepts various parameters during instantiation:
 - `instructions` (optional, str): Natural language instructions to guide the crawler. Default is None.
 - `select_paths` (optional, List[str]): Regex patterns to select specific URL paths. Default is None.
 - `select_domains` (optional, List[str]): Regex patterns to select specific domains. Default is None.
+- `exclude_paths` (optional, List[str]): Regex patterns to exclude URLs with specific path patterns 
+- `exclude_domains` (optional, List[str]): Regex patterns to exclude specific domains or subdomains from crawling 
 - `allow_external` (optional, bool): Allow following external domain links. Default is False.
 - `include_images` (optional, bool): Whether to include images in the crawl results.
 - `categories` (optional, str): Filter URLs by predefined categories. Can be "Careers", "Blog", "Documentation", "About", "Pricing", "Community", "Developers", "Contact", or "Media". Default is None.
@@ -245,10 +247,12 @@ tool = TavilyCrawl(
     # instructions=None,
     # select_paths=None,
     # select_domains=None,
+    # exclude_paths=None,
+    # exclude_domains=None,
     # allow_external=False,
     # include_images=False,
     # categories=None,
-    # extract_depth="basic"
+    # extract_depth=None
 )
 ```
 
@@ -256,7 +260,7 @@ tool = TavilyCrawl(
 
 The Tavily crawl tool accepts the following arguments during invocation:
 - `url` (required): The root URL to begin the crawl.
-- All other parameters can also be set during invocation: `max_depth`, `max_breadth`, `limit`, `instructions`, `select_paths`, `select_domains`, `allow_external`, `include_images`, `categories`, and `extract_depth`
+- All other parameters can also be set during invocation: `max_depth`, `max_breadth`, `limit`, `instructions`, `select_paths`, `select_domains`, `exclude_paths`, `exclude_domains`,`allow_external`, `include_images`, `categories`, and `extract_depth`
 
 NOTE: The optional arguments are available for agents to dynamically set, if you set an argument during instantiation and then invoke the tool with a different value, the tool will use the value you passed during invocation.
 
@@ -301,6 +305,8 @@ The tool accepts various parameters during instantiation:
 - `instructions` (optional, str): Natural language instructions to guide the mapping.
 - `select_paths` (optional, List[str]): Regex patterns to select specific URL paths.
 - `select_domains` (optional, List[str]): Regex patterns to select specific domains.
+- `exclude_paths` (optional, List[str]): Regex patterns to exclude URLs with specific path patterns 
+- `exclude_domains` (optional, List[str]): Regex patterns to exclude specific domains or subdomains from mapping 
 - `allow_external` (optional, bool): Allow following external domain links. Default is False.
 - `categories` (optional, str): Filter URLs by predefined categories ("Careers", "Blog", "Documentation", "About", "Pricing", "Community", "Developers", "Contact", "Media").
 - `extract_depth` (optional, str): Depth of content extraction, either "basic" or "advanced". Default is "basic".
@@ -317,6 +323,8 @@ tool = TavilyMap(
     # instructions=None,
     # select_paths=None,
     # select_domains=None,
+    # exclude_paths=None,
+    # exclude_domains=None,
     # allow_external=False,
     # categories=None,
     # extract_depth="basic"
@@ -327,7 +335,7 @@ tool = TavilyMap(
 
 The Tavily map tool accepts the following arguments during invocation:
 - `url` (required): The root URL to begin the mapping.
-- All other parameters can also be set during invocation: `max_depth`, `max_breadth`, `limit`, `instructions`, `select_paths`, `select_domains`, `allow_external`, `categories`, and `extract_depth`
+- All other parameters can also be set during invocation: `max_depth`, `max_breadth`, `limit`, `instructions`, `select_paths`, `select_domains`, `exclude_paths`, `exclude_domains`, `allow_external`, `categories`, and `extract_depth`
 
 NOTE: The optional arguments are available for agents to dynamically set, if you set an argument during instantiation and then invoke the tool with a different value, the tool will use the value you passed during invocation.
 
@@ -348,8 +356,6 @@ output:
     'response_time': 10.28
 }
 ```
-
-
 
 ## Tavily Research Agent
 
@@ -408,6 +414,70 @@ user_input =  "Research the latest developments in quantum computing and provide
 
 # Construct input properly as a dictionary
 response = agent_executor.invoke({"messages": [HumanMessage(content=user_input)]})
-
-
 ```
+
+## Tavily Search and Crawl Agent Example
+
+This example demonstrates how to build a powerful web research agent using Tavily's search and crawl Langchain tools to find and analyze information from websites.
+
+### Features
+
+- Internet Search: Query the web for up-to-date information using Tavily's search API
+- Website Crawling: Crawl websites to find specific information and content
+- Seamless Integration: Works with OpenAI's function calling capability for reliable tool use
+
+```python
+from typing import Any, Dict, Optional
+import datetime
+
+from langchain.agents import create_openai_tools_agent, AgentExecutor
+from langchain.chat_models import init_chat_model
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+from langchain_openai import ChatOpenAI
+from langchain_tavily import TavilySearch, TavilyCrawl
+from langchain.schema import HumanMessage, SystemMessage
+
+# Initialize LLM
+llm = init_chat_model(model="gpt-4.1", model_provider="openai", temperature=0)
+
+# Initialize Tavily Search Tool
+tavily_search_tool = TavilySearch(
+    max_results=5,
+    topic="general",
+)
+
+tavily_crawl_tool = TavilyCrawl()
+
+# Set up Prompt with 'agent_scratchpad'
+today = datetime.datetime.today().strftime("%D")
+prompt = ChatPromptTemplate.from_messages([
+    ("system", f"""You are a helpful reaserch assistant, you will be given a query and you will need to
+    search the web and crawl the web for the most relevant information. The date today is {today}."""),
+    MessagesPlaceholder(variable_name="messages"),
+    MessagesPlaceholder(variable_name="agent_scratchpad"),  # Required for tool calls
+])
+
+# Create an agent that can use tools
+agent = create_openai_tools_agent(
+    llm=llm,
+    tools=[tavily_search_tool, tavily_crawl_tool],
+    prompt=prompt
+)
+
+# Create an Agent Executor to handle tool execution
+agent_executor = AgentExecutor(agent=agent, tools=[tavily_search_tool, tavily_crawl_tool], verbose=True)
+
+user_input =  "Find the base url of apple and then crawl the base url to find all iphone models"
+
+# Construct input properly as a dictionary
+response = agent_executor.invoke({"messages": [HumanMessage(content=user_input)]})
+```
+
+This example shows how to:
+1. Initialize both Tavily Search and Crawl tools
+2. Set up an agent with a custom prompt that includes the current date
+3. Create an agent executor that can use both tools
+4. Process a user query that requires both searching and crawling capabilities
+
+The agent will first use the search tool to find Apple's base URL, then use the crawl tool to explore the website and find information about iPhone models.
+
