@@ -111,7 +111,21 @@ class TavilyCrawlInput(BaseModel):
         description="""Whether to include images in the crawl results.
         """,  # noqa: E501
     )
-    categories: Optional[List[Literal["Careers", "Blog", "Documentation", "About", "Pricing", "Community", "Developers", "Contact", "Media"]]] = Field(
+    categories: Optional[
+        List[
+            Literal[
+                "Careers",
+                "Blog",
+                "Documentation",
+                "About",
+                "Pricing",
+                "Community",
+                "Developers",
+                "Contact",
+                "Media",
+            ]
+        ]
+    ] = Field(
         default=None,
         description="""Direct the crawler to crawl specific categories of a website.
 
@@ -130,19 +144,18 @@ class TavilyCrawlInput(BaseModel):
 
         ex. "Crawl apple.com for career opportunities" ---> categories="Careers"
         ex. "Crawl tavily.com for API documentation" ---> categories="Documentation"
-    """
+    """, # noqa: E501
     )
     extract_depth: Optional[Literal["basic", "advanced"]] = Field(
         default="basic",
         description="""Advanced extraction retrieves more data, including tables and embedded content
         with higher success but may increase latency.
-        """
+        """, # noqa: E501
     )
 
 
 def _generate_suggestions(params: dict) -> list:
-    """Generate helpful suggestions based on the failed crawl parameters.
-    """
+    """Generate helpful suggestions based on the failed crawl parameters."""
     suggestions = []
 
     instructions = params.get("instructions")
@@ -169,16 +182,14 @@ def _generate_suggestions(params: dict) -> list:
 
 
 class TavilyCrawl(BaseTool):  # type: ignore[override]
-    """Tool that sends requests to the Tavily Crawl API with dynamically settable parameters."""
+    """Tool that sends requests to the Tavily Crawl API with dynamically settable parameters.""" # noqa: E501
 
     name: str = "tavily_crawl"
-    description: str = (
-        """A powerful web crawler that initiates a structured web crawl starting from a specified 
+    description: str = """A powerful web crawler that initiates a structured web crawl starting from a specified 
         base URL. The crawler uses a BFS Depth: refering to the number of link hops from the root URL. 
         A page directly linked from the root is at BFS depth 1, regardless of its URL structure.
         You can control how deep and wide it goes, and guide it to focus on specific sections of the site.
-        """
-    )
+        """ # noqa: E501
 
     args_schema: Type[BaseModel] = TavilyCrawlInput
     handle_tool_error: bool = True
@@ -187,7 +198,7 @@ class TavilyCrawl(BaseTool):  # type: ignore[override]
     """Max depth of the crawl. Defines how far from the base URL the crawler can explore.
 
     max_depth must be greater than 0
-    """
+    """ # noqa: E501
     max_breadth: Optional[int] = 20
     """The maximum number of links to follow per level of the tree (i.e., per page).
 
@@ -229,7 +240,21 @@ class TavilyCrawl(BaseTool):  # type: ignore[override]
     include_images: Optional[bool] = False
     """Whether to include images in the crawl results.
     """
-    categories: Optional[List[Literal["Careers", "Blog", "Documentation", "About", "Pricing", "Community", "Developers", "Contact", "Media"]]] = None
+    categories: Optional[
+        List[
+            Literal[
+                "Careers",
+                "Blog",
+                "Documentation",
+                "About",
+                "Pricing",
+                "Community",
+                "Developers",
+                "Contact",
+                "Media",
+            ]
+        ]
+    ] = None
     """Filter URLs using predefined categories like 'Documentation', 'Blog', 'API', etc.
     """
     extract_depth: Optional[Literal["basic", "advanced"]] = "basic"
@@ -261,7 +286,21 @@ class TavilyCrawl(BaseTool):  # type: ignore[override]
         exclude_domains: Optional[List[str]] = None,
         allow_external: Optional[bool] = None,
         include_images: Optional[bool] = None,
-        categories: Optional[List[Literal["Careers", "Blog", "Documentation", "About", "Pricing", "Community", "Developers", "Contact", "Media"]]] = None,
+        categories: Optional[
+            List[
+                Literal[
+                    "Careers",
+                    "Blog",
+                    "Documentation",
+                    "About",
+                    "Pricing",
+                    "Community",
+                    "Developers",
+                    "Contact",
+                    "Media",
+                ]
+            ]
+        ] = None,
         extract_depth: Optional[Literal["basic", "advanced"]] = None,
         run_manager: Optional[CallbackManagerForToolRun] = None,
     ) -> Dict[str, Any]:
@@ -270,13 +309,13 @@ class TavilyCrawl(BaseTool):  # type: ignore[override]
         Returns:
             - base_url (str): The base URL that was crawled
                 Example: "https://tavily.com/"
-            
+
             - results (List[Dict]): A list of extracted content from the crawled URLs
                 - url (str): The URL that was crawled
                     Example: "https://tavily.com/#features"
                 - raw_content (str): The full content extracted from the page
                 - images (List[str]): A list of image URLs extracted from the page
-            
+
             - response_time (float): Time in seconds it took to complete the request
 
         """
@@ -284,16 +323,24 @@ class TavilyCrawl(BaseTool):  # type: ignore[override]
             # Execute search with parameters directly
             raw_results = self.api_wrapper.raw_results(
                 url=url,
-                max_depth=max_depth if max_depth else self.max_depth,   
+                max_depth=max_depth if max_depth else self.max_depth,
                 max_breadth=max_breadth if max_breadth else self.max_breadth,
                 limit=limit if limit else self.limit,
                 instructions=instructions if instructions else self.instructions,
                 select_paths=select_paths if select_paths else self.select_paths,
-                select_domains=select_domains if select_domains else self.select_domains,
+                select_domains=select_domains
+                if select_domains
+                else self.select_domains,
                 exclude_paths=exclude_paths if exclude_paths else self.exclude_paths,
-                exclude_domains=exclude_domains if exclude_domains else self.exclude_domains,
-                allow_external=allow_external if allow_external else self.allow_external,
-                include_images=include_images if include_images else self.include_images,
+                exclude_domains=exclude_domains
+                if exclude_domains
+                else self.exclude_domains,
+                allow_external=allow_external
+                if allow_external
+                else self.allow_external,
+                include_images=include_images
+                if include_images
+                else self.include_images,
                 categories=categories if categories else self.categories,
                 extract_depth=extract_depth if extract_depth else self.extract_depth,
             )
@@ -337,7 +384,21 @@ class TavilyCrawl(BaseTool):  # type: ignore[override]
         exclude_domains: Optional[List[str]] = None,
         allow_external: Optional[bool] = None,
         include_images: Optional[bool] = None,
-        categories: Optional[List[Literal["Careers", "Blog", "Documentation", "About", "Pricing", "Community", "Developers", "Contact", "Media"]]] = None,
+        categories: Optional[
+            List[
+                Literal[
+                    "Careers",
+                    "Blog",
+                    "Documentation",
+                    "About",
+                    "Pricing",
+                    "Community",
+                    "Developers",
+                    "Contact",
+                    "Media",
+                ]
+            ]
+        ] = None,
         extract_depth: Optional[Literal["basic", "advanced"]] = None,
         run_manager: Optional[AsyncCallbackManagerForToolRun] = None,
     ) -> Dict[str, Any]:
@@ -345,16 +406,24 @@ class TavilyCrawl(BaseTool):  # type: ignore[override]
         try:
             raw_results = await self.api_wrapper.raw_results_async(
                 url=url,
-                max_depth=max_depth if max_depth else self.max_depth,   
+                max_depth=max_depth if max_depth else self.max_depth,
                 max_breadth=max_breadth if max_breadth else self.max_breadth,
                 limit=limit if limit else self.limit,
                 instructions=instructions if instructions else self.instructions,
                 select_paths=select_paths if select_paths else self.select_paths,
-                select_domains=select_domains if select_domains else self.select_domains,
+                select_domains=select_domains
+                if select_domains
+                else self.select_domains,
                 exclude_paths=exclude_paths if exclude_paths else self.exclude_paths,
-                exclude_domains=exclude_domains if exclude_domains else self.exclude_domains,
-                allow_external=allow_external if allow_external else self.allow_external,
-                include_images=include_images if include_images else self.include_images,
+                exclude_domains=exclude_domains
+                if exclude_domains
+                else self.exclude_domains,
+                allow_external=allow_external
+                if allow_external
+                else self.allow_external,
+                include_images=include_images
+                if include_images
+                else self.include_images,
                 categories=categories if categories else self.categories,
                 extract_depth=extract_depth if extract_depth else self.extract_depth,
             )

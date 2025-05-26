@@ -17,7 +17,7 @@ class TestTavilyMapToolIntegration(ToolsIntegrationTests):
             "url": "https://en.wikipedia.org/wiki/Lionel_Messi",
             "max_depth": 1,
             "max_breadth": 20,
-            "limit": 50
+            "limit": 50,
         }
 
     @property
@@ -29,4 +29,3 @@ class TestTavilyMapToolIntegration(ToolsIntegrationTests):
         have {"name", "id", "args"} keys.
         """
         return {"url": "https://en.wikipedia.org/wiki/Lionel_Messi"}
-    

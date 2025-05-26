@@ -13,11 +13,7 @@ class TestTavilyCrawlToolIntegration(ToolsIntegrationTests):
     @property
     def tool_constructor_params(self) -> dict:
         # Parameters for initializing the TavilyCrawl tool
-        return {
-            "max_depth": 1,
-            "max_breadth": 20,
-            "limit": 50
-        }
+        return {"max_depth": 1, "max_breadth": 20, "limit": 50}
 
     @property
     def tool_invoke_params_example(self) -> dict:

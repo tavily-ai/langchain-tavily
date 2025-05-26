@@ -223,6 +223,7 @@ class TavilyExtractAPIWrapper(BaseModel):
 
         return json.loads(results_json_str)
 
+
 class TavilyCrawlAPIWrapper(BaseModel):
     """Wrapper for Tavily Crawl API."""
 
@@ -256,7 +257,19 @@ class TavilyCrawlAPIWrapper(BaseModel):
         exclude_domains: Optional[List[str]],
         allow_external: Optional[bool],
         include_images: Optional[bool],
-        categories: Optional[Literal["Careers", "Blog", "Documentation", "About", "Pricing", "Community", "Developers", "Contact", "Media"]],
+        categories: Optional[
+            Literal[
+                "Careers",
+                "Blog",
+                "Documentation",
+                "About",
+                "Pricing",
+                "Community",
+                "Developers",
+                "Contact",
+                "Media",
+            ]
+        ],
         extract_depth: Optional[Literal["basic", "advanced"]],
     ) -> Dict:
         params = {
@@ -308,7 +321,19 @@ class TavilyCrawlAPIWrapper(BaseModel):
         exclude_domains: Optional[List[str]],
         allow_external: Optional[bool],
         include_images: Optional[bool],
-        categories: Optional[Literal["Careers", "Blog", "Documentation", "About", "Pricing", "Community", "Developers", "Contact", "Media"]],
+        categories: Optional[
+            Literal[
+                "Careers",
+                "Blog",
+                "Documentation",
+                "About",
+                "Pricing",
+                "Community",
+                "Developers",
+                "Contact",
+                "Media",
+            ]
+        ],
         extract_depth: Optional[Literal["basic", "advanced"]],
     ) -> Dict:
         """Get results from the Tavily Crawl API asynchronously."""
@@ -381,7 +406,19 @@ class TavilyMapAPIWrapper(BaseModel):
         exclude_paths: Optional[List[str]],
         exclude_domains: Optional[List[str]],
         allow_external: Optional[bool],
-        categories: Optional[Literal[ "Careers", "Blog", "Documentation", "About", "Pricing", "Community", "Developers", "Contact", "Media"]]
+        categories: Optional[
+            Literal[
+                "Careers",
+                "Blog",
+                "Documentation",
+                "About",
+                "Pricing",
+                "Community",
+                "Developers",
+                "Contact",
+                "Media",
+            ]
+        ],
     ) -> Dict:
         params = {
             "url": url,
@@ -394,7 +431,7 @@ class TavilyMapAPIWrapper(BaseModel):
             "exclude_paths": exclude_paths,
             "exclude_domains": exclude_domains,
             "allow_external": allow_external,
-            "categories": categories
+            "categories": categories,
         }
 
         headers = {
@@ -429,7 +466,19 @@ class TavilyMapAPIWrapper(BaseModel):
         exclude_paths: Optional[List[str]],
         exclude_domains: Optional[List[str]],
         allow_external: Optional[bool],
-        categories: Optional[Literal[ "Careers", "Blog", "Documentation", "About", "Pricing", "Community", "Developers", "Contact", "Media"]]
+        categories: Optional[
+            Literal[
+                "Careers",
+                "Blog",
+                "Documentation",
+                "About",
+                "Pricing",
+                "Community",
+                "Developers",
+                "Contact",
+                "Media",
+            ]
+        ],
     ) -> Dict:
         """Get results from the Tavily Map API asynchronously."""
 

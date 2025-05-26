@@ -106,7 +106,21 @@ class TavilyMapInput(BaseModel):
         Use when the user explicitly asks to allow or deny external links.
         """,  # noqa: E501
     )
-    categories: Optional[List[Literal["Careers", "Blog", "Documentation", "About", "Pricing", "Community", "Developers", "Contact", "Media"]]] = Field(
+    categories: Optional[
+        List[
+            Literal[
+                "Careers",
+                "Blog",
+                "Documentation",
+                "About",
+                "Pricing",
+                "Community",
+                "Developers",
+                "Contact",
+                "Media",
+            ]
+        ]
+    ] = Field(
         default=None,
         description="""Direct the crawler to crawl specific categories of a website.
 
@@ -125,19 +139,18 @@ class TavilyMapInput(BaseModel):
 
         ex. "Crawl apple.com for career opportunities" ---> categories="Careers"
         ex. "Crawl tavily.com for API documentation" ---> categories="Documentation"
-    """
+    """, # noqa: E501
     )
     extract_depth: Optional[Literal["basic", "advanced"]] = Field(
         default="basic",
         description="""Advanced extraction retrieves more data, including tables and embedded content
         with higher success but may increase latency.
-        """
+        """, # noqa: E501
     )
 
 
 def _generate_suggestions(params: dict) -> list:
-    """Generate helpful suggestions based on the failed crawl parameters.
-    """
+    """Generate helpful suggestions based on the failed crawl parameters."""
     suggestions = []
 
     instructions = params.get("instructions")
@@ -164,15 +177,13 @@ def _generate_suggestions(params: dict) -> list:
 
 
 class TavilyMap(BaseTool):  # type: ignore[override]
-    """Tool that sends requests to the Tavily Map API with dynamically settable parameters."""
+    """Tool that sends requests to the Tavily Map API with dynamically settable parameters.""" # noqa: E501
 
     name: str = "tavily_map"
-    description: str = (
-        """"A powerful web mapping tool that creates a structured map of website URLs, allowing 
+    description: str = """"A powerful web mapping tool that creates a structured map of website URLs, allowing 
         you to discover and analyze site structure, content organization, and navigation paths. 
         Perfect for site audits, content discovery, and understanding website architecture.
-        """
-    )
+        """ # noqa: E501
 
     args_schema: Type[BaseModel] = TavilyMapInput
     handle_tool_error: bool = True
@@ -181,7 +192,7 @@ class TavilyMap(BaseTool):  # type: ignore[override]
     """Max depth of the crawl. Defines how far from the base URL the crawler can explore.
 
     max_depth must be greater than 0
-    """
+    """ # noqa: E501
     max_breadth: Optional[int] = 20
     """The maximum number of links to follow per level of the tree (i.e., per page).
 
@@ -220,7 +231,21 @@ class TavilyMap(BaseTool):  # type: ignore[override]
     allow_external: Optional[bool] = False
     """Whether to allow following links that go to external domains.
     """
-    categories: Optional[List[Literal["Careers", "Blog", "Documentation", "About", "Pricing", "Community", "Developers", "Contact", "Media"]]] = None
+    categories: Optional[
+        List[
+            Literal[
+                "Careers",
+                "Blog",
+                "Documentation",
+                "About",
+                "Pricing",
+                "Community",
+                "Developers",
+                "Contact",
+                "Media",
+            ]
+        ]
+    ] = None
     """Filter URLs using predefined categories like 'Documentation', 'Blog', 'API', etc.
     """
     extract_depth: Optional[Literal["basic", "advanced"]] = "basic"
@@ -251,7 +276,21 @@ class TavilyMap(BaseTool):  # type: ignore[override]
         exclude_paths: Optional[List[str]] = None,
         exclude_domains: Optional[List[str]] = None,
         allow_external: Optional[bool] = None,
-        categories: Optional[List[Literal["Careers", "Blog", "Documentation", "About", "Pricing", "Community", "Developers", "Contact", "Media"]]] = None,
+        categories: Optional[
+            List[
+                Literal[
+                    "Careers",
+                    "Blog",
+                    "Documentation",
+                    "About",
+                    "Pricing",
+                    "Community",
+                    "Developers",
+                    "Contact",
+                    "Media",
+                ]
+            ]
+        ] = None,
         extract_depth: Optional[Literal["basic", "advanced"]] = None,
         run_manager: Optional[CallbackManagerForToolRun] = None,
     ) -> Dict[str, Any]:
@@ -260,11 +299,11 @@ class TavilyMap(BaseTool):  # type: ignore[override]
         Returns:
             - base_url (str): The base URL that was mapped
                 Example: "https://tavily.com/"
-            
+
             - results (List[str]): A list of mapped URLs
                 - url (str): The URL that was mapped
                     Example: "https://tavily.com/#features"
-            
+
             - response_time (float): Time in seconds it took to complete the request
 
         """
@@ -272,15 +311,21 @@ class TavilyMap(BaseTool):  # type: ignore[override]
             # Execute search with parameters directly
             raw_results = self.api_wrapper.raw_results(
                 url=url,
-                max_depth=max_depth if max_depth else self.max_depth,   
+                max_depth=max_depth if max_depth else self.max_depth,
                 max_breadth=max_breadth if max_breadth else self.max_breadth,
                 limit=limit if limit else self.limit,
                 instructions=instructions if instructions else self.instructions,
                 select_paths=select_paths if select_paths else self.select_paths,
-                select_domains=select_domains if select_domains else self.select_domains,
+                select_domains=select_domains
+                if select_domains
+                else self.select_domains,
                 exclude_paths=exclude_paths if exclude_paths else self.exclude_paths,
-                exclude_domains=exclude_domains if exclude_domains else self.exclude_domains,
-                allow_external=allow_external if allow_external else self.allow_external,
+                exclude_domains=exclude_domains
+                if exclude_domains
+                else self.exclude_domains,
+                allow_external=allow_external
+                if allow_external
+                else self.allow_external,
                 categories=categories if categories else self.categories,
                 extract_depth=extract_depth if extract_depth else self.extract_depth,
             )
@@ -323,7 +368,21 @@ class TavilyMap(BaseTool):  # type: ignore[override]
         exclude_paths: Optional[List[str]] = None,
         exclude_domains: Optional[List[str]] = None,
         allow_external: Optional[bool] = None,
-        categories: Optional[List[Literal["Careers", "Blog", "Documentation", "About", "Pricing", "Community", "Developers", "Contact", "Media"]]] = None,
+        categories: Optional[
+            List[
+                Literal[
+                    "Careers",
+                    "Blog",
+                    "Documentation",
+                    "About",
+                    "Pricing",
+                    "Community",
+                    "Developers",
+                    "Contact",
+                    "Media",
+                ]
+            ]
+        ] = None,
         extract_depth: Optional[Literal["basic", "advanced"]] = None,
         run_manager: Optional[AsyncCallbackManagerForToolRun] = None,
     ) -> Dict[str, Any]:
@@ -331,15 +390,21 @@ class TavilyMap(BaseTool):  # type: ignore[override]
         try:
             raw_results = await self.api_wrapper.raw_results_async(
                 url=url,
-                max_depth=max_depth if max_depth else self.max_depth,   
+                max_depth=max_depth if max_depth else self.max_depth,
                 max_breadth=max_breadth if max_breadth else self.max_breadth,
                 limit=limit if limit else self.limit,
                 instructions=instructions if instructions else self.instructions,
                 select_paths=select_paths if select_paths else self.select_paths,
-                select_domains=select_domains if select_domains else self.select_domains,
+                select_domains=select_domains
+                if select_domains
+                else self.select_domains,
                 exclude_paths=exclude_paths if exclude_paths else self.exclude_paths,
-                exclude_domains=exclude_domains if exclude_domains else self.exclude_domains,
-                allow_external=allow_external if allow_external else self.allow_external,
+                exclude_domains=exclude_domains
+                if exclude_domains
+                else self.exclude_domains,
+                allow_external=allow_external
+                if allow_external
+                else self.allow_external,
                 categories=categories if categories else self.categories,
                 extract_depth=extract_depth if extract_depth else self.extract_depth,
             )
