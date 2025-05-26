@@ -6,7 +6,7 @@
 
 This package contains the LangChain integration with [Tavily](https://tavily.com/)
 
-# 🎉 **Introducing [tavily-crawl](https://docs.tavily.com/documentation/api-reference/endpoint/crawl) + [tavily-map](https://docs.tavily.com/documentation/api-reference/endpoint/map) in v0.2.0!** 🎉
+# **Introducing [tavily-crawl](https://docs.tavily.com/documentation/api-reference/endpoint/crawl) + [tavily-map](https://docs.tavily.com/documentation/api-reference/endpoint/map) in v0.2.0!** 
 Two powerful new tools have joined the Tavily family! Upgrade now to access:
 ```bash
 pip install -U langchain-tavily
@@ -356,6 +356,8 @@ output:
     'response_time': 10.28
 }
 ```
+
+
 
 ## Tavily Research Agent
 
