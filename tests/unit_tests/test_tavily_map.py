@@ -36,9 +36,10 @@ class TestTavilyMapToolUnit(ToolsUnitTests):  # Fixed class name to match its pu
             "instructions": "best time to visit japan",
             "select_paths": None,
             "select_domains": None,
+            "exclude_paths": None,
+            "exclude_domains": None,
             "allow_external": False,
             "categories": None,
-            "extract_depth": "advanced",
         }
 
     @property

@@ -141,12 +141,7 @@ class TavilyMapInput(BaseModel):
         ex. "Crawl tavily.com for API documentation" ---> categories="Documentation"
     """, # noqa: E501
     )
-    extract_depth: Optional[Literal["basic", "advanced"]] = Field(
-        default="basic",
-        description="""Advanced extraction retrieves more data, including tables and embedded content
-        with higher success but may increase latency.
-        """, # noqa: E501
-    )
+
 
 
 def _generate_suggestions(params: dict) -> list:
@@ -248,10 +243,6 @@ class TavilyMap(BaseTool):  # type: ignore[override]
     ] = None
     """Filter URLs using predefined categories like 'Documentation', 'Blog', 'API', etc.
     """
-    extract_depth: Optional[Literal["basic", "advanced"]] = "basic"
-    """Advanced extraction retrieves more data, including tables and embedded content, 
-    with higher success but may increase latency.
-    """
 
     api_wrapper: TavilyMapAPIWrapper = Field(default_factory=TavilyMapAPIWrapper)  # type: ignore[arg-type]
 
@@ -291,7 +282,6 @@ class TavilyMap(BaseTool):  # type: ignore[override]
                 ]
             ]
         ] = None,
-        extract_depth: Optional[Literal["basic", "advanced"]] = None,
         run_manager: Optional[CallbackManagerForToolRun] = None,
     ) -> Dict[str, Any]:
         """Execute a mapping using the Tavily Map API.
@@ -327,7 +317,6 @@ class TavilyMap(BaseTool):  # type: ignore[override]
                 if allow_external
                 else self.allow_external,
                 categories=categories if categories else self.categories,
-                extract_depth=extract_depth if extract_depth else self.extract_depth,
             )
 
             # Check if results are empty and raise a specific exception
@@ -383,7 +372,6 @@ class TavilyMap(BaseTool):  # type: ignore[override]
                 ]
             ]
         ] = None,
-        extract_depth: Optional[Literal["basic", "advanced"]] = None,
         run_manager: Optional[AsyncCallbackManagerForToolRun] = None,
     ) -> Dict[str, Any]:
         """Use the tool asynchronously."""
@@ -406,7 +394,6 @@ class TavilyMap(BaseTool):  # type: ignore[override]
                 if allow_external
                 else self.allow_external,
                 categories=categories if categories else self.categories,
-                extract_depth=extract_depth if extract_depth else self.extract_depth,
             )
 
             # Check if results are empty and raise a specific exception

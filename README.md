@@ -269,7 +269,7 @@ NOTE: The optional arguments are available for agents to dynamically set, if you
 result = tool.invoke({
     "url": "https://docs.tavily.com",
     "instructions": "Find SDK documentation",
-    "categories": "Documentation"
+    "categories": ["Documentation"]
 })
 ```
 
@@ -309,7 +309,6 @@ The tool accepts various parameters during instantiation:
 - `exclude_domains` (optional, List[str]): Regex patterns to exclude specific domains or subdomains from mapping 
 - `allow_external` (optional, bool): Allow following external domain links. Default is False.
 - `categories` (optional, str): Filter URLs by predefined categories ("Careers", "Blog", "Documentation", "About", "Pricing", "Community", "Developers", "Contact", "Media").
-- `extract_depth` (optional, str): Depth of content extraction, either "basic" or "advanced". Default is "basic".
 
 For a comprehensive overview of the available parameters, refer to the [Tavily Map API documentation](https://docs.tavily.com/documentation/api-reference/endpoint/map)
 
@@ -317,7 +316,7 @@ For a comprehensive overview of the available parameters, refer to the [Tavily M
 from langchain_tavily import TavilyMap
 
 tool = TavilyMap(
-    max_depth=1,
+    max_depth=2,
     max_breadth=20,
     limit=50,
     # instructions=None,
@@ -327,7 +326,6 @@ tool = TavilyMap(
     # exclude_domains=None,
     # allow_external=False,
     # categories=None,
-    # extract_depth="basic"
 )
 ```
 
@@ -335,7 +333,7 @@ tool = TavilyMap(
 
 The Tavily map tool accepts the following arguments during invocation:
 - `url` (required): The root URL to begin the mapping.
-- All other parameters can also be set during invocation: `max_depth`, `max_breadth`, `limit`, `instructions`, `select_paths`, `select_domains`, `exclude_paths`, `exclude_domains`, `allow_external`, `categories`, and `extract_depth`
+- All other parameters can also be set during invocation: `max_depth`, `max_breadth`, `limit`, `instructions`, `select_paths`, `select_domains`, `exclude_paths`, `exclude_domains`, `allow_external`, and `categories`.
 
 NOTE: The optional arguments are available for agents to dynamically set, if you set an argument during instantiation and then invoke the tool with a different value, the tool will use the value you passed during invocation.
 
@@ -344,7 +342,7 @@ NOTE: The optional arguments are available for agents to dynamically set, if you
 result = tool.invoke({
     "url": "https://docs.tavily.com",
     "instructions": "Find SDK documentation",
-    "categories": "Documentation"
+    "categories": ["Documentation"]
 })
 ```
 

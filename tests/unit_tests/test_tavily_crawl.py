@@ -35,10 +35,12 @@ class TestTavilyCrawlToolUnit(ToolsUnitTests):  # Fixed class name to match its 
             "instructions": "best time to visit japan",
             "select_paths": None,
             "select_domains": None,
+            "exclude_paths": None,
+            "exclude_domains": None,
             "allow_external": False,
             "include_images": False,
             "categories": None,
-            "extract_depth": "advanced",
+            "extract_depth": "basic",
         }
 
     @property
