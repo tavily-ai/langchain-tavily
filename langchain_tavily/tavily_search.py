@@ -227,7 +227,8 @@ class TavilySearch(BaseTool):  # type: ignore[override]
     Default is False.
     """
     include_raw_content: Optional[Union[bool, Literal["markdown", "text"]]] = False
-    """Include an LLM-generated answer to the provided query. basic or true returns a quick answer. advanced returns a more detailed answer.
+    """Include an LLM-generated answer to the provided query. basic or true returns a 
+    quick answer. advanced returns a more detailed answer.
     
     Default is False.
     """
@@ -237,8 +238,8 @@ class TavilySearch(BaseTool):  # type: ignore[override]
     Default is False.
     """
     country: Optional[str] = None
-    """Boost search results from a specific country. This will prioritize content from the selected country in the search results. 
-       Available only if topic is general.
+    """Boost search results from a specific country. This will prioritize content from 
+    the selected country in the search results. Available only if topic is general.
     
     To see the countries supported visit our docs https://docs.tavily.com/documentation/api-reference/endpoint/search
     Default is None.
