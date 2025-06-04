@@ -119,6 +119,7 @@ class TavilyExtract(BaseTool):  # type: ignore[override, override]
                 include_images=include_images
                 if include_images
                 else self.include_images,
+                format=self.format,
             )
 
             # Check if results are empty and raise a specific exception
@@ -165,6 +166,7 @@ class TavilyExtract(BaseTool):  # type: ignore[override, override]
                 include_images=include_images
                 if include_images
                 else self.include_images,
+                format=self.format,
             )
 
             # Check if results are empty and raise a specific exception
