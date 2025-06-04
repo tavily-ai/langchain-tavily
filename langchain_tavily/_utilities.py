@@ -43,11 +43,12 @@ class TavilySearchAPIWrapper(BaseModel):
         include_domains: Optional[List[str]] = None,
         exclude_domains: Optional[List[str]] = None,
         include_answer: Optional[Union[bool, Literal["basic", "advanced"]]] = False,
-        include_raw_content: Optional[bool] = False,
+        include_raw_content: Optional[Union[bool, Literal["markdown", "text"]]] = False,
         include_images: Optional[bool] = False,
         include_image_descriptions: Optional[bool] = False,
         topic: Optional[Literal["general", "news", "finance"]] = "general",
         time_range: Optional[Literal["day", "week", "month", "year"]] = None,
+        country: Optional[str] = None,
     ) -> Dict:
         params = {
             "query": query,
@@ -61,6 +62,7 @@ class TavilySearchAPIWrapper(BaseModel):
             "include_image_descriptions": include_image_descriptions,
             "topic": topic,
             "time_range": time_range,
+            "country": country,
         }
 
         # Remove None values
@@ -93,11 +95,12 @@ class TavilySearchAPIWrapper(BaseModel):
         include_domains: Optional[List[str]] = None,
         exclude_domains: Optional[List[str]] = None,
         include_answer: Optional[Union[bool, Literal["basic", "advanced"]]] = False,
-        include_raw_content: Optional[bool] = False,
+        include_raw_content: Optional[Union[bool, Literal["markdown", "text"]]] = False,
         include_images: Optional[bool] = False,
         include_image_descriptions: Optional[bool] = False,
         topic: Optional[Literal["general", "news", "finance"]] = "general",
         time_range: Optional[Literal["day", "week", "month", "year"]] = None,
+        country: Optional[str] = None,
     ) -> Dict:
         """Get results from the Tavily Search API asynchronously."""
 
@@ -115,6 +118,7 @@ class TavilySearchAPIWrapper(BaseModel):
                 "include_image_descriptions": include_image_descriptions,
                 "topic": topic,
                 "time_range": time_range,
+                "country": country,
             }
 
             params = {k: v for k, v in params.items() if v is not None}

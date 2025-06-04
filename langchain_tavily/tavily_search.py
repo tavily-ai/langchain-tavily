@@ -145,7 +145,8 @@ class TavilySearch(BaseTool):  # type: ignore[override]
                 # search_depth="basic",
                 # time_range="day",
                 # include_domains=None,
-                # exclude_domains=None
+                # exclude_domains=None,
+                # country=None
             )
 
     Invoke directly with args:
@@ -225,8 +226,8 @@ class TavilySearch(BaseTool):  # type: ignore[override]
     
     Default is False.
     """
-    include_raw_content: Optional[bool] = False
-    """Include cleaned and parsed HTML of each site search results. 
+    include_raw_content: Optional[Union[bool, Literal["markdown", "text"]]] = False
+    """Include an LLM-generated answer to the provided query. basic or true returns a quick answer. advanced returns a more detailed answer.
     
     Default is False.
     """
@@ -234,6 +235,13 @@ class TavilySearch(BaseTool):  # type: ignore[override]
     """Include a descriptive text for each image in the search results.
     
     Default is False.
+    """
+    country: Optional[str] = None
+    """Boost search results from a specific country. This will prioritize content from the selected country in the search results. 
+       Available only if topic is general.
+    
+    To see the countries supported visit our docs https://docs.tavily.com/documentation/api-reference/endpoint/search
+    Default is None.
     """
     api_wrapper: TavilySearchAPIWrapper = Field(default_factory=TavilySearchAPIWrapper)  # type: ignore[arg-type]
 
@@ -255,6 +263,7 @@ class TavilySearch(BaseTool):  # type: ignore[override]
         include_images: Optional[bool] = False,
         time_range: Optional[Literal["day", "week", "month", "year"]] = None,
         topic: Optional[Literal["general", "news", "finance"]] = "general",
+        country: Optional[str] = None,
         run_manager: Optional[CallbackManagerForToolRun] = None,
     ) -> Dict[str, Any]:
         """Execute a search query using the Tavily Search API.
@@ -286,6 +295,7 @@ class TavilySearch(BaseTool):  # type: ignore[override]
                 else self.include_images,
                 time_range=time_range if time_range else self.time_range,
                 topic=topic if topic else self.topic,
+                country=country if country else self.country,
                 max_results=self.max_results,
                 include_answer=self.include_answer,
                 include_raw_content=self.include_raw_content,
@@ -326,6 +336,7 @@ class TavilySearch(BaseTool):  # type: ignore[override]
         include_images: Optional[bool] = False,
         time_range: Optional[Literal["day", "week", "month", "year"]] = None,
         topic: Optional[Literal["general", "news", "finance"]] = "general",
+        country: Optional[str] = None,
         run_manager: Optional[AsyncCallbackManagerForToolRun] = None,
     ) -> Dict[str, Any]:
         """Use the tool asynchronously."""
@@ -344,6 +355,7 @@ class TavilySearch(BaseTool):  # type: ignore[override]
                 else self.include_images,
                 time_range=time_range if time_range else self.time_range,
                 topic=topic if topic else self.topic,
+                country=country if country else self.country,
                 max_results=self.max_results,
                 include_answer=self.include_answer,
                 include_raw_content=self.include_raw_content,
