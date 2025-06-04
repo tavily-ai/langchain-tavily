@@ -167,11 +167,13 @@ class TavilyExtractAPIWrapper(BaseModel):
         urls: List[str],
         extract_depth: Optional[Literal["basic", "advanced"]] = "advanced",
         include_images: Optional[bool] = False,
+        format: Optional[str] = "markdown",
     ) -> Dict:
         params = {
             "urls": urls,
             "include_images": include_images,
             "extract_depth": extract_depth,
+            "format": format,
         }
 
         headers = {
@@ -199,6 +201,7 @@ class TavilyExtractAPIWrapper(BaseModel):
         urls: List[str],
         include_images: Optional[bool] = False,
         extract_depth: Optional[Literal["basic", "advanced"]] = "advanced",
+        format: Optional[str] = "markdown",
     ) -> Dict:
         """Get results from the Tavily Extract API asynchronously."""
 
@@ -208,6 +211,7 @@ class TavilyExtractAPIWrapper(BaseModel):
                 "urls": urls,
                 "include_images": include_images,
                 "extract_depth": extract_depth,
+                "format": format,
             }
             headers = {
                 "Authorization": f"Bearer {self.tavily_api_key.get_secret_value()}",
@@ -275,6 +279,7 @@ class TavilyCrawlAPIWrapper(BaseModel):
             ]
         ],
         extract_depth: Optional[Literal["basic", "advanced"]],
+        format: Optional[str] = "markdown",
     ) -> Dict:
         params = {
             "url": url,
@@ -290,6 +295,7 @@ class TavilyCrawlAPIWrapper(BaseModel):
             "include_images": include_images,
             "categories": categories,
             "extract_depth": extract_depth,
+            "format": format,
         }
 
         headers = {
@@ -339,6 +345,7 @@ class TavilyCrawlAPIWrapper(BaseModel):
             ]
         ],
         extract_depth: Optional[Literal["basic", "advanced"]],
+        format: Optional[str] = "markdown",
     ) -> Dict:
         """Get results from the Tavily Crawl API asynchronously."""
 
@@ -358,6 +365,7 @@ class TavilyCrawlAPIWrapper(BaseModel):
                 "include_images": include_images,
                 "categories": categories,
                 "extract_depth": extract_depth,
+                "format": format,
             }
             headers = {
                 "Authorization": f"Bearer {self.tavily_api_key.get_secret_value()}",

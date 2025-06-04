@@ -262,6 +262,12 @@ class TavilyCrawl(BaseTool):  # type: ignore[override]
     with higher success but may increase latency.
     """
 
+    format: Optional[str] = "markdown"
+    """
+    The format of the extracted web page content. markdown returns content in markdown format.
+    text returns plain text and may increase latency.
+    """
+
     api_wrapper: TavilyCrawlAPIWrapper = Field(default_factory=TavilyCrawlAPIWrapper)  # type: ignore[arg-type]
 
     def __init__(self, **kwargs: Any) -> None:
@@ -343,6 +349,7 @@ class TavilyCrawl(BaseTool):  # type: ignore[override]
                 else self.include_images,
                 categories=categories if categories else self.categories,
                 extract_depth=extract_depth if extract_depth else self.extract_depth,
+                format=self.format,
             )
 
             # Check if results are empty and raise a specific exception
@@ -354,6 +361,7 @@ class TavilyCrawl(BaseTool):  # type: ignore[override]
                     "exclude_paths": exclude_paths,
                     "exclude_domains": exclude_domains,
                     "categories": categories,
+                    "format": self.format,
                 }
                 suggestions = _generate_suggestions(search_params)
 
@@ -426,6 +434,7 @@ class TavilyCrawl(BaseTool):  # type: ignore[override]
                 else self.include_images,
                 categories=categories if categories else self.categories,
                 extract_depth=extract_depth if extract_depth else self.extract_depth,
+                format=self.format,
             )
 
             # Check if results are empty and raise a specific exception

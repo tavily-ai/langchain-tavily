@@ -85,6 +85,13 @@ class TavilyExtract(BaseTool):  # type: ignore[override, override]
     
     Default is False
     """
+    format: Optional[str] = "markdown"
+    """
+    The format of the extracted web page content. markdown returns content in markdown format.
+    text returns plain text and may increase latency.
+    
+    Default is 'markdown'
+    """
 
     apiwrapper: TavilyExtractAPIWrapper = Field(default_factory=TavilyExtractAPIWrapper)  # type: ignore[arg-type]
 
@@ -125,6 +132,7 @@ class TavilyExtract(BaseTool):  # type: ignore[override, override]
                     "include_images": include_images
                     if include_images
                     else self.include_images,
+                    "format": self.format
                 }
                 suggestions = _generate_suggestions(search_params)
 
@@ -171,6 +179,7 @@ class TavilyExtract(BaseTool):  # type: ignore[override, override]
                     "include_images": include_images
                     if include_images
                     else self.include_images,
+                    "format": self.format
                 }
                 suggestions = _generate_suggestions(search_params)
                 error_message = (
