@@ -139,9 +139,8 @@ class TavilyMapInput(BaseModel):
 
         ex. "Crawl apple.com for career opportunities" ---> categories="Careers"
         ex. "Crawl tavily.com for API documentation" ---> categories="Documentation"
-    """, # noqa: E501
+    """,  # noqa: E501
     )
-
 
 
 def _generate_suggestions(params: dict) -> list:
@@ -172,13 +171,13 @@ def _generate_suggestions(params: dict) -> list:
 
 
 class TavilyMap(BaseTool):  # type: ignore[override]
-    """Tool that sends requests to the Tavily Map API with dynamically settable parameters.""" # noqa: E501
+    """Tool that sends requests to the Tavily Map API with dynamically settable parameters."""  # noqa: E501
 
     name: str = "tavily_map"
     description: str = """"A powerful web mapping tool that creates a structured map of website URLs, allowing 
         you to discover and analyze site structure, content organization, and navigation paths. 
         Perfect for site audits, content discovery, and understanding website architecture.
-        """ # noqa: E501
+        """  # noqa: E501
 
     args_schema: Type[BaseModel] = TavilyMapInput
     handle_tool_error: bool = True
@@ -187,7 +186,7 @@ class TavilyMap(BaseTool):  # type: ignore[override]
     """Max depth of the crawl. Defines how far from the base URL the crawler can explore.
 
     max_depth must be greater than 0
-    """ # noqa: E501
+    """  # noqa: E501
     max_breadth: Optional[int] = 20
     """The maximum number of links to follow per level of the tree (i.e., per page).
 
