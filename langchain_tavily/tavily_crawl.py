@@ -144,13 +144,13 @@ class TavilyCrawlInput(BaseModel):
 
         ex. "Crawl apple.com for career opportunities" ---> categories="Careers"
         ex. "Crawl tavily.com for API documentation" ---> categories="Documentation"
-    """, # noqa: E501
+    """,  # noqa: E501
     )
     extract_depth: Optional[Literal["basic", "advanced"]] = Field(
         default="basic",
         description="""Advanced extraction retrieves more data, including tables and embedded content
         with higher success but may increase latency.
-        """, # noqa: E501
+        """,  # noqa: E501
     )
 
 
@@ -182,14 +182,14 @@ def _generate_suggestions(params: dict) -> list:
 
 
 class TavilyCrawl(BaseTool):  # type: ignore[override]
-    """Tool that sends requests to the Tavily Crawl API with dynamically settable parameters.""" # noqa: E501
+    """Tool that sends requests to the Tavily Crawl API with dynamically settable parameters."""  # noqa: E501
 
     name: str = "tavily_crawl"
     description: str = """A powerful web crawler that initiates a structured web crawl starting from a specified 
         base URL. The crawler uses a BFS Depth: refering to the number of link hops from the root URL. 
         A page directly linked from the root is at BFS depth 1, regardless of its URL structure.
         You can control how deep and wide it goes, and guide it to focus on specific sections of the site.
-        """ # noqa: E501
+        """  # noqa: E501
 
     args_schema: Type[BaseModel] = TavilyCrawlInput
     handle_tool_error: bool = True
@@ -198,7 +198,7 @@ class TavilyCrawl(BaseTool):  # type: ignore[override]
     """Max depth of the crawl. Defines how far from the base URL the crawler can explore.
 
     max_depth must be greater than 0
-    """ # noqa: E501
+    """  # noqa: E501
     max_breadth: Optional[int] = 20
     """The maximum number of links to follow per level of the tree (i.e., per page).
 
