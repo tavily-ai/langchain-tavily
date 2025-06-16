@@ -73,19 +73,19 @@ class TavilyExtract(BaseTool):  # type: ignore[override, override]
     handle_tool_error: bool = True
 
     # Default parameters
-    extract_depth: Optional[Literal["basic", "advanced"]] = "basic"
+    extract_depth: Optional[Literal["basic", "advanced"]] = None
     """The depth of the extraction process. 
     'advanced' extraction retrieves more data than 'basic',
     with higher success but may increase latency.
     
     Default is 'basic'
     """
-    include_images: Optional[bool] = False
+    include_images: Optional[bool] = None
     """Include a list of images extracted from the URLs in the response.
     
     Default is False
     """
-    format: Optional[str] = "markdown"
+    format: Optional[str] = None
     """
     The format of the extracted web page content. markdown returns content in markdown 
     format. text returns plain text and may increase latency.
@@ -115,10 +115,12 @@ class TavilyExtract(BaseTool):  # type: ignore[override, override]
             # Execute search with parameters directly
             raw_results = self.apiwrapper.raw_results(
                 urls=urls,
-                extract_depth=extract_depth if extract_depth else self.extract_depth,
-                include_images=include_images
-                if include_images
-                else self.include_images,
+                extract_depth=self.extract_depth
+                if self.extract_depth
+                else extract_depth,
+                include_images=self.include_images
+                if self.include_images
+                else include_images,
                 format=self.format,
             )
 
@@ -127,13 +129,8 @@ class TavilyExtract(BaseTool):  # type: ignore[override, override]
             failed_results = raw_results.get("failed_results", [])
             if not results or len(failed_results) == len(urls):
                 search_params = {
-                    "extract_depth": extract_depth
-                    if extract_depth
-                    else self.extract_depth,
-                    "include_images": include_images
-                    if include_images
-                    else self.include_images,
-                    "format": self.format,
+                    "extract_depth": extract_depth,
+                    "include_images": include_images,
                 }
                 suggestions = _generate_suggestions(search_params)
 
@@ -162,10 +159,12 @@ class TavilyExtract(BaseTool):  # type: ignore[override, override]
         try:
             raw_results = await self.apiwrapper.raw_results_async(
                 urls=urls,
-                extract_depth=extract_depth if extract_depth else self.extract_depth,
-                include_images=include_images
-                if include_images
-                else self.include_images,
+                extract_depth=self.extract_depth
+                if self.extract_depth
+                else extract_depth,
+                include_images=self.include_images
+                if self.include_images
+                else include_images,
                 format=self.format,
             )
 
@@ -174,14 +173,8 @@ class TavilyExtract(BaseTool):  # type: ignore[override, override]
             failed_results = raw_results.get("failed_results", [])
             if not results or len(failed_results) == len(urls):
                 search_params = {
-                    "urls": urls,
-                    "extract_depth": extract_depth
-                    if extract_depth
-                    else self.extract_depth,
-                    "include_images": include_images
-                    if include_images
-                    else self.include_images,
-                    "format": self.format,
+                    "extract_depth": extract_depth,
+                    "include_images": include_images,
                 }
                 suggestions = _generate_suggestions(search_params)
                 error_message = (
