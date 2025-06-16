@@ -265,7 +265,7 @@ class TavilyCrawl(BaseTool):  # type: ignore[override]
             ]
         ]
     ] = None
-    """Filter URLs using predefined categories like 'Documentation', 'Blogs', 'API', etc.
+    """Filter URLs using predefined categories like 'Documentation', 'Blogs', etc.
     """
     extract_depth: Optional[Literal["basic", "advanced"]] = None
     """Advanced extraction retrieves more data, including tables and embedded content, 
@@ -440,7 +440,9 @@ class TavilyCrawl(BaseTool):  # type: ignore[override]
                 select_domains=self.select_domains
                 if self.select_domains
                 else select_domains,
-                exclude_paths=self.exclude_paths if self.exclude_paths else exclude_paths,
+                exclude_paths=self.exclude_paths
+                if self.exclude_paths
+                else exclude_paths,
                 exclude_domains=self.exclude_domains
                 if self.exclude_domains
                 else exclude_domains,
@@ -451,7 +453,9 @@ class TavilyCrawl(BaseTool):  # type: ignore[override]
                 if self.include_images
                 else include_images,
                 categories=self.categories if self.categories else categories,
-                extract_depth=self.extract_depth if self.extract_depth else extract_depth,
+                extract_depth=self.extract_depth
+                if self.extract_depth
+                else extract_depth,
                 format=self.format,
             )
 

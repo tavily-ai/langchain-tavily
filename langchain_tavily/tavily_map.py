@@ -248,7 +248,7 @@ class TavilyMap(BaseTool):  # type: ignore[override]
             ]
         ]
     ] = None
-    """Filter URLs using predefined categories like 'Documentation', 'Blogs', 'API', etc.
+    """Filter URLs using predefined categories like 'Documentation', 'Blogs', etc.
     """
 
     api_wrapper: TavilyMapAPIWrapper = Field(default_factory=TavilyMapAPIWrapper)  # type: ignore[arg-type]
