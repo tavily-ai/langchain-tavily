@@ -71,6 +71,7 @@ class TavilySearchAPIWrapper(BaseModel):
         headers = {
             "Authorization": f"Bearer {self.tavily_api_key.get_secret_value()}",
             "Content-Type": "application/json",
+            "X-Client-Source": "langchain-tavily"
         }
 
         response = requests.post(
@@ -127,6 +128,7 @@ class TavilySearchAPIWrapper(BaseModel):
             headers = {
                 "Authorization": f"Bearer {self.tavily_api_key.get_secret_value()}",
                 "Content-Type": "application/json",
+                "X-Client-Source": "langchain-tavily"
             }
             async with aiohttp.ClientSession() as session:
                 async with session.post(
@@ -183,6 +185,7 @@ class TavilyExtractAPIWrapper(BaseModel):
         headers = {
             "Authorization": f"Bearer {self.tavily_api_key.get_secret_value()}",
             "Content-Type": "application/json",
+            "X-Client-Source": "langchain-tavily"
         }
 
         response = requests.post(
@@ -225,6 +228,7 @@ class TavilyExtractAPIWrapper(BaseModel):
             headers = {
                 "Authorization": f"Bearer {self.tavily_api_key.get_secret_value()}",
                 "Content-Type": "application/json",
+                "X-Client-Source": "langchain-tavily"
             }
 
             async with aiohttp.ClientSession() as session:
@@ -314,6 +318,7 @@ class TavilyCrawlAPIWrapper(BaseModel):
         headers = {
             "Authorization": f"Bearer {self.tavily_api_key.get_secret_value()}",
             "Content-Type": "application/json",
+            "X-Client-Source": "langchain-tavily"
         }
 
         response = requests.post(
@@ -387,6 +392,7 @@ class TavilyCrawlAPIWrapper(BaseModel):
             headers = {
                 "Authorization": f"Bearer {self.tavily_api_key.get_secret_value()}",
                 "Content-Type": "application/json",
+                "X-Client-Source": "langchain-tavily"
             }
 
             async with aiohttp.ClientSession() as session:
@@ -470,6 +476,7 @@ class TavilyMapAPIWrapper(BaseModel):
         headers = {
             "Authorization": f"Bearer {self.tavily_api_key.get_secret_value()}",
             "Content-Type": "application/json",
+            "X-Client-Source": "langchain-tavily"
         }
 
         response = requests.post(
@@ -537,6 +544,7 @@ class TavilyMapAPIWrapper(BaseModel):
             headers = {
                 "Authorization": f"Bearer {self.tavily_api_key.get_secret_value()}",
                 "Content-Type": "application/json",
+                "X-Client-Source": "langchain-tavily"
             }
             async with aiohttp.ClientSession() as session:
                 async with session.post(

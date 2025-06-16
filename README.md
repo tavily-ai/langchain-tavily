@@ -6,7 +6,7 @@
 
 This package contains the LangChain integration with [Tavily](https://tavily.com/)
 
-# **Introducing [tavily-crawl](https://docs.tavily.com/documentation/api-reference/endpoint/crawl) + [tavily-map](https://docs.tavily.com/documentation/api-reference/endpoint/map) in v0.2.1!** 
+# **Introducing [tavily-crawl](https://docs.tavily.com/documentation/api-reference/endpoint/crawl) + [tavily-map](https://docs.tavily.com/documentation/api-reference/endpoint/map) in v0.2.2!** 
 Two powerful new tools have joined the Tavily family! Upgrade now to access:
 ```bash
 pip install -U langchain-tavily
