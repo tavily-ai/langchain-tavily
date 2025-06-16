@@ -196,12 +196,12 @@ class TavilySearch(BaseTool):  # type: ignore[override]
 
     default is None
     """
-    search_depth: Optional[Literal["basic", "advanced"]] = "basic"
+    search_depth: Optional[Literal["basic", "advanced"]] = None
     """The depth of the search. It can be 'basic' or 'advanced'
     
     default is "basic"
     """
-    include_images: Optional[bool] = False
+    include_images: Optional[bool] = None
     """Include a list of query related images in the response
     
     default is False
@@ -211,28 +211,28 @@ class TavilySearch(BaseTool):  # type: ignore[override]
     
     default is None
     """
-    max_results: Optional[int] = 5
+    max_results: Optional[int] = None
     """Max search results to return, 
     
     default is 5
     """
-    topic: Optional[Literal["general", "news", "finance"]] = "general"
+    topic: Optional[Literal["general", "news", "finance"]] = None
     """The category of the search. Can be "general", "news", or "finance".
     
     Default is "general".
     """
-    include_answer: Optional[Union[bool, Literal["basic", "advanced"]]] = False
+    include_answer: Optional[Union[bool, Literal["basic", "advanced"]]] = None
     """Include a short answer to original query in the search results. 
     
     Default is False.
     """
-    include_raw_content: Optional[Union[bool, Literal["markdown", "text"]]] = False
+    include_raw_content: Optional[Union[bool, Literal["markdown", "text"]]] = None
     """Include an LLM-generated answer to the provided query. basic or true returns a 
     quick answer. advanced returns a more detailed answer.
     
     Default is False.
     """
-    include_image_descriptions: Optional[bool] = False
+    include_image_descriptions: Optional[bool] = None
     """Include a descriptive text for each image in the search results.
     
     Default is False.
@@ -260,10 +260,10 @@ class TavilySearch(BaseTool):  # type: ignore[override]
         query: str,
         include_domains: Optional[List[str]] = None,
         exclude_domains: Optional[List[str]] = None,
-        search_depth: Optional[Literal["basic", "advanced"]] = "basic",
-        include_images: Optional[bool] = False,
+        search_depth: Optional[Literal["basic", "advanced"]] = None,
+        include_images: Optional[bool] = None,
         time_range: Optional[Literal["day", "week", "month", "year"]] = None,
-        topic: Optional[Literal["general", "news", "finance"]] = "general",
+        topic: Optional[Literal["general", "news", "finance"]] = None,
         run_manager: Optional[CallbackManagerForToolRun] = None,
     ) -> Dict[str, Any]:
         """Execute a search query using the Tavily Search API.
@@ -283,18 +283,18 @@ class TavilySearch(BaseTool):  # type: ignore[override]
             # Execute search with parameters directly
             raw_results = self.api_wrapper.raw_results(
                 query=query,
-                include_domains=include_domains
-                if include_domains
-                else self.include_domains,
-                exclude_domains=exclude_domains
-                if exclude_domains
-                else self.exclude_domains,
-                search_depth=search_depth if search_depth else self.search_depth,
-                include_images=include_images
-                if include_images
-                else self.include_images,
-                time_range=time_range if time_range else self.time_range,
-                topic=topic if topic else self.topic,
+                include_domains=self.include_domains
+                if self.include_domains
+                else include_domains,
+                exclude_domains=self.exclude_domains
+                if self.exclude_domains
+                else exclude_domains,
+                search_depth=self.search_depth if self.search_depth else search_depth,
+                include_images=self.include_images
+                if self.include_images
+                else include_images,
+                time_range=self.time_range if self.time_range else time_range,
+                topic=self.topic if self.topic else topic,
                 country=self.country,
                 max_results=self.max_results,
                 include_answer=self.include_answer,
@@ -342,18 +342,18 @@ class TavilySearch(BaseTool):  # type: ignore[override]
         try:
             raw_results = await self.api_wrapper.raw_results_async(
                 query=query,
-                include_domains=include_domains
-                if include_domains
-                else self.include_domains,
-                exclude_domains=exclude_domains
-                if exclude_domains
-                else self.exclude_domains,
-                search_depth=search_depth if search_depth else self.search_depth,
-                include_images=include_images
-                if include_images
-                else self.include_images,
-                time_range=time_range if time_range else self.time_range,
-                topic=topic if topic else self.topic,
+                include_domains=self.include_domains
+                if self.include_domains
+                else include_domains,
+                exclude_domains=self.exclude_domains
+                if self.exclude_domains
+                else exclude_domains,
+                search_depth=self.search_depth if self.search_depth else search_depth,
+                include_images=self.include_images
+                if self.include_images
+                else include_images,
+                time_range=self.time_range if self.time_range else time_range,
+                topic=self.topic if self.topic else topic,
                 country=self.country,
                 max_results=self.max_results,
                 include_answer=self.include_answer,

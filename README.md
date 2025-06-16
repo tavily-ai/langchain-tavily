@@ -6,7 +6,7 @@
 
 This package contains the LangChain integration with [Tavily](https://tavily.com/)
 
-# **Introducing [tavily-crawl](https://docs.tavily.com/documentation/api-reference/endpoint/crawl) + [tavily-map](https://docs.tavily.com/documentation/api-reference/endpoint/map) in v0.2.2!** 
+# **Introducing [tavily-crawl](https://docs.tavily.com/documentation/api-reference/endpoint/crawl) + [tavily-map](https://docs.tavily.com/documentation/api-reference/endpoint/map) in v0.2.3!** 
 Two powerful new tools have joined the Tavily family! Upgrade now to access:
 ```bash
 pip install -U langchain-tavily
@@ -81,7 +81,7 @@ The Tavily search tool accepts the following arguments during invocation:
 - The following arguments can also be set during invocation : `include_images`, `search_depth` , `time_range`, `include_domains`, `exclude_domains`, `include_images`
 - For reliability and performance reasons, certain parameters that affect response size cannot be modified during invocation: `include_answer` and `include_raw_content`. These limitations prevent unexpected context window issues and ensure consistent results.
 
-NOTE: The optional arguments are available for agents to dynamically set, if you set a argument during instantiation and then invoke the tool with a different value, the tool will use the value you passed during invocation.
+NOTE: If you set an argument during instantiation this value will persist and overwrite the value passed during invocation.
 
 ```python
 # Basic query
@@ -195,7 +195,7 @@ The Tavily extract tool accepts the following arguments during invocation:
 - `urls` (required): A list of URLs to extract content from.
 - Both `extract_depth` and `include_images` can also be set during invocation
 
-NOTE: The optional arguments are available for agents to dynamically set, if you set a argument during instantiation and then invoke the tool with a different value, the tool will use the value you passed during invocation.
+NOTE: If you set an argument during instantiation this value will persist and overwrite the value passed during invocation.
 
 ```python
 # Extract content from a URL
@@ -236,7 +236,7 @@ The tool accepts various parameters during instantiation:
 - `exclude_domains` (optional, List[str]): Regex patterns to exclude specific domains or subdomains from crawling 
 - `allow_external` (optional, bool): Allow following external domain links. Default is False.
 - `include_images` (optional, bool): Whether to include images in the crawl results.
-- `categories` (optional, str): Filter URLs by predefined categories. Can be "Careers", "Blog", "Documentation", "About", "Pricing", "Community", "Developers", "Contact", or "Media". Default is None.
+- `categories` (optional, str): Filter URLs by predefined categories. Can be "Careers", "Blogs", "Documentation", "About", "Pricing", "Community", "Developers", "Contact", or "Media". Default is None.
 - `extract_depth` (optional, str): Depth of content extraction, either "basic" or "advanced". Default is "basic".
 - `format` (optional, str): The format of the extracted web page content. "markdown" returns content in markdown format. "text" returns plain text and may increase latency.
 
@@ -268,7 +268,7 @@ The Tavily crawl tool accepts the following arguments during invocation:
 - `url` (required): The root URL to begin the crawl.
 - All other parameters can also be set during invocation: `max_depth`, `max_breadth`, `limit`, `instructions`, `select_paths`, `select_domains`, `exclude_paths`, `exclude_domains`,`allow_external`, `include_images`, `categories`, and `extract_depth`
 
-NOTE: The optional arguments are available for agents to dynamically set, if you set an argument during instantiation and then invoke the tool with a different value, the tool will use the value you passed during invocation.
+NOTE: If you set an argument during instantiation this value will persist and overwrite the value passed during invocation.
 
 ```python
 # Basic crawl of a website
@@ -314,7 +314,7 @@ The tool accepts various parameters during instantiation:
 - `exclude_paths` (optional, List[str]): Regex patterns to exclude URLs with specific path patterns 
 - `exclude_domains` (optional, List[str]): Regex patterns to exclude specific domains or subdomains from mapping 
 - `allow_external` (optional, bool): Allow following external domain links. Default is False.
-- `categories` (optional, str): Filter URLs by predefined categories ("Careers", "Blog", "Documentation", "About", "Pricing", "Community", "Developers", "Contact", "Media").
+- `categories` (optional, str): Filter URLs by predefined categories ("Careers", "Blogs", "Documentation", "About", "Pricing", "Community", "Developers", "Contact", "Media").
 
 For a comprehensive overview of the available parameters, refer to the [Tavily Map API documentation](https://docs.tavily.com/documentation/api-reference/endpoint/map)
 
@@ -341,7 +341,7 @@ The Tavily map tool accepts the following arguments during invocation:
 - `url` (required): The root URL to begin the mapping.
 - All other parameters can also be set during invocation: `max_depth`, `max_breadth`, `limit`, `instructions`, `select_paths`, `select_domains`, `exclude_paths`, `exclude_domains`, `allow_external`, and `categories`.
 
-NOTE: The optional arguments are available for agents to dynamically set, if you set an argument during instantiation and then invoke the tool with a different value, the tool will use the value you passed during invocation.
+NOTE: If you set an argument during instantiation this value will persist and overwrite the value passed during invocation.
 
 ```python
 # Basic mapping of a website
