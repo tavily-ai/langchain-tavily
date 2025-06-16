@@ -281,7 +281,7 @@ class TavilyCrawlAPIWrapper(BaseModel):
         categories: Optional[
             Literal[
                 "Careers",
-                "Blog",
+                "Blogs",
                 "Documentation",
                 "About",
                 "Pricing",
@@ -351,7 +351,7 @@ class TavilyCrawlAPIWrapper(BaseModel):
         categories: Optional[
             Literal[
                 "Careers",
-                "Blog",
+                "Blogs",
                 "Documentation",
                 "About",
                 "Pricing",
@@ -444,7 +444,7 @@ class TavilyMapAPIWrapper(BaseModel):
         categories: Optional[
             Literal[
                 "Careers",
-                "Blog",
+                "Blogs",
                 "Documentation",
                 "About",
                 "Pricing",
@@ -508,7 +508,7 @@ class TavilyMapAPIWrapper(BaseModel):
         categories: Optional[
             Literal[
                 "Careers",
-                "Blog",
+                "Blogs",
                 "Documentation",
                 "About",
                 "Pricing",

@@ -115,7 +115,7 @@ class TavilyCrawlInput(BaseModel):
         List[
             Literal[
                 "Careers",
-                "Blog",
+                "Blogs",
                 "Documentation",
                 "About",
                 "Pricing",
@@ -132,7 +132,7 @@ class TavilyCrawlInput(BaseModel):
         Set this field to the category that best matches the user's request. Use the following guide to choose the appropriate category:
 
             Careers: Crawl pages related to job listings, open positions, and company career information.
-            Blog: Crawl blog posts, news articles, and editorial content.
+            Blogs: Crawl blog posts, news articles, and editorial content.
             Documentation: Crawl technical documentation, user guides, API references, and manuals.
             About: Crawl 'About Us' pages, company background, mission statements, and team information.
             Pricing: Crawl pages that detail product or service pricing, plans, and cost comparisons.
@@ -254,7 +254,7 @@ class TavilyCrawl(BaseTool):  # type: ignore[override]
         List[
             Literal[
                 "Careers",
-                "Blog",
+                "Blogs",
                 "Documentation",
                 "About",
                 "Pricing",
@@ -265,7 +265,7 @@ class TavilyCrawl(BaseTool):  # type: ignore[override]
             ]
         ]
     ] = None
-    """Filter URLs using predefined categories like 'Documentation', 'Blog', 'API', etc.
+    """Filter URLs using predefined categories like 'Documentation', 'Blogs', 'API', etc.
     """
     extract_depth: Optional[Literal["basic", "advanced"]] = None
     """Advanced extraction retrieves more data, including tables and embedded content, 
@@ -310,7 +310,7 @@ class TavilyCrawl(BaseTool):  # type: ignore[override]
             List[
                 Literal[
                     "Careers",
-                    "Blog",
+                    "Blogs",
                     "Documentation",
                     "About",
                     "Pricing",
@@ -414,7 +414,7 @@ class TavilyCrawl(BaseTool):  # type: ignore[override]
             List[
                 Literal[
                     "Careers",
-                    "Blog",
+                    "Blogs",
                     "Documentation",
                     "About",
                     "Pricing",
@@ -432,26 +432,26 @@ class TavilyCrawl(BaseTool):  # type: ignore[override]
         try:
             raw_results = await self.api_wrapper.raw_results_async(
                 url=url,
-                max_depth=max_depth if max_depth else self.max_depth,
-                max_breadth=max_breadth if max_breadth else self.max_breadth,
-                limit=limit if limit else self.limit,
-                instructions=instructions if instructions else self.instructions,
-                select_paths=select_paths if select_paths else self.select_paths,
-                select_domains=select_domains
-                if select_domains
-                else self.select_domains,
-                exclude_paths=exclude_paths if exclude_paths else self.exclude_paths,
-                exclude_domains=exclude_domains
-                if exclude_domains
-                else self.exclude_domains,
-                allow_external=allow_external
-                if allow_external
-                else self.allow_external,
-                include_images=include_images
-                if include_images
-                else self.include_images,
-                categories=categories if categories else self.categories,
-                extract_depth=extract_depth if extract_depth else self.extract_depth,
+                max_depth=self.max_depth if self.max_depth else max_depth,
+                max_breadth=self.max_breadth if self.max_breadth else max_breadth,
+                limit=self.limit if self.limit else limit,
+                instructions=self.instructions if self.instructions else instructions,
+                select_paths=self.select_paths if self.select_paths else select_paths,
+                select_domains=self.select_domains
+                if self.select_domains
+                else select_domains,
+                exclude_paths=self.exclude_paths if self.exclude_paths else exclude_paths,
+                exclude_domains=self.exclude_domains
+                if self.exclude_domains
+                else exclude_domains,
+                allow_external=self.allow_external
+                if self.allow_external
+                else allow_external,
+                include_images=self.include_images
+                if self.include_images
+                else include_images,
+                categories=self.categories if self.categories else categories,
+                extract_depth=self.extract_depth if self.extract_depth else extract_depth,
                 format=self.format,
             )
 

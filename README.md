@@ -236,7 +236,7 @@ The tool accepts various parameters during instantiation:
 - `exclude_domains` (optional, List[str]): Regex patterns to exclude specific domains or subdomains from crawling 
 - `allow_external` (optional, bool): Allow following external domain links. Default is False.
 - `include_images` (optional, bool): Whether to include images in the crawl results.
-- `categories` (optional, str): Filter URLs by predefined categories. Can be "Careers", "Blog", "Documentation", "About", "Pricing", "Community", "Developers", "Contact", or "Media". Default is None.
+- `categories` (optional, str): Filter URLs by predefined categories. Can be "Careers", "Blogs", "Documentation", "About", "Pricing", "Community", "Developers", "Contact", or "Media". Default is None.
 - `extract_depth` (optional, str): Depth of content extraction, either "basic" or "advanced". Default is "basic".
 - `format` (optional, str): The format of the extracted web page content. "markdown" returns content in markdown format. "text" returns plain text and may increase latency.
 
@@ -314,7 +314,7 @@ The tool accepts various parameters during instantiation:
 - `exclude_paths` (optional, List[str]): Regex patterns to exclude URLs with specific path patterns 
 - `exclude_domains` (optional, List[str]): Regex patterns to exclude specific domains or subdomains from mapping 
 - `allow_external` (optional, bool): Allow following external domain links. Default is False.
-- `categories` (optional, str): Filter URLs by predefined categories ("Careers", "Blog", "Documentation", "About", "Pricing", "Community", "Developers", "Contact", "Media").
+- `categories` (optional, str): Filter URLs by predefined categories ("Careers", "Blogs", "Documentation", "About", "Pricing", "Community", "Developers", "Contact", "Media").
 
 For a comprehensive overview of the available parameters, refer to the [Tavily Map API documentation](https://docs.tavily.com/documentation/api-reference/endpoint/map)
 

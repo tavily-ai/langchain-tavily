@@ -110,7 +110,7 @@ class TavilyMapInput(BaseModel):
         List[
             Literal[
                 "Careers",
-                "Blog",
+                "Blogs",
                 "Documentation",
                 "About",
                 "Pricing",
@@ -127,7 +127,7 @@ class TavilyMapInput(BaseModel):
         Set this field to the category that best matches the user's request. Use the following guide to choose the appropriate category:
 
             Careers: Crawl pages related to job listings, open positions, and company career information.
-            Blog: Crawl blog posts, news articles, and editorial content.
+            Blogs: Crawl blog posts, news articles, and editorial content.
             Documentation: Crawl technical documentation, user guides, API references, and manuals.
             About: Crawl 'About Us' pages, company background, mission statements, and team information.
             Pricing: Crawl pages that detail product or service pricing, plans, and cost comparisons.
@@ -237,7 +237,7 @@ class TavilyMap(BaseTool):  # type: ignore[override]
         List[
             Literal[
                 "Careers",
-                "Blog",
+                "Blogs",
                 "Documentation",
                 "About",
                 "Pricing",
@@ -248,7 +248,7 @@ class TavilyMap(BaseTool):  # type: ignore[override]
             ]
         ]
     ] = None
-    """Filter URLs using predefined categories like 'Documentation', 'Blog', 'API', etc.
+    """Filter URLs using predefined categories like 'Documentation', 'Blogs', 'API', etc.
     """
 
     api_wrapper: TavilyMapAPIWrapper = Field(default_factory=TavilyMapAPIWrapper)  # type: ignore[arg-type]
@@ -278,7 +278,7 @@ class TavilyMap(BaseTool):  # type: ignore[override]
             List[
                 Literal[
                     "Careers",
-                    "Blog",
+                    "Blogs",
                     "Documentation",
                     "About",
                     "Pricing",
@@ -370,7 +370,7 @@ class TavilyMap(BaseTool):  # type: ignore[override]
             List[
                 Literal[
                     "Careers",
-                    "Blog",
+                    "Blogs",
                     "Documentation",
                     "About",
                     "Pricing",
