@@ -38,17 +38,17 @@ class TavilySearchAPIWrapper(BaseModel):
     def raw_results(
         self,
         query: str,
-        max_results: Optional[int] = 5,
-        search_depth: Optional[Literal["basic", "advanced"]] = "advanced",
-        include_domains: Optional[List[str]] = None,
-        exclude_domains: Optional[List[str]] = None,
-        include_answer: Optional[Union[bool, Literal["basic", "advanced"]]] = False,
-        include_raw_content: Optional[Union[bool, Literal["markdown", "text"]]] = False,
-        include_images: Optional[bool] = False,
-        include_image_descriptions: Optional[bool] = False,
-        topic: Optional[Literal["general", "news", "finance"]] = "general",
-        time_range: Optional[Literal["day", "week", "month", "year"]] = None,
-        country: Optional[str] = None,
+        max_results: Optional[int],
+        search_depth: Optional[Literal["basic", "advanced"]],
+        include_domains: Optional[List[str]],
+        exclude_domains: Optional[List[str]],
+        include_answer: Optional[Union[bool, Literal["basic", "advanced"]]],
+        include_raw_content: Optional[Union[bool, Literal["markdown", "text"]]],
+        include_images: Optional[bool],
+        include_image_descriptions: Optional[bool],
+        topic: Optional[Literal["general", "news", "finance"]],
+        time_range: Optional[Literal["day", "week", "month", "year"]],
+        country: Optional[str],
     ) -> Dict:
         params = {
             "query": query,
@@ -90,17 +90,17 @@ class TavilySearchAPIWrapper(BaseModel):
     async def raw_results_async(
         self,
         query: str,
-        max_results: Optional[int] = 5,
-        search_depth: Optional[Literal["basic", "advanced"]] = "advanced",
-        include_domains: Optional[List[str]] = None,
-        exclude_domains: Optional[List[str]] = None,
-        include_answer: Optional[Union[bool, Literal["basic", "advanced"]]] = False,
-        include_raw_content: Optional[Union[bool, Literal["markdown", "text"]]] = False,
-        include_images: Optional[bool] = False,
-        include_image_descriptions: Optional[bool] = False,
-        topic: Optional[Literal["general", "news", "finance"]] = "general",
-        time_range: Optional[Literal["day", "week", "month", "year"]] = None,
-        country: Optional[str] = None,
+        max_results: Optional[int],
+        search_depth: Optional[Literal["basic", "advanced"]],
+        include_domains: Optional[List[str]],
+        exclude_domains: Optional[List[str]],
+        include_answer: Optional[Union[bool, Literal["basic", "advanced"]]],
+        include_raw_content: Optional[Union[bool, Literal["markdown", "text"]]],
+        include_images: Optional[bool],
+        include_image_descriptions: Optional[bool],
+        topic: Optional[Literal["general", "news", "finance"]],
+        time_range: Optional[Literal["day", "week", "month", "year"]],
+        country: Optional[str],
     ) -> Dict:
         """Get results from the Tavily Search API asynchronously."""
 
@@ -121,6 +121,7 @@ class TavilySearchAPIWrapper(BaseModel):
                 "country": country,
             }
 
+            # Remove None values
             params = {k: v for k, v in params.items() if v is not None}
 
             headers = {
@@ -165,9 +166,9 @@ class TavilyExtractAPIWrapper(BaseModel):
     def raw_results(
         self,
         urls: List[str],
-        extract_depth: Optional[Literal["basic", "advanced"]] = "advanced",
-        include_images: Optional[bool] = False,
-        format: Optional[str] = "markdown",
+        extract_depth: Optional[Literal["basic", "advanced"]],
+        include_images: Optional[bool],
+        format: Optional[str],
     ) -> Dict:
         params = {
             "urls": urls,
@@ -175,6 +176,9 @@ class TavilyExtractAPIWrapper(BaseModel):
             "extract_depth": extract_depth,
             "format": format,
         }
+
+        # Remove None values
+        params = {k: v for k, v in params.items() if v is not None}
 
         headers = {
             "Authorization": f"Bearer {self.tavily_api_key.get_secret_value()}",
@@ -199,9 +203,9 @@ class TavilyExtractAPIWrapper(BaseModel):
     async def raw_results_async(
         self,
         urls: List[str],
-        include_images: Optional[bool] = False,
-        extract_depth: Optional[Literal["basic", "advanced"]] = "advanced",
-        format: Optional[str] = "markdown",
+        include_images: Optional[bool],
+        extract_depth: Optional[Literal["basic", "advanced"]],
+        format: Optional[str],
     ) -> Dict:
         """Get results from the Tavily Extract API asynchronously."""
 
@@ -213,10 +217,16 @@ class TavilyExtractAPIWrapper(BaseModel):
                 "extract_depth": extract_depth,
                 "format": format,
             }
+
+            # Remove None values
+            params = {k: v for k, v in params.items() if v is not None}
+
+
             headers = {
                 "Authorization": f"Bearer {self.tavily_api_key.get_secret_value()}",
                 "Content-Type": "application/json",
             }
+
             async with aiohttp.ClientSession() as session:
                 async with session.post(
                     f"{TAVILY_API_URL}/extract", json=params, headers=headers
@@ -279,7 +289,7 @@ class TavilyCrawlAPIWrapper(BaseModel):
             ]
         ],
         extract_depth: Optional[Literal["basic", "advanced"]],
-        format: Optional[str] = "markdown",
+        format: Optional[str],
     ) -> Dict:
         params = {
             "url": url,
@@ -297,6 +307,9 @@ class TavilyCrawlAPIWrapper(BaseModel):
             "extract_depth": extract_depth,
             "format": format,
         }
+
+        # Remove None values
+        params = {k: v for k, v in params.items() if v is not None}
 
         headers = {
             "Authorization": f"Bearer {self.tavily_api_key.get_secret_value()}",
@@ -345,7 +358,7 @@ class TavilyCrawlAPIWrapper(BaseModel):
             ]
         ],
         extract_depth: Optional[Literal["basic", "advanced"]],
-        format: Optional[str] = "markdown",
+        format: Optional[str],
     ) -> Dict:
         """Get results from the Tavily Crawl API asynchronously."""
 
@@ -367,10 +380,15 @@ class TavilyCrawlAPIWrapper(BaseModel):
                 "extract_depth": extract_depth,
                 "format": format,
             }
+
+            # Remove None values
+            params = {k: v for k, v in params.items() if v is not None}
+
             headers = {
                 "Authorization": f"Bearer {self.tavily_api_key.get_secret_value()}",
                 "Content-Type": "application/json",
             }
+
             async with aiohttp.ClientSession() as session:
                 async with session.post(
                     f"{TAVILY_API_URL}/crawl", json=params, headers=headers
@@ -446,6 +464,9 @@ class TavilyMapAPIWrapper(BaseModel):
             "categories": categories,
         }
 
+        # Remove None values
+        params = {k: v for k, v in params.items() if v is not None}
+
         headers = {
             "Authorization": f"Bearer {self.tavily_api_key.get_secret_value()}",
             "Content-Type": "application/json",
@@ -509,6 +530,10 @@ class TavilyMapAPIWrapper(BaseModel):
                 "allow_external": allow_external,
                 "categories": categories,
             }
+
+            # Remove None values
+            params = {k: v for k, v in params.items() if v is not None}
+
             headers = {
                 "Authorization": f"Bearer {self.tavily_api_key.get_secret_value()}",
                 "Content-Type": "application/json",
