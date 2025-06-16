@@ -81,7 +81,7 @@ The Tavily search tool accepts the following arguments during invocation:
 - The following arguments can also be set during invocation : `include_images`, `search_depth` , `time_range`, `include_domains`, `exclude_domains`, `include_images`
 - For reliability and performance reasons, certain parameters that affect response size cannot be modified during invocation: `include_answer` and `include_raw_content`. These limitations prevent unexpected context window issues and ensure consistent results.
 
-NOTE: The optional arguments are available for agents to dynamically set, if you set a argument during instantiation and then invoke the tool with a different value, the tool will use the value you passed during invocation.
+NOTE: If you set an argument during instantiation this value will persist and overwrite the value passed during invocation.
 
 ```python
 # Basic query
@@ -195,7 +195,7 @@ The Tavily extract tool accepts the following arguments during invocation:
 - `urls` (required): A list of URLs to extract content from.
 - Both `extract_depth` and `include_images` can also be set during invocation
 
-NOTE: The optional arguments are available for agents to dynamically set, if you set a argument during instantiation and then invoke the tool with a different value, the tool will use the value you passed during invocation.
+NOTE: If you set an argument during instantiation this value will persist and overwrite the value passed during invocation.
 
 ```python
 # Extract content from a URL
@@ -268,7 +268,7 @@ The Tavily crawl tool accepts the following arguments during invocation:
 - `url` (required): The root URL to begin the crawl.
 - All other parameters can also be set during invocation: `max_depth`, `max_breadth`, `limit`, `instructions`, `select_paths`, `select_domains`, `exclude_paths`, `exclude_domains`,`allow_external`, `include_images`, `categories`, and `extract_depth`
 
-NOTE: The optional arguments are available for agents to dynamically set, if you set an argument during instantiation and then invoke the tool with a different value, the tool will use the value you passed during invocation.
+NOTE: If you set an argument during instantiation this value will persist and overwrite the value passed during invocation.
 
 ```python
 # Basic crawl of a website
@@ -341,7 +341,7 @@ The Tavily map tool accepts the following arguments during invocation:
 - `url` (required): The root URL to begin the mapping.
 - All other parameters can also be set during invocation: `max_depth`, `max_breadth`, `limit`, `instructions`, `select_paths`, `select_domains`, `exclude_paths`, `exclude_domains`, `allow_external`, and `categories`.
 
-NOTE: The optional arguments are available for agents to dynamically set, if you set an argument during instantiation and then invoke the tool with a different value, the tool will use the value you passed during invocation.
+NOTE: If you set an argument during instantiation this value will persist and overwrite the value passed during invocation.
 
 ```python
 # Basic mapping of a website
