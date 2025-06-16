@@ -182,20 +182,26 @@ class TavilyMap(BaseTool):  # type: ignore[override]
     args_schema: Type[BaseModel] = TavilyMapInput
     handle_tool_error: bool = True
 
-    max_depth: Optional[int] = 1
+    max_depth: Optional[int] = None
     """Max depth of the crawl. Defines how far from the base URL the crawler can explore.
 
     max_depth must be greater than 0
+
+    default is 1
     """  # noqa: E501
-    max_breadth: Optional[int] = 20
+    max_breadth: Optional[int] = None
     """The maximum number of links to follow per level of the tree (i.e., per page).
 
     max_breadth must be greater than 0
+
+    default is 20
     """
-    limit: Optional[int] = 50
+    limit: Optional[int] = None
     """Total number of links the crawler will process before stopping.
 
     limit must be greater than 0
+
+    default is 50
     """
     instructions: Optional[str] = None
     """Natural language instructions for the crawler.
@@ -222,8 +228,10 @@ class TavilyMap(BaseTool):  # type: ignore[override]
     Regex patterns to exclude specific domains or subdomains from mapping 
     ex. [^private\.example\.com$]
     """
-    allow_external: Optional[bool] = False
+    allow_external: Optional[bool] = None
     """Whether to allow following links that go to external domains.
+
+    default is False
     """
     categories: Optional[
         List[
@@ -300,22 +308,24 @@ class TavilyMap(BaseTool):  # type: ignore[override]
             # Execute search with parameters directly
             raw_results = self.api_wrapper.raw_results(
                 url=url,
-                max_depth=max_depth if max_depth else self.max_depth,
-                max_breadth=max_breadth if max_breadth else self.max_breadth,
-                limit=limit if limit else self.limit,
-                instructions=instructions if instructions else self.instructions,
-                select_paths=select_paths if select_paths else self.select_paths,
-                select_domains=select_domains
-                if select_domains
-                else self.select_domains,
-                exclude_paths=exclude_paths if exclude_paths else self.exclude_paths,
-                exclude_domains=exclude_domains
-                if exclude_domains
-                else self.exclude_domains,
-                allow_external=allow_external
-                if allow_external
-                else self.allow_external,
-                categories=categories if categories else self.categories,
+                max_depth=self.max_depth if self.max_depth else max_depth,
+                max_breadth=self.max_breadth if self.max_breadth else max_breadth,
+                limit=self.limit if self.limit else limit,
+                instructions=self.instructions if self.instructions else instructions,
+                select_paths=self.select_paths if self.select_paths else select_paths,
+                select_domains=self.select_domains
+                if self.select_domains
+                else select_domains,
+                exclude_paths=self.exclude_paths
+                if self.exclude_paths
+                else exclude_paths,
+                exclude_domains=self.exclude_domains
+                if self.exclude_domains
+                else exclude_domains,
+                allow_external=self.allow_external
+                if self.allow_external
+                else allow_external,
+                categories=self.categories if self.categories else categories,
             )
 
             # Check if results are empty and raise a specific exception
@@ -377,22 +387,24 @@ class TavilyMap(BaseTool):  # type: ignore[override]
         try:
             raw_results = await self.api_wrapper.raw_results_async(
                 url=url,
-                max_depth=max_depth if max_depth else self.max_depth,
-                max_breadth=max_breadth if max_breadth else self.max_breadth,
-                limit=limit if limit else self.limit,
-                instructions=instructions if instructions else self.instructions,
-                select_paths=select_paths if select_paths else self.select_paths,
-                select_domains=select_domains
-                if select_domains
-                else self.select_domains,
-                exclude_paths=exclude_paths if exclude_paths else self.exclude_paths,
-                exclude_domains=exclude_domains
-                if exclude_domains
-                else self.exclude_domains,
-                allow_external=allow_external
-                if allow_external
-                else self.allow_external,
-                categories=categories if categories else self.categories,
+                max_depth=self.max_depth if self.max_depth else max_depth,
+                max_breadth=self.max_breadth if self.max_breadth else max_breadth,
+                limit=self.limit if self.limit else limit,
+                instructions=self.instructions if self.instructions else instructions,
+                select_paths=self.select_paths if self.select_paths else select_paths,
+                select_domains=self.select_domains
+                if self.select_domains
+                else select_domains,
+                exclude_paths=self.exclude_paths
+                if self.exclude_paths
+                else exclude_paths,
+                exclude_domains=self.exclude_domains
+                if self.exclude_domains
+                else exclude_domains,
+                allow_external=self.allow_external
+                if self.allow_external
+                else allow_external,
+                categories=self.categories if self.categories else categories,
             )
 
             # Check if results are empty and raise a specific exception
