@@ -49,6 +49,7 @@ class TavilySearchAPIWrapper(BaseModel):
         topic: Optional[Literal["general", "news", "finance"]],
         time_range: Optional[Literal["day", "week", "month", "year"]],
         country: Optional[str],
+        auto_parameters: Optional[bool]
     ) -> Dict:
         params = {
             "query": query,
@@ -63,6 +64,7 @@ class TavilySearchAPIWrapper(BaseModel):
             "topic": topic,
             "time_range": time_range,
             "country": country,
+            "auto_parameters": auto_parameters
         }
 
         # Remove None values
@@ -102,6 +104,7 @@ class TavilySearchAPIWrapper(BaseModel):
         topic: Optional[Literal["general", "news", "finance"]],
         time_range: Optional[Literal["day", "week", "month", "year"]],
         country: Optional[str],
+        auto_parameters: Optional[bool]
     ) -> Dict:
         """Get results from the Tavily Search API asynchronously."""
 
@@ -120,6 +123,7 @@ class TavilySearchAPIWrapper(BaseModel):
                 "topic": topic,
                 "time_range": time_range,
                 "country": country,
+                "auto_parameters": auto_parameters
             }
 
             # Remove None values
