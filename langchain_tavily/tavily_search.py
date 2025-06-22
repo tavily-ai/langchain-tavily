@@ -312,7 +312,7 @@ class TavilySearch(BaseTool):  # type: ignore[override]
                 include_answer=self.include_answer,
                 include_raw_content=self.include_raw_content,
                 include_image_descriptions=self.include_image_descriptions,
-                auto_parameters=self.auto_parameters
+                auto_parameters=self.auto_parameters,
             )
 
             # Check if results are empty and raise a specific exception
@@ -372,7 +372,7 @@ class TavilySearch(BaseTool):  # type: ignore[override]
                 include_answer=self.include_answer,
                 include_raw_content=self.include_raw_content,
                 include_image_descriptions=self.include_image_descriptions,
-                auto_parameters=self.auto_parameters
+                auto_parameters=self.auto_parameters,
             )
 
             # Check if results are empty and raise a specific exception
