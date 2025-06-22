@@ -188,12 +188,14 @@ class TavilySearch(BaseTool):  # type: ignore[override]
 
     auto_parameters: Optional[bool] = None
     """
-    When `auto_parameters` is enabled, Tavily automatically configures search parameters based on your query's 
-    content and intent. You can still set other parameters manually, and your explicit values will override the 
-    automatic ones. The parameters `include_answer`, `include_raw_content`, and `max_results` must always be set 
-    manually, as they directly affect response size. Note: `search_depth` may be automatically set to advanced when 
-    it’s likely to improve results. This uses 2 API credits per request. To avoid the extra cost, you can explicitly 
-    set `search_depth` to `basic`. 
+    When `auto_parameters` is enabled, Tavily automatically configures search parameters
+    based on your query's content and intent. You can still set other parameters 
+    manually, and your explicit values will override the automatic ones. The parameters 
+    `include_answer`, `include_raw_content`, and `max_results` must always be set 
+    manually, as they directly affect response size. Note: `search_depth` may be 
+    automatically set to advanced when it’s likely to improve results. This uses 2 API
+    credits per request. To avoid the extra cost, you can explicitly set `search_depth` 
+    to `basic`. 
 
     Default is `False`.
     """
