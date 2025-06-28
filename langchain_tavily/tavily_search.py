@@ -241,10 +241,11 @@ class TavilySearch(BaseTool):  # type: ignore[override]
     Default is False.
     """
     include_raw_content: Optional[Union[bool, Literal["markdown", "text"]]] = None
-    """Include an LLM-generated answer to the provided query. basic or true returns a 
-    quick answer. advanced returns a more detailed answer.
+    """ Include the cleaned and parsed HTML content of each search result. 
+    "markdown" returns search result content in markdown format. "text" 
+    returns the plain text from the results and may increase latency.
     
-    Default is False.
+    Default is "markdown".
     """
     include_image_descriptions: Optional[bool] = None
     """Include a descriptive text for each image in the search results.
