@@ -152,6 +152,10 @@ class TavilyCrawlInput(BaseModel):
         with higher success but may increase latency.
         """,  # noqa: E501
     )
+    include_favicon: Optional[bool] = Field(
+        default=False,
+        description="Whether to include the favicon URL for each result.",
+    )
 
 
 def _generate_suggestions(params: dict) -> list:
@@ -281,6 +285,11 @@ class TavilyCrawl(BaseTool):  # type: ignore[override]
 
     default is markdown
     """
+    include_favicon: Optional[bool] = None
+    """Whether to include the favicon URL for each result.
+    
+    Default is False.
+    """
 
     api_wrapper: TavilyCrawlAPIWrapper = Field(default_factory=TavilyCrawlAPIWrapper)  # type: ignore[arg-type]
 
@@ -322,6 +331,7 @@ class TavilyCrawl(BaseTool):  # type: ignore[override]
             ]
         ] = None,
         extract_depth: Optional[Literal["basic", "advanced"]] = None,
+        include_favicon: Optional[bool] = None,
         run_manager: Optional[CallbackManagerForToolRun] = None,
     ) -> Dict[str, Any]:
         """Execute a crawl using the Tavily Crawl API.
@@ -367,6 +377,9 @@ class TavilyCrawl(BaseTool):  # type: ignore[override]
                 extract_depth=self.extract_depth
                 if self.extract_depth
                 else extract_depth,
+                include_favicon=self.include_favicon
+                if self.include_favicon
+                else include_favicon,
                 format=self.format,
             )
 
@@ -426,6 +439,7 @@ class TavilyCrawl(BaseTool):  # type: ignore[override]
             ]
         ] = None,
         extract_depth: Optional[Literal["basic", "advanced"]] = None,
+        include_favicon: Optional[bool] = None,
         run_manager: Optional[AsyncCallbackManagerForToolRun] = None,
     ) -> Dict[str, Any]:
         """Use the tool asynchronously."""
@@ -456,6 +470,9 @@ class TavilyCrawl(BaseTool):  # type: ignore[override]
                 extract_depth=self.extract_depth
                 if self.extract_depth
                 else extract_depth,
+                include_favicon=self.include_favicon
+                if self.include_favicon
+                else include_favicon,
                 format=self.format,
             )
 
