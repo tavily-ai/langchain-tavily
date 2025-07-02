@@ -151,6 +151,7 @@ class TavilySearch(BaseTool):  # type: ignore[override]
                 # include_domains=None,
                 # exclude_domains=None,
                 # country=None
+                # include_favicon=False
             )
 
     Invoke directly with args:
