@@ -46,6 +46,7 @@ class TavilySearchAPIWrapper(BaseModel):
         include_raw_content: Optional[Union[bool, Literal["markdown", "text"]]],
         include_images: Optional[bool],
         include_image_descriptions: Optional[bool],
+        include_favicon: Optional[bool],
         topic: Optional[Literal["general", "news", "finance"]],
         time_range: Optional[Literal["day", "week", "month", "year"]],
         country: Optional[str],
@@ -61,6 +62,7 @@ class TavilySearchAPIWrapper(BaseModel):
             "include_raw_content": include_raw_content,
             "include_images": include_images,
             "include_image_descriptions": include_image_descriptions,
+            "include_favicon": include_favicon,
             "topic": topic,
             "time_range": time_range,
             "country": country,
@@ -101,6 +103,7 @@ class TavilySearchAPIWrapper(BaseModel):
         include_raw_content: Optional[Union[bool, Literal["markdown", "text"]]],
         include_images: Optional[bool],
         include_image_descriptions: Optional[bool],
+        include_favicon: Optional[bool],
         topic: Optional[Literal["general", "news", "finance"]],
         time_range: Optional[Literal["day", "week", "month", "year"]],
         country: Optional[str],
@@ -120,6 +123,7 @@ class TavilySearchAPIWrapper(BaseModel):
                 "include_raw_content": include_raw_content,
                 "include_images": include_images,
                 "include_image_descriptions": include_image_descriptions,
+                "include_favicon": include_favicon,
                 "topic": topic,
                 "time_range": time_range,
                 "country": country,
@@ -174,11 +178,13 @@ class TavilyExtractAPIWrapper(BaseModel):
         urls: List[str],
         extract_depth: Optional[Literal["basic", "advanced"]],
         include_images: Optional[bool],
+        include_favicon: Optional[bool],
         format: Optional[str],
     ) -> Dict:
         params = {
             "urls": urls,
             "include_images": include_images,
+            "include_favicon": include_favicon,
             "extract_depth": extract_depth,
             "format": format,
         }
@@ -211,6 +217,7 @@ class TavilyExtractAPIWrapper(BaseModel):
         self,
         urls: List[str],
         include_images: Optional[bool],
+        include_favicon: Optional[bool],
         extract_depth: Optional[Literal["basic", "advanced"]],
         format: Optional[str],
     ) -> Dict:
@@ -221,6 +228,7 @@ class TavilyExtractAPIWrapper(BaseModel):
             params = {
                 "urls": urls,
                 "include_images": include_images,
+                "include_favicon": include_favicon,
                 "extract_depth": extract_depth,
                 "format": format,
             }

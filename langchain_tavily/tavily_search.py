@@ -93,6 +93,10 @@ class TavilySearchInput(BaseModel):
         mainstream media - NOT simply because a query asks for "new" information.
         """,  # noqa: E501
     )
+    include_favicon: Optional[bool] = Field(
+        default=False,
+        description="Whether to include the favicon URL for each result.",
+    )
 
 
 def _generate_suggestions(params: dict) -> list:
@@ -259,6 +263,11 @@ class TavilySearch(BaseTool):  # type: ignore[override]
     To see the countries supported visit our docs https://docs.tavily.com/documentation/api-reference/endpoint/search
     Default is None.
     """
+    include_favicon: Optional[bool] = None
+    """Whether to include the favicon URL for each result.
+    
+    Default is False.
+    """
     api_wrapper: TavilySearchAPIWrapper = Field(default_factory=TavilySearchAPIWrapper)  # type: ignore[arg-type]
 
     def __init__(self, **kwargs: Any) -> None:
@@ -279,6 +288,7 @@ class TavilySearch(BaseTool):  # type: ignore[override]
         include_images: Optional[bool] = None,
         time_range: Optional[Literal["day", "week", "month", "year"]] = None,
         topic: Optional[Literal["general", "news", "finance"]] = None,
+        include_favicon: Optional[bool] = None,
         run_manager: Optional[CallbackManagerForToolRun] = None,
     ) -> Dict[str, Any]:
         """Execute a search query using the Tavily Search API.
@@ -310,6 +320,9 @@ class TavilySearch(BaseTool):  # type: ignore[override]
                 else include_images,
                 time_range=self.time_range if self.time_range else time_range,
                 topic=self.topic if self.topic else topic,
+                include_favicon=self.include_favicon
+                if self.include_favicon
+                else include_favicon,
                 country=self.country,
                 max_results=self.max_results,
                 include_answer=self.include_answer,
@@ -352,6 +365,7 @@ class TavilySearch(BaseTool):  # type: ignore[override]
         include_images: Optional[bool] = False,
         time_range: Optional[Literal["day", "week", "month", "year"]] = None,
         topic: Optional[Literal["general", "news", "finance"]] = "general",
+        include_favicon: Optional[bool] = False,
         run_manager: Optional[AsyncCallbackManagerForToolRun] = None,
     ) -> Dict[str, Any]:
         """Use the tool asynchronously."""
@@ -370,6 +384,9 @@ class TavilySearch(BaseTool):  # type: ignore[override]
                 else include_images,
                 time_range=self.time_range if self.time_range else time_range,
                 topic=self.topic if self.topic else topic,
+                include_favicon=self.include_favicon
+                if self.include_favicon
+                else include_favicon,
                 country=self.country,
                 max_results=self.max_results,
                 include_answer=self.include_answer,

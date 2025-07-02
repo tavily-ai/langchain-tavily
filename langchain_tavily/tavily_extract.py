@@ -41,6 +41,10 @@ class TavilyExtractInput(BaseModel):
         Default is False (extracts text content only).
         """,  # noqa: E501
     )
+    include_favicon: Optional[bool] = Field(
+        default=False,
+        description="Whether to include the favicon URL for each result.",
+    )
 
 
 def _generate_suggestions(params: dict) -> list:
@@ -92,6 +96,11 @@ class TavilyExtract(BaseTool):  # type: ignore[override, override]
     
     Default is 'markdown'
     """
+    include_favicon: Optional[bool] = None
+    """Whether to include the favicon URL for each result.
+    
+    Default is False.
+    """
 
     apiwrapper: TavilyExtractAPIWrapper = Field(default_factory=TavilyExtractAPIWrapper)  # type: ignore[arg-type]
 
@@ -108,6 +117,7 @@ class TavilyExtract(BaseTool):  # type: ignore[override, override]
         urls: List[str],
         extract_depth: Optional[Literal["basic", "advanced"]] = None,
         include_images: Optional[bool] = None,
+        include_favicon: Optional[bool] = None,
         run_manager: Optional[CallbackManagerForToolRun] = None,
     ) -> Dict[str, Any]:
         """Use the tool."""
@@ -121,6 +131,9 @@ class TavilyExtract(BaseTool):  # type: ignore[override, override]
                 include_images=self.include_images
                 if self.include_images
                 else include_images,
+                include_favicon=self.include_favicon
+                if self.include_favicon
+                else include_favicon,
                 format=self.format,
             )
 
@@ -153,6 +166,7 @@ class TavilyExtract(BaseTool):  # type: ignore[override, override]
         urls: List[str],
         extract_depth: Optional[Literal["basic", "advanced"]] = None,
         include_images: Optional[bool] = None,
+        include_favicon: Optional[bool] = None,
         run_manager: Optional[AsyncCallbackManagerForToolRun] = None,
     ) -> Dict[str, Any]:
         """Use the tool asynchronously."""
@@ -165,6 +179,9 @@ class TavilyExtract(BaseTool):  # type: ignore[override, override]
                 include_images=self.include_images
                 if self.include_images
                 else include_images,
+                include_favicon=self.include_favicon
+                if self.include_favicon
+                else include_favicon,
                 format=self.format,
             )
 
