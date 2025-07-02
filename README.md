@@ -6,6 +6,9 @@
 
 This package contains the LangChain integration with [Tavily](https://tavily.com/)
 
+# **NEW in v0.2.6: Favicon Support!** 
+Now you can include favicon URLs in your search, extract, and crawl results! Set `include_favicon=True` to get the favicon URL for each result.
+
 # **Introducing [tavily-crawl](https://docs.tavily.com/documentation/api-reference/endpoint/crawl) + [tavily-map](https://docs.tavily.com/documentation/api-reference/endpoint/map) in v0.2.4!** 
 Two powerful new tools have joined the Tavily family! Upgrade now to access:
 ```bash
@@ -47,6 +50,7 @@ The tool accepts various parameters during instantiation:
 - `include_raw_content` (optional,  bool | str): Include the cleaned and parsed HTML content of each search result. "markdown" returns search result content in markdown format. "text" returns the plain text from the results and may increase latency. If True, defaults to "markdown"
 - `include_images` (optional, bool): Include a list of query related images in the response. Default is False.
 - `include_image_descriptions` (optional, bool): Include descriptive text for each image. Default is False.
+- `include_favicon` (optional, bool): Whether to include the favicon URL for each result. Default is False.
 - `search_depth` (optional, str): Depth of the search, either "basic" or "advanced". Default is "basic".
 - `time_range` (optional, str): The time range back from the current date to filter results - "day", "week", "month", or "year". Default is None.
 - `include_domains` (optional, List[str]): List of domains to specifically include. Default is None.
@@ -65,6 +69,7 @@ tool = TavilySearch(
     # include_raw_content=False,
     # include_images=False,
     # include_image_descriptions=False,
+    # include_favicon=False,
     # search_depth="basic",
     # time_range="day",
     # include_domains=None,
@@ -78,7 +83,7 @@ tool = TavilySearch(
 The Tavily search tool accepts the following arguments during invocation:
 
 - `query` (required): A natural language search query
-- The following arguments can also be set during invocation : `include_images`, `search_depth` , `time_range`, `include_domains`, `exclude_domains`, `include_images`
+- The following arguments can also be set during invocation : `include_images`, `include_favicon`, `search_depth` , `time_range`, `include_domains`, `exclude_domains`
 - For reliability and performance reasons, certain parameters that affect response size cannot be modified during invocation: `include_answer` and `include_raw_content`. These limitations prevent unexpected context window issues and ensure consistent results.
 
 NOTE: If you set an argument during instantiation this value will persist and overwrite the value passed during invocation.
@@ -174,6 +179,7 @@ The tool accepts various parameters during instantiation:
 
 - `extract_depth` (optional, str): The depth of the extraction, either "basic" or "advanced". Default is "basic ".
 - `include_images` (optional, bool): Whether to include images in the extraction. Default is False.
+- `include_favicon` (optional, bool): Whether to include the favicon URL for each result. Default is False.
 - `format` (optional, str): The format of the extracted web page content. "markdown" returns content in markdown format. "text" returns plain text and may increase latency.
 
 For a comprehensive overview of the available parameters, refer to the [Tavily Extract API documentation](https://docs.tavily.com/documentation/api-reference/endpoint/extract)
@@ -184,6 +190,7 @@ from langchain_tavily import TavilyExtract
 tool = TavilyExtract(
     extract_depth="advanced",
     include_images=False,
+    include_favicon=False,
     format="markdown"
 )
 ```
@@ -193,7 +200,7 @@ tool = TavilyExtract(
 The Tavily extract tool accepts the following arguments during invocation:
 
 - `urls` (required): A list of URLs to extract content from.
-- Both `extract_depth` and `include_images` can also be set during invocation
+- The parameters `extract_depth`, `include_images`, and `include_favicon` can also be set during invocation
 
 NOTE: If you set an argument during instantiation this value will persist and overwrite the value passed during invocation.
 
@@ -238,6 +245,7 @@ The tool accepts various parameters during instantiation:
 - `include_images` (optional, bool): Whether to include images in the crawl results.
 - `categories` (optional, str): Filter URLs by predefined categories. Can be "Careers", "Blogs", "Documentation", "About", "Pricing", "Community", "Developers", "Contact", or "Media". Default is None.
 - `extract_depth` (optional, str): Depth of content extraction, either "basic" or "advanced". Default is "basic".
+- `include_favicon` (optional, bool): Whether to include the favicon URL for each result. Default is False.
 - `format` (optional, str): The format of the extracted web page content. "markdown" returns content in markdown format. "text" returns plain text and may increase latency.
 
 For a comprehensive overview of the available parameters, refer to the [Tavily Crawl API documentation](https://docs.tavily.com/documentation/api-reference/endpoint/crawl)
@@ -257,7 +265,8 @@ tool = TavilyCrawl(
     # allow_external=False,
     # include_images=False,
     # categories=None,
-    # extract_depth=None
+    # extract_depth=None,
+    # include_favicon=False,
     # format=None
 )
 ```
@@ -266,7 +275,7 @@ tool = TavilyCrawl(
 
 The Tavily crawl tool accepts the following arguments during invocation:
 - `url` (required): The root URL to begin the crawl.
-- All other parameters can also be set during invocation: `max_depth`, `max_breadth`, `limit`, `instructions`, `select_paths`, `select_domains`, `exclude_paths`, `exclude_domains`,`allow_external`, `include_images`, `categories`, and `extract_depth`
+- All other parameters can also be set during invocation: `max_depth`, `max_breadth`, `limit`, `instructions`, `select_paths`, `select_domains`, `exclude_paths`, `exclude_domains`,`allow_external`, `include_images`, `categories`, `extract_depth`, and `include_favicon`
 
 NOTE: If you set an argument during instantiation this value will persist and overwrite the value passed during invocation.
 
