@@ -7,7 +7,7 @@
 This package contains the LangChain integration with [Tavily](https://tavily.com/)
 
 # **NEW in v0.2.6: Favicon Support!** 
-Now you can include favicon URLs in your search and extract results! Set `include_favicon=True` to get the favicon URL for each result.
+Now you can include favicon URLs in your search, extract, and crawl results! Set `include_favicon=True` to get the favicon URL for each result.
 
 # **Introducing [tavily-crawl](https://docs.tavily.com/documentation/api-reference/endpoint/crawl) + [tavily-map](https://docs.tavily.com/documentation/api-reference/endpoint/map) in v0.2.4!** 
 Two powerful new tools have joined the Tavily family! Upgrade now to access:
@@ -245,6 +245,7 @@ The tool accepts various parameters during instantiation:
 - `include_images` (optional, bool): Whether to include images in the crawl results.
 - `categories` (optional, str): Filter URLs by predefined categories. Can be "Careers", "Blogs", "Documentation", "About", "Pricing", "Community", "Developers", "Contact", or "Media". Default is None.
 - `extract_depth` (optional, str): Depth of content extraction, either "basic" or "advanced". Default is "basic".
+- `include_favicon` (optional, bool): Whether to include the favicon URL for each result. Default is False.
 - `format` (optional, str): The format of the extracted web page content. "markdown" returns content in markdown format. "text" returns plain text and may increase latency.
 
 For a comprehensive overview of the available parameters, refer to the [Tavily Crawl API documentation](https://docs.tavily.com/documentation/api-reference/endpoint/crawl)
@@ -264,7 +265,8 @@ tool = TavilyCrawl(
     # allow_external=False,
     # include_images=False,
     # categories=None,
-    # extract_depth=None
+    # extract_depth=None,
+    # include_favicon=False,
     # format=None
 )
 ```
@@ -273,7 +275,7 @@ tool = TavilyCrawl(
 
 The Tavily crawl tool accepts the following arguments during invocation:
 - `url` (required): The root URL to begin the crawl.
-- All other parameters can also be set during invocation: `max_depth`, `max_breadth`, `limit`, `instructions`, `select_paths`, `select_domains`, `exclude_paths`, `exclude_domains`,`allow_external`, `include_images`, `categories`, and `extract_depth`
+- All other parameters can also be set during invocation: `max_depth`, `max_breadth`, `limit`, `instructions`, `select_paths`, `select_domains`, `exclude_paths`, `exclude_domains`,`allow_external`, `include_images`, `categories`, `extract_depth`, and `include_favicon`
 
 NOTE: If you set an argument during instantiation this value will persist and overwrite the value passed during invocation.
 
