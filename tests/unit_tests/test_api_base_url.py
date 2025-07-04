@@ -1,6 +1,5 @@
 """Unit tests for api_base_url parameter."""
 
-import pytest
 from unittest.mock import Mock, patch
 
 from langchain_tavily import TavilySearch, TavilyExtract, TavilyCrawl, TavilyMap
