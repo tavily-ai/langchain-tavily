@@ -19,6 +19,7 @@ class TavilySearchAPIWrapper(BaseModel):
     """Wrapper for Tavily Search API."""
 
     tavily_api_key: SecretStr
+    api_base_url: Optional[str] = None
 
     model_config = ConfigDict(
         extra="forbid",
@@ -78,9 +79,10 @@ class TavilySearchAPIWrapper(BaseModel):
             "X-Client-Source": "langchain-tavily",
         }
 
+        base_url = self.api_base_url or TAVILY_API_URL
         response = requests.post(
             # type: ignore
-            f"{TAVILY_API_URL}/search",
+            f"{base_url}/search",
             json=params,
             headers=headers,
         )
@@ -138,9 +140,10 @@ class TavilySearchAPIWrapper(BaseModel):
                 "Content-Type": "application/json",
                 "X-Client-Source": "langchain-tavily",
             }
+            base_url = self.api_base_url or TAVILY_API_URL
             async with aiohttp.ClientSession() as session:
                 async with session.post(
-                    f"{TAVILY_API_URL}/search", json=params, headers=headers
+                    f"{base_url}/search", json=params, headers=headers
                 ) as res:
                     if res.status == 200:
                         data = await res.text()
@@ -157,6 +160,7 @@ class TavilyExtractAPIWrapper(BaseModel):
     """Wrapper for Tavily Extract API."""
 
     tavily_api_key: SecretStr
+    api_base_url: Optional[str] = None
 
     model_config = ConfigDict(
         extra="forbid",
@@ -198,9 +202,10 @@ class TavilyExtractAPIWrapper(BaseModel):
             "X-Client-Source": "langchain-tavily",
         }
 
+        base_url = self.api_base_url or TAVILY_API_URL
         response = requests.post(
             # type: ignore
-            f"{TAVILY_API_URL}/extract",
+            f"{base_url}/extract",
             json=params,
             headers=headers,
         )
@@ -242,9 +247,10 @@ class TavilyExtractAPIWrapper(BaseModel):
                 "X-Client-Source": "langchain-tavily",
             }
 
+            base_url = self.api_base_url or TAVILY_API_URL
             async with aiohttp.ClientSession() as session:
                 async with session.post(
-                    f"{TAVILY_API_URL}/extract", json=params, headers=headers
+                    f"{base_url}/extract", json=params, headers=headers
                 ) as res:
                     if res.status == 200:
                         data = await res.text()
@@ -261,6 +267,7 @@ class TavilyCrawlAPIWrapper(BaseModel):
     """Wrapper for Tavily Crawl API."""
 
     tavily_api_key: SecretStr
+    api_base_url: Optional[str] = None
 
     model_config = ConfigDict(
         extra="forbid",
@@ -334,9 +341,10 @@ class TavilyCrawlAPIWrapper(BaseModel):
             "X-Client-Source": "langchain-tavily",
         }
 
+        base_url = self.api_base_url or TAVILY_API_URL
         response = requests.post(
             # type: ignore
-            f"{TAVILY_API_URL}/crawl",
+            f"{base_url}/crawl",
             json=params,
             headers=headers,
         )
@@ -410,9 +418,10 @@ class TavilyCrawlAPIWrapper(BaseModel):
                 "X-Client-Source": "langchain-tavily",
             }
 
+            base_url = self.api_base_url or TAVILY_API_URL
             async with aiohttp.ClientSession() as session:
                 async with session.post(
-                    f"{TAVILY_API_URL}/crawl", json=params, headers=headers
+                    f"{base_url}/crawl", json=params, headers=headers
                 ) as res:
                     if res.status == 200:
                         data = await res.text()
@@ -429,6 +438,7 @@ class TavilyMapAPIWrapper(BaseModel):
     """Wrapper for Tavily Map API."""
 
     tavily_api_key: SecretStr
+    api_base_url: Optional[str] = None
 
     model_config = ConfigDict(
         extra="forbid",
@@ -494,9 +504,10 @@ class TavilyMapAPIWrapper(BaseModel):
             "X-Client-Source": "langchain-tavily",
         }
 
+        base_url = self.api_base_url or TAVILY_API_URL
         response = requests.post(
             # type: ignore
-            f"{TAVILY_API_URL}/map",
+            f"{base_url}/map",
             json=params,
             headers=headers,
         )
@@ -561,9 +572,10 @@ class TavilyMapAPIWrapper(BaseModel):
                 "Content-Type": "application/json",
                 "X-Client-Source": "langchain-tavily",
             }
+            base_url = self.api_base_url or TAVILY_API_URL
             async with aiohttp.ClientSession() as session:
                 async with session.post(
-                    f"{TAVILY_API_URL}/map", json=params, headers=headers
+                    f"{base_url}/map", json=params, headers=headers
                 ) as res:
                     if res.status == 200:
                         data = await res.text()

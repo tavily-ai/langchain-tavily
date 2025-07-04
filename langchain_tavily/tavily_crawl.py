@@ -290,15 +290,23 @@ class TavilyCrawl(BaseTool):  # type: ignore[override]
     
     Default is False.
     """
+    api_base_url: Optional[str] = None
+    """Custom base URL for the API. Defaults to https://api.tavily.com
+    
+    Default is None.
+    """
 
     api_wrapper: TavilyCrawlAPIWrapper = Field(default_factory=TavilyCrawlAPIWrapper)  # type: ignore[arg-type]
 
     def __init__(self, **kwargs: Any) -> None:
-        # Create api_wrapper with tavily_api_key if provided
-        if "tavily_api_key" in kwargs:
-            kwargs["api_wrapper"] = TavilyCrawlAPIWrapper(
-                tavily_api_key=kwargs["tavily_api_key"]
-            )
+        # Create api_wrapper with tavily_api_key and api_base_url if provided
+        if "tavily_api_key" in kwargs or "api_base_url" in kwargs:
+            wrapper_kwargs = {}
+            if "tavily_api_key" in kwargs:
+                wrapper_kwargs["tavily_api_key"] = kwargs["tavily_api_key"]
+            if "api_base_url" in kwargs:
+                wrapper_kwargs["api_base_url"] = kwargs["api_base_url"]
+            kwargs["api_wrapper"] = TavilyCrawlAPIWrapper(**wrapper_kwargs)
 
         super().__init__(**kwargs)
 
