@@ -294,11 +294,14 @@ class TavilyCrawl(BaseTool):  # type: ignore[override]
     api_wrapper: TavilyCrawlAPIWrapper = Field(default_factory=TavilyCrawlAPIWrapper)  # type: ignore[arg-type]
 
     def __init__(self, **kwargs: Any) -> None:
-        # Create api_wrapper with tavily_api_key if provided
-        if "tavily_api_key" in kwargs:
-            kwargs["api_wrapper"] = TavilyCrawlAPIWrapper(
-                tavily_api_key=kwargs["tavily_api_key"]
-            )
+        # Create api_wrapper with tavily_api_key and api_base_url if provided
+        if "tavily_api_key" in kwargs or "api_base_url" in kwargs:
+            wrapper_kwargs = {}
+            if "tavily_api_key" in kwargs:
+                wrapper_kwargs["tavily_api_key"] = kwargs["tavily_api_key"]
+            if "api_base_url" in kwargs:
+                wrapper_kwargs["api_base_url"] = kwargs["api_base_url"]
+            kwargs["api_wrapper"] = TavilyCrawlAPIWrapper(**wrapper_kwargs)
 
         super().__init__(**kwargs)
 
@@ -337,9 +340,6 @@ class TavilyCrawl(BaseTool):  # type: ignore[override]
         """Execute a crawl using the Tavily Crawl API.
 
         Returns:
-            - base_url (str): The base URL that was crawled
-                Example: "https://tavily.com/"
-
             - results (List[Dict]): A list of extracted content from the crawled URLs
                 - url (str): The URL that was crawled
                     Example: "https://tavily.com/#features"

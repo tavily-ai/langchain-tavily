@@ -101,15 +101,17 @@ class TavilyExtract(BaseTool):  # type: ignore[override, override]
     
     Default is False.
     """
-
     apiwrapper: TavilyExtractAPIWrapper = Field(default_factory=TavilyExtractAPIWrapper)  # type: ignore[arg-type]
 
     def __init__(self, **kwargs: Any) -> None:
-        # Create apiwrapper with tavily_api_key if provided
-        if "tavily_api_key" in kwargs:
-            kwargs["apiwrapper"] = TavilyExtractAPIWrapper(
-                tavily_api_key=kwargs["tavily_api_key"]
-            )
+        # Create apiwrapper with tavily_api_key and api_base_url if provided
+        if "tavily_api_key" in kwargs or "api_base_url" in kwargs:
+            wrapper_kwargs = {}
+            if "tavily_api_key" in kwargs:
+                wrapper_kwargs["tavily_api_key"] = kwargs["tavily_api_key"]
+            if "api_base_url" in kwargs:
+                wrapper_kwargs["api_base_url"] = kwargs["api_base_url"]
+            kwargs["apiwrapper"] = TavilyExtractAPIWrapper(**wrapper_kwargs)
         super().__init__(**kwargs)
 
     def _run(

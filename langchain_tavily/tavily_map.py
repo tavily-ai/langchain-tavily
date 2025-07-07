@@ -250,15 +250,17 @@ class TavilyMap(BaseTool):  # type: ignore[override]
     ] = None
     """Filter URLs using predefined categories like 'Documentation', 'Blogs', etc.
     """
-
     api_wrapper: TavilyMapAPIWrapper = Field(default_factory=TavilyMapAPIWrapper)  # type: ignore[arg-type]
 
     def __init__(self, **kwargs: Any) -> None:
-        # Create api_wrapper with tavily_api_key if provided
-        if "tavily_api_key" in kwargs:
-            kwargs["api_wrapper"] = TavilyMapAPIWrapper(
-                tavily_api_key=kwargs["tavily_api_key"]
-            )
+        # Create api_wrapper with tavily_api_key and api_base_url if provided
+        if "tavily_api_key" in kwargs or "api_base_url" in kwargs:
+            wrapper_kwargs = {}
+            if "tavily_api_key" in kwargs:
+                wrapper_kwargs["tavily_api_key"] = kwargs["tavily_api_key"]
+            if "api_base_url" in kwargs:
+                wrapper_kwargs["api_base_url"] = kwargs["api_base_url"]
+            kwargs["api_wrapper"] = TavilyMapAPIWrapper(**wrapper_kwargs)
 
         super().__init__(**kwargs)
 
