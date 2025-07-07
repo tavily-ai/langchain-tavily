@@ -6,10 +6,10 @@
 
 This package contains the LangChain integration with [Tavily](https://tavily.com/)
 
-# **NEW in v0.2.6: Favicon Support!** 
+# **NEW in v0.2.7: Favicon Support!** 
 Now you can include favicon URLs in your search, extract, and crawl results! Set `include_favicon=True` to get the favicon URL for each result.
 
-# **Introducing [tavily-crawl](https://docs.tavily.com/documentation/api-reference/endpoint/crawl) + [tavily-map](https://docs.tavily.com/documentation/api-reference/endpoint/map) in v0.2.4!** 
+# **Introducing [tavily-crawl](https://docs.tavily.com/documentation/api-reference/endpoint/crawl) + [tavily-map](https://docs.tavily.com/documentation/api-reference/endpoint/map) in v0.2.7!** 
 Two powerful new tools have joined the Tavily family! Upgrade now to access:
 ```bash
 pip install -U langchain-tavily
