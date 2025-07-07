@@ -250,12 +250,6 @@ class TavilyMap(BaseTool):  # type: ignore[override]
     ] = None
     """Filter URLs using predefined categories like 'Documentation', 'Blogs', etc.
     """
-    api_base_url: Optional[str] = None
-    """Custom base URL for the API. Defaults to https://api.tavily.com
-    
-    Default is None.
-    """
-
     api_wrapper: TavilyMapAPIWrapper = Field(default_factory=TavilyMapAPIWrapper)  # type: ignore[arg-type]
 
     def __init__(self, **kwargs: Any) -> None:

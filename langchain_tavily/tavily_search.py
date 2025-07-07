@@ -269,11 +269,6 @@ class TavilySearch(BaseTool):  # type: ignore[override]
     
     Default is False.
     """
-    api_base_url: Optional[str] = None
-    """Custom base URL for the API. Defaults to https://api.tavily.com
-    
-    Default is None.
-    """
     api_wrapper: TavilySearchAPIWrapper = Field(default_factory=TavilySearchAPIWrapper)  # type: ignore[arg-type]
 
     def __init__(self, **kwargs: Any) -> None:

@@ -290,11 +290,6 @@ class TavilyCrawl(BaseTool):  # type: ignore[override]
     
     Default is False.
     """
-    api_base_url: Optional[str] = None
-    """Custom base URL for the API. Defaults to https://api.tavily.com
-    
-    Default is None.
-    """
 
     api_wrapper: TavilyCrawlAPIWrapper = Field(default_factory=TavilyCrawlAPIWrapper)  # type: ignore[arg-type]
 
@@ -345,9 +340,6 @@ class TavilyCrawl(BaseTool):  # type: ignore[override]
         """Execute a crawl using the Tavily Crawl API.
 
         Returns:
-            - base_url (str): The base URL that was crawled
-                Example: "https://tavily.com/"
-
             - results (List[Dict]): A list of extracted content from the crawled URLs
                 - url (str): The URL that was crawled
                     Example: "https://tavily.com/#features"

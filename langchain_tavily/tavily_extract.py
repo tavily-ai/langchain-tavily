@@ -101,12 +101,6 @@ class TavilyExtract(BaseTool):  # type: ignore[override, override]
     
     Default is False.
     """
-    api_base_url: Optional[str] = None
-    """Custom base URL for the API. Defaults to https://api.tavily.com
-    
-    Default is None.
-    """
-
     apiwrapper: TavilyExtractAPIWrapper = Field(default_factory=TavilyExtractAPIWrapper)  # type: ignore[arg-type]
 
     def __init__(self, **kwargs: Any) -> None:
