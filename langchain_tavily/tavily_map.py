@@ -77,7 +77,7 @@ class TavilyMapInput(BaseModel):
    
         Use when the user explicitly asks for a specific domain or subdomain from a website.
 
-        ex. "Map only the docs.tavily.com subdomain" ---> ["^docs\.tavily\.com$"]
+        ex. "Map only the docs.tavily.com subdomain" ---> ["^docs\\.tavily\\.com$"]
         """,  # noqa: E501
     )
     exclude_paths: Optional[List[str]] = Field(
@@ -96,7 +96,7 @@ class TavilyMapInput(BaseModel):
 
         Use when the user explicitly asks to exclude a specific domain or subdomain from a website.
 
-        ex. "Map tavily.com but exclude the docs.tavily.com subdomain from the map" ---> ["^docs\.tavily\.com$"]
+        ex. "Map tavily.com but exclude the docs.tavily.com subdomain from the map" ---> ["^docs\\.tavily\\.com$"]
         """,  # noqa: E501
     )
     allow_external: Optional[bool] = Field(
@@ -216,7 +216,7 @@ class TavilyMap(BaseTool):  # type: ignore[override]
     select_domains: Optional[List[str]] = None
     """Regex patterns to select only URLs from specific domains or subdomains.
 
-    ex. ["^docs\.example\.com$"]
+    ex. ["^docs\\.example\\.com$"]
     """
     exclude_paths: Optional[List[str]] = None
     """
@@ -226,7 +226,7 @@ class TavilyMap(BaseTool):  # type: ignore[override]
     exclude_domains: Optional[List[str]] = None
     """
     Regex patterns to exclude specific domains or subdomains from mapping 
-    ex. [^private\.example\.com$]
+    ex. [^private\\.example\\.com$]
     """
     allow_external: Optional[bool] = None
     """Whether to allow following links that go to external domains.
