@@ -319,7 +319,7 @@ class TavilyCrawlAPIWrapper(BaseModel):
             "max_depth": max_depth,
             "max_breadth": max_breadth,
             "limit": limit,
-            "query": instructions,
+            "instructions": instructions,
             "select_paths": select_paths,
             "select_domains": select_domains,
             "exclude_paths": exclude_paths,
