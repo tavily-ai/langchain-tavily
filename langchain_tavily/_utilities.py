@@ -306,16 +306,18 @@ class TavilyCrawlAPIWrapper(BaseModel):
         allow_external: Optional[bool],
         include_images: Optional[bool],
         categories: Optional[
-            Literal[
-                "Careers",
-                "Blogs",
-                "Documentation",
-                "About",
-                "Pricing",
-                "Community",
-                "Developers",
-                "Contact",
-                "Media",
+            List[
+                Literal[
+                    "Careers",
+                    "Blogs",
+                    "Documentation",
+                    "About",
+                    "Pricing",
+                    "Community",
+                    "Developers",
+                    "Contact",
+                    "Media",
+                ]
             ]
         ],
         extract_depth: Optional[Literal["basic", "advanced"]],
@@ -379,16 +381,18 @@ class TavilyCrawlAPIWrapper(BaseModel):
         allow_external: Optional[bool],
         include_images: Optional[bool],
         categories: Optional[
-            Literal[
-                "Careers",
-                "Blogs",
-                "Documentation",
-                "About",
-                "Pricing",
-                "Community",
-                "Developers",
-                "Contact",
-                "Media",
+            List[
+                Literal[
+                    "Careers",
+                    "Blogs",
+                    "Documentation",
+                    "About",
+                    "Pricing",
+                    "Community",
+                    "Developers",
+                    "Contact",
+                    "Media",
+                ]
             ]
         ],
         extract_depth: Optional[Literal["basic", "advanced"]],
@@ -476,16 +480,18 @@ class TavilyMapAPIWrapper(BaseModel):
         exclude_domains: Optional[List[str]],
         allow_external: Optional[bool],
         categories: Optional[
-            Literal[
-                "Careers",
-                "Blogs",
-                "Documentation",
-                "About",
-                "Pricing",
-                "Community",
-                "Developers",
-                "Contact",
-                "Media",
+            List[
+                Literal[
+                    "Careers",
+                    "Blogs",
+                    "Documentation",
+                    "About",
+                    "Pricing",
+                    "Community",
+                    "Developers",
+                    "Contact",
+                    "Media",
+                ]
             ]
         ],
     ) -> Dict:
@@ -541,16 +547,18 @@ class TavilyMapAPIWrapper(BaseModel):
         exclude_domains: Optional[List[str]],
         allow_external: Optional[bool],
         categories: Optional[
-            Literal[
-                "Careers",
-                "Blogs",
-                "Documentation",
-                "About",
-                "Pricing",
-                "Community",
-                "Developers",
-                "Contact",
-                "Media",
+            List[
+                Literal[
+                    "Careers",
+                    "Blogs",
+                    "Documentation",
+                    "About",
+                    "Pricing",
+                    "Community",
+                    "Developers",
+                    "Contact",
+                    "Media",
+                ]
             ]
         ],
     ) -> Dict:
