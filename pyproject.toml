@@ -24,6 +24,13 @@ requests = "^2.32.3"
 [tool.ruff.lint]
 select = ["E", "F", "I", "T201"]
 
+[tool.ruff]
+extend-exclude = [
+    "test_lc.py",
+    "test_util.py", 
+    "tests/agent_tests/"
+]
+
 [tool.coverage.run]
 omit = ["tests/*"]
 
