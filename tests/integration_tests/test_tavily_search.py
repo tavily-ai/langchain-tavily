@@ -30,3 +30,16 @@ class TestTavilySearchToolIntegration(ToolsIntegrationTests):
         have {"name", "id", "args"} keys.
         """
         return {"query": "best time to visit japan"}
+
+    def test_search_with_date_range(self) -> None:
+        """Test TavilySearch with date range parameters."""
+        tool = TavilySearch()
+        result = tool.invoke(
+            {
+                "query": "AI developments in 2024",
+                "start_date": "2024-01-01",
+                "end_date": "2024-12-31",
+            }
+        )
+        assert isinstance(result, dict)
+        assert "query" in result

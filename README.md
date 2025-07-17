@@ -6,8 +6,11 @@
 
 This package contains the LangChain integration with [Tavily](https://tavily.com/)
 
-# **NEW in v0.2.9: Favicon Support!** 
-Now you can include favicon URLs in your search, extract, and crawl results! Set `include_favicon=True` to get the favicon URL for each result.
+# **NEW in v0.2.10: Date Range Search Support!** 
+Now you can filter search results by date range using `start_date` and `end_date` parameters! Use YYYY-MM-DD format to specify the date range for your search results.
+
+# **Favicon Support in v0.2.9!** 
+You can include favicon URLs in your search, extract, and crawl results! Set `include_favicon=True` to get the favicon URL for each result.
 
 # **Introducing [tavily-crawl](https://docs.tavily.com/documentation/api-reference/endpoint/crawl) + [tavily-map](https://docs.tavily.com/documentation/api-reference/endpoint/map) in v0.2.9!** 
 Two powerful new tools have joined the Tavily family! Upgrade now to access:

@@ -52,6 +52,8 @@ class TavilySearchAPIWrapper(BaseModel):
         time_range: Optional[Literal["day", "week", "month", "year"]],
         country: Optional[str],
         auto_parameters: Optional[bool],
+        start_date: Optional[str],
+        end_date: Optional[str],
     ) -> Dict:
         params = {
             "query": query,
@@ -68,6 +70,8 @@ class TavilySearchAPIWrapper(BaseModel):
             "time_range": time_range,
             "country": country,
             "auto_parameters": auto_parameters,
+            "start_date": start_date,
+            "end_date": end_date,
         }
 
         # Remove None values
@@ -110,6 +114,8 @@ class TavilySearchAPIWrapper(BaseModel):
         time_range: Optional[Literal["day", "week", "month", "year"]],
         country: Optional[str],
         auto_parameters: Optional[bool],
+        start_date: Optional[str],
+        end_date: Optional[str],
     ) -> Dict:
         """Get results from the Tavily Search API asynchronously."""
 
@@ -130,6 +136,8 @@ class TavilySearchAPIWrapper(BaseModel):
                 "time_range": time_range,
                 "country": country,
                 "auto_parameters": auto_parameters,
+                "start_date": start_date,
+                "end_date": end_date,
             }
 
             # Remove None values
@@ -298,16 +306,18 @@ class TavilyCrawlAPIWrapper(BaseModel):
         allow_external: Optional[bool],
         include_images: Optional[bool],
         categories: Optional[
-            Literal[
-                "Careers",
-                "Blogs",
-                "Documentation",
-                "About",
-                "Pricing",
-                "Community",
-                "Developers",
-                "Contact",
-                "Media",
+            List[
+                Literal[
+                    "Careers",
+                    "Blogs",
+                    "Documentation",
+                    "About",
+                    "Pricing",
+                    "Community",
+                    "Developers",
+                    "Contact",
+                    "Media",
+                ]
             ]
         ],
         extract_depth: Optional[Literal["basic", "advanced"]],
@@ -371,16 +381,18 @@ class TavilyCrawlAPIWrapper(BaseModel):
         allow_external: Optional[bool],
         include_images: Optional[bool],
         categories: Optional[
-            Literal[
-                "Careers",
-                "Blogs",
-                "Documentation",
-                "About",
-                "Pricing",
-                "Community",
-                "Developers",
-                "Contact",
-                "Media",
+            List[
+                Literal[
+                    "Careers",
+                    "Blogs",
+                    "Documentation",
+                    "About",
+                    "Pricing",
+                    "Community",
+                    "Developers",
+                    "Contact",
+                    "Media",
+                ]
             ]
         ],
         extract_depth: Optional[Literal["basic", "advanced"]],
@@ -468,16 +480,18 @@ class TavilyMapAPIWrapper(BaseModel):
         exclude_domains: Optional[List[str]],
         allow_external: Optional[bool],
         categories: Optional[
-            Literal[
-                "Careers",
-                "Blogs",
-                "Documentation",
-                "About",
-                "Pricing",
-                "Community",
-                "Developers",
-                "Contact",
-                "Media",
+            List[
+                Literal[
+                    "Careers",
+                    "Blogs",
+                    "Documentation",
+                    "About",
+                    "Pricing",
+                    "Community",
+                    "Developers",
+                    "Contact",
+                    "Media",
+                ]
             ]
         ],
     ) -> Dict:
@@ -533,16 +547,18 @@ class TavilyMapAPIWrapper(BaseModel):
         exclude_domains: Optional[List[str]],
         allow_external: Optional[bool],
         categories: Optional[
-            Literal[
-                "Careers",
-                "Blogs",
-                "Documentation",
-                "About",
-                "Pricing",
-                "Community",
-                "Developers",
-                "Contact",
-                "Media",
+            List[
+                Literal[
+                    "Careers",
+                    "Blogs",
+                    "Documentation",
+                    "About",
+                    "Pricing",
+                    "Community",
+                    "Developers",
+                    "Contact",
+                    "Media",
+                ]
             ]
         ],
     ) -> Dict:
