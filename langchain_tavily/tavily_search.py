@@ -95,15 +95,63 @@ class TavilySearchInput(BaseModel):
     )
     include_favicon: Optional[bool] = Field(
         default=False,
-        description="Whether to include the favicon URL for each result.",
+        description="""Determines whether to include favicon URLs for each search result.
+        
+        When enabled, each search result will include the website's favicon URL,
+        which can be useful for:
+        - Building rich UI interfaces with visual website indicators
+        - Providing visual cues about the source's credibility or brand
+        - Creating bookmark-like displays with recognizable site icons
+        
+        Set to True when creating user interfaces that benefit from visual branding
+        or when favicon information enhances the user experience.
+        
+        Default is False to minimize response size and API usage.
+        """,  # noqa: E501
     )
     start_date: Optional[str] = Field(
         default=None,
-        description="Will return all results after the specified start date. Required to be written in the format YYYY-MM-DD.",
+        description="""Filters search results to include only content published on or after this date.
+        
+        Use this parameter when you need to:
+        - Find recent developments or updates on a topic
+        - Exclude outdated information from search results
+        - Focus on content within a specific timeframe
+        - Combine with end_date to create a custom date range
+        
+        Format must be YYYY-MM-DD (e.g., "2024-01-15" for January 15, 2024).
+        
+        Examples:
+        - "2024-01-01" - Results from January 1, 2024 onwards
+        - "2023-12-25" - Results from December 25, 2023 onwards
+        
+        When combined with end_date, creates a precise date range filter.
+        
+        Default is None (no start date restriction).
+        """,  # noqa: E501
     )
     end_date: Optional[str] = Field(
         default=None,
-        description="Will return all results before the specified end date. Required to be written in the format YYYY-MM-DD.",
+        description="""Filters search results to include only content published on or before this date.
+        
+        Use this parameter when you need to:
+        - Exclude content published after a certain date
+        - Study historical information or past events
+        - Research how topics were covered during specific time periods
+        - Combine with start_date to create a custom date range
+        
+        Format must be YYYY-MM-DD (e.g., "2024-03-31" for March 31, 2024).
+        
+        Examples:
+        - "2024-03-31" - Results up to and including March 31, 2024
+        - "2023-12-31" - Results up to and including December 31, 2023
+        
+        When combined with start_date, creates a precise date range filter.
+        For example: start_date="2024-01-01", end_date="2024-03-31" 
+        returns results from Q1 2024 only.
+        
+        Default is None (no end date restriction).
+        """,  # noqa: E501
     )
 
 
