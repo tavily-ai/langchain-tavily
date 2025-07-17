@@ -45,3 +45,30 @@ class TestTavilySearchToolUnit(ToolsUnitTests):  # Fixed class name to match its
         have {"name", "id", "args"} keys.
         """
         return {"query": "best time to visit japan"}
+
+
+def test_tavily_search_date_parameters():
+    """Test that start_date and end_date parameters are properly handled."""
+    with patch("langchain_tavily._utilities.TavilySearchAPIWrapper.validate_environment"):
+        # Create TavilySearch instance
+        tool = TavilySearch(tavily_api_key="fake_key_for_testing")
+        
+        # Mock the api_wrapper.raw_results method
+        with patch.object(tool.api_wrapper, 'raw_results') as mock_raw_results:
+            mock_raw_results.return_value = {
+                "results": [{"title": "Test", "url": "http://test.com", "content": "Test content"}],
+                "query": "test query"
+            }
+            
+            # Test with date parameters
+            result = tool._run(
+                query="test query",
+                start_date="2024-01-01",
+                end_date="2024-12-31"
+            )
+            
+            # Verify the method was called with date parameters
+            mock_raw_results.assert_called_once()
+            call_args = mock_raw_results.call_args
+            assert call_args.kwargs["start_date"] == "2024-01-01"
+            assert call_args.kwargs["end_date"] == "2024-12-31"

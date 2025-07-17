@@ -97,6 +97,14 @@ class TavilySearchInput(BaseModel):
         default=False,
         description="Whether to include the favicon URL for each result.",
     )
+    start_date: Optional[str] = Field(
+        default=None,
+        description="Will return all results after the specified start date. Required to be written in the format YYYY-MM-DD.",
+    )
+    end_date: Optional[str] = Field(
+        default=None,
+        description="Will return all results before the specified end date. Required to be written in the format YYYY-MM-DD.",
+    )
 
 
 def _generate_suggestions(params: dict) -> list:
@@ -293,6 +301,8 @@ class TavilySearch(BaseTool):  # type: ignore[override]
         time_range: Optional[Literal["day", "week", "month", "year"]] = None,
         topic: Optional[Literal["general", "news", "finance"]] = None,
         include_favicon: Optional[bool] = None,
+        start_date: Optional[str] = None,
+        end_date: Optional[str] = None,
         run_manager: Optional[CallbackManagerForToolRun] = None,
     ) -> Dict[str, Any]:
         """Execute a search query using the Tavily Search API.
@@ -333,6 +343,8 @@ class TavilySearch(BaseTool):  # type: ignore[override]
                 include_raw_content=self.include_raw_content,
                 include_image_descriptions=self.include_image_descriptions,
                 auto_parameters=self.auto_parameters,
+                start_date=start_date,
+                end_date=end_date,
             )
 
             # Check if results are empty and raise a specific exception
@@ -370,6 +382,8 @@ class TavilySearch(BaseTool):  # type: ignore[override]
         time_range: Optional[Literal["day", "week", "month", "year"]] = None,
         topic: Optional[Literal["general", "news", "finance"]] = "general",
         include_favicon: Optional[bool] = False,
+        start_date: Optional[str] = None,
+        end_date: Optional[str] = None,
         run_manager: Optional[AsyncCallbackManagerForToolRun] = None,
     ) -> Dict[str, Any]:
         """Use the tool asynchronously."""
@@ -397,6 +411,8 @@ class TavilySearch(BaseTool):  # type: ignore[override]
                 include_raw_content=self.include_raw_content,
                 include_image_descriptions=self.include_image_descriptions,
                 auto_parameters=self.auto_parameters,
+                start_date=start_date,
+                end_date=end_date,
             )
 
             # Check if results are empty and raise a specific exception
