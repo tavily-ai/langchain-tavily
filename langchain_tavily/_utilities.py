@@ -12,7 +12,8 @@ import requests
 from langchain_core.utils import get_from_dict_or_env
 from pydantic import BaseModel, ConfigDict, SecretStr, model_validator
 
-TAVILY_API_URL = "https://api.tavily.com"
+
+TAVILY_API_URL: str = "https://api.tavily.com"
 
 
 class TavilySearchAPIWrapper(BaseModel):
@@ -54,7 +55,7 @@ class TavilySearchAPIWrapper(BaseModel):
         auto_parameters: Optional[bool],
         start_date: Optional[str],
         end_date: Optional[str],
-    ) -> Dict:
+    ) -> Dict[str, Any]:
         params = {
             "query": query,
             "max_results": max_results,
@@ -116,7 +117,7 @@ class TavilySearchAPIWrapper(BaseModel):
         auto_parameters: Optional[bool],
         start_date: Optional[str],
         end_date: Optional[str],
-    ) -> Dict:
+    ) -> Dict[str, Any]:
         """Get results from the Tavily Search API asynchronously."""
 
         # Function to perform the API call
@@ -192,7 +193,7 @@ class TavilyExtractAPIWrapper(BaseModel):
         include_images: Optional[bool],
         include_favicon: Optional[bool],
         format: Optional[str],
-    ) -> Dict:
+    ) -> Dict[str, Any]:
         params = {
             "urls": urls,
             "include_images": include_images,
@@ -233,7 +234,7 @@ class TavilyExtractAPIWrapper(BaseModel):
         include_favicon: Optional[bool],
         extract_depth: Optional[Literal["basic", "advanced"]],
         format: Optional[str],
-    ) -> Dict:
+    ) -> Dict[str, Any]:
         """Get results from the Tavily Extract API asynchronously."""
 
         # Function to perform the API call
@@ -323,7 +324,7 @@ class TavilyCrawlAPIWrapper(BaseModel):
         extract_depth: Optional[Literal["basic", "advanced"]],
         include_favicon: Optional[bool],
         format: Optional[str],
-    ) -> Dict:
+    ) -> Dict[str, Any]:
         params = {
             "url": url,
             "max_depth": max_depth,
@@ -398,7 +399,7 @@ class TavilyCrawlAPIWrapper(BaseModel):
         extract_depth: Optional[Literal["basic", "advanced"]],
         include_favicon: Optional[bool],
         format: Optional[str],
-    ) -> Dict:
+    ) -> Dict[str, Any]:
         """Get results from the Tavily Crawl API asynchronously."""
 
         # Function to perform the API call
@@ -494,7 +495,7 @@ class TavilyMapAPIWrapper(BaseModel):
                 ]
             ]
         ],
-    ) -> Dict:
+    ) -> Dict[str, Any]:
         params = {
             "url": url,
             "max_depth": max_depth,
@@ -561,7 +562,7 @@ class TavilyMapAPIWrapper(BaseModel):
                 ]
             ]
         ],
-    ) -> Dict:
+    ) -> Dict[str, Any]:
         """Get results from the Tavily Map API asynchronously."""
 
         # Function to perform the API call

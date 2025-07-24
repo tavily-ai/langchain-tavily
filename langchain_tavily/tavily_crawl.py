@@ -158,7 +158,7 @@ class TavilyCrawlInput(BaseModel):
     )
 
 
-def _generate_suggestions(params: dict) -> list:
+def _generate_suggestions(params: Dict[str, Any]) -> List[str]:
     """Generate helpful suggestions based on the failed crawl parameters."""
     suggestions = []
 
