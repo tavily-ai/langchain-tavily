@@ -6,6 +6,9 @@
 
 This package contains the LangChain integration with [Tavily](https://tavily.com/)
 
+# **NEW in v0.2.11: Enhanced Type Hints and mypy Support!** 
+Added type hints and py.typed marker to resolve mypy import-untyped errors for better development experience.
+
 # **NEW in v0.2.10: Date Range Search Support!** 
 Now you can filter search results by date range using `start_date` and `end_date` parameters! Use YYYY-MM-DD format to specify the date range for your search results.
 
