@@ -5,6 +5,7 @@ https://docs.tavily.com/docs/tavily-api/introduction
 """
 
 import json
+from os import getenv
 from typing import Any, Dict, List, Literal, Optional, Union
 
 import aiohttp
@@ -21,6 +22,7 @@ class TavilySearchAPIWrapper(BaseModel):
 
     tavily_api_key: SecretStr
     api_base_url: Optional[str] = None
+    proxies: Optional[dict[str, str]] = None
 
     model_config = ConfigDict(
         extra="forbid",
@@ -74,7 +76,14 @@ class TavilySearchAPIWrapper(BaseModel):
             "start_date": start_date,
             "end_date": end_date,
         }
+        
+        resolved_proxies = {
+            "http": self.proxies.get("http") if self.proxies else getenv("TAVILY_HTTP_PROXY"),
+            "https": self.proxies.get("https") if self.proxies else getenv("TAVILY_HTTPS_PROXY"),
+        }
 
+        resolved_proxies = {k: v for k, v in resolved_proxies.items() if v} or None
+        
         # Remove None values
         params = {k: v for k, v in params.items() if v is not None}
 
@@ -90,6 +99,7 @@ class TavilySearchAPIWrapper(BaseModel):
             f"{base_url}/search",
             json=params,
             headers=headers,
+            proxies=resolved_proxies,
         )
         if response.status_code != 200:
             detail = response.json().get("detail", {})
@@ -170,6 +180,7 @@ class TavilyExtractAPIWrapper(BaseModel):
 
     tavily_api_key: SecretStr
     api_base_url: Optional[str] = None
+    proxies: Optional[dict[str, str]] = None
 
     model_config = ConfigDict(
         extra="forbid",
@@ -201,6 +212,13 @@ class TavilyExtractAPIWrapper(BaseModel):
             "extract_depth": extract_depth,
             "format": format,
         }
+        
+        resolved_proxies = {
+            "http": self.proxies.get("http") if self.proxies else getenv("TAVILY_HTTP_PROXY"),
+            "https": self.proxies.get("https") if self.proxies else getenv("TAVILY_HTTPS_PROXY"),
+        }
+
+        resolved_proxies = {k: v for k, v in resolved_proxies.items() if v} or None
 
         # Remove None values
         params = {k: v for k, v in params.items() if v is not None}
@@ -217,6 +235,7 @@ class TavilyExtractAPIWrapper(BaseModel):
             f"{base_url}/extract",
             json=params,
             headers=headers,
+            proxies=resolved_proxies,
         )
 
         if response.status_code != 200:
@@ -277,6 +296,7 @@ class TavilyCrawlAPIWrapper(BaseModel):
 
     tavily_api_key: SecretStr
     api_base_url: Optional[str] = None
+    proxies: Optional[dict[str, str]] = None
 
     model_config = ConfigDict(
         extra="forbid",
@@ -342,6 +362,13 @@ class TavilyCrawlAPIWrapper(BaseModel):
             "include_favicon": include_favicon,
             "format": format,
         }
+        
+        resolved_proxies = {
+            "http": self.proxies.get("http") if self.proxies else getenv("TAVILY_HTTP_PROXY"),
+            "https": self.proxies.get("https") if self.proxies else getenv("TAVILY_HTTPS_PROXY"),
+        }
+
+        resolved_proxies = {k: v for k, v in resolved_proxies.items() if v} or None
 
         # Remove None values
         params = {k: v for k, v in params.items() if v is not None}
@@ -358,6 +385,7 @@ class TavilyCrawlAPIWrapper(BaseModel):
             f"{base_url}/crawl",
             json=params,
             headers=headers,
+            proxies=resolved_proxies,
         )
 
         if response.status_code != 200:
@@ -452,6 +480,7 @@ class TavilyMapAPIWrapper(BaseModel):
 
     tavily_api_key: SecretStr
     api_base_url: Optional[str] = None
+    proxies: Optional[dict[str, str]] = None
 
     model_config = ConfigDict(
         extra="forbid",
@@ -509,6 +538,13 @@ class TavilyMapAPIWrapper(BaseModel):
             "allow_external": allow_external,
             "categories": categories,
         }
+        
+        resolved_proxies = {
+            "http": self.proxies.get("http") if self.proxies else getenv("TAVILY_HTTP_PROXY"),
+            "https": self.proxies.get("https") if self.proxies else getenv("TAVILY_HTTPS_PROXY"),
+        }
+
+        resolved_proxies = {k: v for k, v in resolved_proxies.items() if v} or None
 
         # Remove None values
         params = {k: v for k, v in params.items() if v is not None}
@@ -525,6 +561,7 @@ class TavilyMapAPIWrapper(BaseModel):
             f"{base_url}/map",
             json=params,
             headers=headers,
+            proxies=resolved_proxies,
         )
 
         if response.status_code != 200:
