@@ -1,6 +1,6 @@
 """Tool for the Tavily Crawl API."""
 
-from typing import Any, Dict, List, Literal, Optional, Type
+from typing import Any, Dict, List, Literal, Optional, Type, overload
 
 from langchain_core.callbacks import (
     AsyncCallbackManagerForToolRun,
@@ -10,152 +10,7 @@ from langchain_core.tools import BaseTool, ToolException
 from pydantic import BaseModel, Field
 
 from langchain_tavily._utilities import TavilyCrawlAPIWrapper
-
-
-class TavilyCrawlInput(BaseModel):
-    """Input for [TavilyCrawl]"""
-
-    url: str = Field(description=("The root URL to begin the crawl."))
-    max_depth: Optional[int] = Field(
-        default=1,
-        description="""Max depth of the crawl. Defines how far from the base URL the crawler can explore.
-
-        Increase this parameter when:
-        1. To crawl large websites and get a comprehensive overview of its structure.
-        2. To crawl a website that has a lot of links to other pages.
-
-        Set this parameter to 1 when:
-        1. To stay local to the base_url
-        2. To crawl a single page
-
-        max_depth must be greater than 0
-        """,  # noqa: E501
-    )
-    max_breadth: Optional[int] = Field(
-        default=20,
-        description="""Max number of links to follow per level of the tree (i.e., per page).
-
-        tavily-crawl uses a BFS Depth: referring to the number of link hops from the root URL. 
-        A page directly linked from the root is at BFS depth 1, regardless of its URL structure.
-
-        Increase this parameter when:
-        1. You want many links from each page to be crawled.
-
-        max_breadth must be greater than 0
-        """,  # noqa: E501
-    )
-    limit: Optional[int] = Field(
-        default=50,
-        description="""Total number of links the crawler will process before stopping.
-        
-        limit must be greater than 0
-        """,  # noqa: E501
-    )
-    instructions: Optional[str] = Field(
-        default=None,
-        description="""Natural language instructions for the crawler.
-
-        The instructions parameter allows the crawler to intelligently navigate through a website using natural language.
-        Take the users request to set the instructions parameter to guide the crawler in the direction of the users request.
-        
-        ex. "I want to find all the Javascript SDK documentation from Tavily" ---> instructions = "Javascript SDK documentation"
-        """,  # noqa: E501
-    )
-    select_paths: Optional[List[str]] = Field(
-        default=None,
-        description="""Regex patterns to select only URLs with specific path patterns.
-
-        Use when the user explicitly asks for a specific path from a website.
-        
-        ex. "Only crawl the /api/v1 path" ---> ["/api/v1.*"] 
-        ex. "Only crawl the /documentation path" ---> ["/documentation/.*"]
-        """,  # noqa: E501
-    )
-    select_domains: Optional[List[str]] = Field(
-        default=None,
-        description="""Regex patterns to select only URLs from specific domains or subdomains.
-   
-        Use when the user explicitly asks for a specific domain or subdomain from a website.
-
-        ex. "Crawl only the docs.tavily.com subdomain" ---> ["^docs\\.tavily\\.com$"]
-        """,  # noqa: E501
-    )
-    exclude_paths: Optional[List[str]] = Field(
-        default=None,
-        description="""Regex patterns to exclude URLs from the crawl with specific path patterns.
-
-        Use when the user explicitly asks to exclude a specific path from a website.
-
-        ex. "Crawl example.com but exclude the /api/v1 path form the crawl" ---> ["/api/v1.*"] 
-        ex. "Crawl example.com but exclude the /documentation path from the crawl" ---> ["/documentation/.*"]
-        """,  # noqa: E501
-    )
-    exclude_domains: Optional[List[str]] = Field(
-        default=None,
-        description="""Regex patterns to exclude URLs from specific domains or subdomains.
-
-        Use when the user explicitly asks to exclude a specific domain or subdomain from a website.
-
-        ex. "Crawl tavily.com but exclude the docs.tavily.com subdomain from the crawl" ---> ["^docs\\.tavily\\.com$"]
-        """,  # noqa: E501
-    )
-    allow_external: Optional[bool] = Field(
-        default=False,
-        description="""Allow the crawler to follow external links.
-
-        Use when the user explicitly asks to allow or deny external links.
-        """,  # noqa: E501
-    )
-    include_images: Optional[bool] = Field(
-        default=False,
-        description="""Whether to include images in the crawl results.
-        """,  # noqa: E501
-    )
-    categories: Optional[
-        List[
-            Literal[
-                "Careers",
-                "Blogs",
-                "Documentation",
-                "About",
-                "Pricing",
-                "Community",
-                "Developers",
-                "Contact",
-                "Media",
-            ]
-        ]
-    ] = Field(
-        default=None,
-        description="""Direct the crawler to crawl specific categories of a website.
-
-        Set this field to the category that best matches the user's request. Use the following guide to choose the appropriate category:
-
-            Careers: Crawl pages related to job listings, open positions, and company career information.
-            Blogs: Crawl blog posts, news articles, and editorial content.
-            Documentation: Crawl technical documentation, user guides, API references, and manuals.
-            About: Crawl 'About Us' pages, company background, mission statements, and team information.
-            Pricing: Crawl pages that detail product or service pricing, plans, and cost comparisons.
-            Community: Crawl forums, discussion boards, user groups, and community-driven content.
-            Developers: Crawl developer portals, SDKs, API documentation, and resources for software developers.
-            Contact: Crawl contact information pages, support forms, and customer service details.
-            Media: Crawl press releases, media kits, newsrooms, and multimedia content.
-
-
-        ex. "Crawl apple.com for career opportunities" ---> categories="Careers"
-        ex. "Crawl tavily.com for API documentation" ---> categories="Documentation"
-    """,  # noqa: E501
-    )
-    extract_depth: Optional[Literal["basic", "advanced"]] = Field(
-        default="basic",
-        description="""Advanced extraction retrieves more data, including tables and embedded content
-        with higher success but may increase latency.
-        """,  # noqa: E501
-    )
-    include_favicon: Optional[bool] = Field(
-        default=False,
-        description="Whether to include the favicon URL for each result.",
-    )
+from langchain_tavily.models.crawl import TavilyCrawlInput, TavilyCrawlAgentInput
 
 
 def _generate_suggestions(params: Dict[str, Any]) -> List[str]:
@@ -167,7 +22,6 @@ def _generate_suggestions(params: Dict[str, Any]) -> List[str]:
     select_domains = params.get("select_domains")
     exclude_paths = params.get("exclude_paths")
     exclude_domains = params.get("exclude_domains")
-    categories = params.get("categories")
 
     if instructions:
         suggestions.append("Try more consice instructions")
@@ -179,103 +33,103 @@ def _generate_suggestions(params: Dict[str, Any]) -> List[str]:
         suggestions.append("Remove exclude_paths argument")
     if exclude_domains:
         suggestions.append("Remove exclude_domains argument")
-    if categories:
-        suggestions.append("Remove categories argument")
 
     return suggestions
 
 
-class TavilyCrawl(BaseTool):  # type: ignore[override]
-    """Tool that sends requests to the Tavily Crawl API with dynamically settable parameters."""  # noqa: E501
+class TavilyCrawl(BaseTool): 
+    """Wrapper around the Tavily Crawl API.""" 
 
     name: str = "tavily_crawl"
-    description: str = """A powerful web crawler that initiates a structured web crawl starting from a specified 
-        base URL. The crawler uses a BFS Depth: refering to the number of link hops from the root URL. 
-        A page directly linked from the root is at BFS depth 1, regardless of its URL structure.
-        You can control how deep and wide it goes, and guide it to focus on specific sections of the site.
-        """  # noqa: E501
+
+    description: str = """An intelligent web crawler that initiates a structured web crawl starting from a specified base URL. 
+    You can provide natural language instructions to guide the crawler.
+    """ 
 
     args_schema: Type[BaseModel] = TavilyCrawlInput
+
     handle_tool_error: bool = True
 
+    agent_mode: Optional[bool] = True
+    """Enable an agent-optimized invocation schema.
+
+    When `True`, the tool exposes a simplified invocation schema, making it easier for agents to call.
+    You can still manually specify parameters at instantiation time.
+
+    Default is `True`.
+    """
+
     max_depth: Optional[int] = None
-    """Max depth of the crawl. Defines how far from the base URL the crawler can explore.
+    """The maximum depth of the crawl. Determines how many hops the crawler can make from the root URL.
+    
+    Must be greater than `0`.
 
-    max_depth must be greater than 0
-
-    default is 1
-    """  # noqa: E501
+    Default is `3`.
+    """ 
     max_breadth: Optional[int] = None
-    """The maximum number of links to follow per level of the tree (i.e., per page).
+    """The maximum number of links to follow per page.
 
-    max_breadth must be greater than 0
+    Must be greater than `0`.
 
-    default is 20
+    Default is `20`.
     """
     limit: Optional[int] = None
-    """Total number of links the crawler will process before stopping.
+    """The maximum number of links the crawler will return.
 
-    limit must be greater than 0
+    Must be greater than `0`.
 
-    default is 50
+    Default is `50`.
     """
+
     instructions: Optional[str] = None
     """Natural language instructions for the crawler.
 
-    ex. "Python SDK"
+    ex. `"Python SDK"`
     """
+
     select_paths: Optional[List[str]] = None
-    """Regex patterns to select only URLs with specific path patterns.
+    """RegEx patterns to select only URLs with specific path patterns.
 
-    ex. ["/api/v1.*"]
+    ex. `["/api/v1.*"]`
     """
+
     select_domains: Optional[List[str]] = None
-    """Regex patterns to select only URLs from specific domains or subdomains.
+    """RegEx patterns to select only URLs from specific domains or subdomains.
 
-    ex. ["^docs\\.example\\.com$"]
+    ex. `["^docs\\.example\\.com$"]`
     """
+
     exclude_paths: Optional[List[str]] = None
     """
-    Regex patterns to exclude URLs with specific path patterns 
-    ex.  [/private/.*, /admin/.*]
+    RegEx patterns to exclude URLs with specific path patterns.
+
+    ex.  `[/private/.*, /admin/.*]`
     """
+
     exclude_domains: Optional[List[str]] = None
     """
-    Regex patterns to exclude specific domains or subdomains from crawling 
-    ex. [^private\\.example\\.com$]
+    RegEx patterns to exclude specific domains or subdomains from crawling.
+
+    ex. `[^private\\.example\\.com$]`
     """
+
     allow_external: Optional[bool] = None
     """Whether to allow following links that go to external domains.
 
-    default is False
+    Default is `False`.
     """
+
     include_images: Optional[bool] = None
     """Whether to include images in the crawl results.
 
-    default is False
+    Default is `False`.
     """
-    categories: Optional[
-        List[
-            Literal[
-                "Careers",
-                "Blogs",
-                "Documentation",
-                "About",
-                "Pricing",
-                "Community",
-                "Developers",
-                "Contact",
-                "Media",
-            ]
-        ]
-    ] = None
-    """Filter URLs using predefined categories like 'Documentation', 'Blogs', etc.
-    """
+
     extract_depth: Optional[Literal["basic", "advanced"]] = None
     """Advanced extraction retrieves more data, including tables and embedded content, 
     with higher success but may increase latency.
 
-    default is basic
+    Default is `"basic"`.
     """
 
     format: Optional[str] = None
@@ -283,17 +137,18 @@ class TavilyCrawl(BaseTool):  # type: ignore[override]
     The format of the extracted web page content. markdown returns content in markdown 
     format. text returns plain text and may increase latency.
 
-    default is markdown
+    Default is `"markdown"`.
     """
+
     include_favicon: Optional[bool] = None
     """Whether to include the favicon URL for each result.
     
-    Default is False.
+    Default is `False`.
     """
 
     api_wrapper: TavilyCrawlAPIWrapper = Field(default_factory=TavilyCrawlAPIWrapper)  # type: ignore[arg-type]
 
-    def __init__(self, **kwargs: Any) -> None:
+    def __init__(self, agent_mode: bool = True, **kwargs: Any) -> None:
         # Create api_wrapper with tavily_api_key and api_base_url if provided
         if "tavily_api_key" in kwargs or "api_base_url" in kwargs:
             wrapper_kwargs = {}
@@ -305,6 +160,100 @@ class TavilyCrawl(BaseTool):  # type: ignore[override]
 
         super().__init__(**kwargs)
 
+        # If agent mode is enabled, switch to a simplified args schema and
+        # update description to reflect agent-focused usage.
+        if getattr(self, "agent_mode", False):
+            # Switch the invocation schema for this instance
+            self.args_schema = TavilyCrawlAgentInput  # type: ignore[assignment]
+
+    def _map_crawl_depth(self, crawl_depth: Literal["fast", "basic", "deep"]) -> Dict[str, int]:
+        """Map crawl_depth values to specific max_depth, max_breadth, and limit parameters."""
+        mapping = {
+            "fast": {"max_depth": 1, "max_breadth": 20, "limit": 20},
+            "basic": {"max_depth": 3, "max_breadth": 50, "limit": 100},
+            "deep": {"max_depth": 5, "max_breadth": 50, "limit": 200},
+        }
+        return mapping[crawl_depth]
+
+    def _run_agent(
+        self,
+        url: str,
+        instructions: Optional[str] = None,
+        crawl_depth: Optional[Literal["fast", "basic", "deep"]] = None,
+        run_manager: Optional[CallbackManagerForToolRun] = None,
+    ) -> Dict[str, Any]:
+        """Execute a crawl using the agent-optimized schema."""
+        # Map crawl_depth to specific parameters if provided
+        if crawl_depth:
+            depth_params = self._map_crawl_depth(crawl_depth)
+            max_depth = depth_params["max_depth"]
+            max_breadth = depth_params["max_breadth"]
+            limit = depth_params["limit"]
+        else:
+            # Use default values from the mapping for "basic" mode
+            depth_params = self._map_crawl_depth("basic")
+            max_depth = depth_params["max_depth"]
+            max_breadth = depth_params["max_breadth"]
+            limit = depth_params["limit"]
+
+        # Use instance attributes if set, otherwise use mapped values
+        final_max_depth = self.max_depth if self.max_depth is not None else max_depth
+        final_max_breadth = self.max_breadth if self.max_breadth is not None else max_breadth
+        final_limit = self.limit if self.limit is not None else limit
+        final_instructions = self.instructions if self.instructions is not None else instructions
+
+        try:
+            raw_results = self.api_wrapper.raw_results(
+                url=url,
+                max_depth=final_max_depth,
+                max_breadth=final_max_breadth,
+                limit=final_limit,
+                instructions=final_instructions,
+                select_paths=self.select_paths,
+                select_domains=self.select_domains,
+                exclude_paths=self.exclude_paths,
+                exclude_domains=self.exclude_domains,
+                allow_external=self.allow_external,
+                include_images=self.include_images,
+                extract_depth=self.extract_depth,
+                include_favicon=self.include_favicon,
+                format=self.format,
+            )
+
+            # Check if results are empty and raise a specific exception
+            if not raw_results.get("results", []):
+                search_params = {
+                    "instructions": final_instructions,
+                    "select_paths": self.select_paths,
+                    "select_domains": self.select_domains,
+                    "exclude_paths": self.exclude_paths,
+                    "exclude_domains": self.exclude_domains,
+                    "format": self.format,
+                }
+                suggestions = _generate_suggestions(search_params)
+
+                error_message = (
+                    f"No crawl results found for '{url}'. "
+                    f"Suggestions: {', '.join(suggestions)}. "
+                    f"Try modifying your crawl parameters with one of these approaches." 
+                )
+                raise ToolException(error_message)
+            return raw_results
+        except ToolException:
+            raise
+        except Exception as e:
+            return {"error": e}
+
+    @overload
+    def _run(
+        self,
+        url: str,
+        instructions: Optional[str] = None,
+        crawl_depth: Optional[Literal["fast", "basic", "deep"]] = None,
+        run_manager: Optional[CallbackManagerForToolRun] = None,
+    ) -> Dict[str, Any]: ...
+
+    @overload
     def _run(
         self,
         url: str,
@@ -318,21 +267,41 @@ class TavilyCrawl(BaseTool):  # type: ignore[override]
         exclude_domains: Optional[List[str]] = None,
         allow_external: Optional[bool] = None,
         include_images: Optional[bool] = None,
-        categories: Optional[
-            List[
-                Literal[
-                    "Careers",
-                    "Blogs",
-                    "Documentation",
-                    "About",
-                    "Pricing",
-                    "Community",
-                    "Developers",
-                    "Contact",
-                    "Media",
-                ]
-            ]
-        ] = None,
+        extract_depth: Optional[Literal["basic", "advanced"]] = None,
+        include_favicon: Optional[bool] = None,
+        run_manager: Optional[CallbackManagerForToolRun] = None,
+    ) -> Dict[str, Any]: ...
+
+    def _run(self, **kwargs: Any) -> Dict[str, Any]:
+        """Route to appropriate implementation based on agent_mode."""
+        if getattr(self, "agent_mode", False):
+            # Extract only agent-compatible parameters
+            agent_kwargs = {}
+            if "url" in kwargs:
+                agent_kwargs["url"] = kwargs["url"]
+            if "instructions" in kwargs:
+                agent_kwargs["instructions"] = kwargs["instructions"]
+            if "crawl_depth" in kwargs:
+                agent_kwargs["crawl_depth"] = kwargs["crawl_depth"]
+            if "run_manager" in kwargs:
+                agent_kwargs["run_manager"] = kwargs["run_manager"]
+            return self._run_agent(**agent_kwargs)
+        else:
+            return self._run_full(**kwargs)
+
+    def _run_full(
+        self,
+        url: str,
+        max_depth: Optional[int] = None,
+        max_breadth: Optional[int] = None,
+        limit: Optional[int] = None,
+        instructions: Optional[str] = None,
+        select_paths: Optional[List[str]] = None,
+        select_domains: Optional[List[str]] = None,
+        exclude_paths: Optional[List[str]] = None,
+        exclude_domains: Optional[List[str]] = None,
+        allow_external: Optional[bool] = None,
+        include_images: Optional[bool] = None,
         extract_depth: Optional[Literal["basic", "advanced"]] = None,
         include_favicon: Optional[bool] = None,
         run_manager: Optional[CallbackManagerForToolRun] = None,
@@ -358,28 +327,27 @@ class TavilyCrawl(BaseTool):  # type: ignore[override]
                 limit=self.limit if self.limit else limit,
                 instructions=self.instructions if self.instructions else instructions,
                 select_paths=self.select_paths if self.select_paths else select_paths,
-                select_domains=self.select_domains
-                if self.select_domains
-                else select_domains,
-                exclude_paths=self.exclude_paths
-                if self.exclude_paths
-                else exclude_paths,
-                exclude_domains=self.exclude_domains
-                if self.exclude_domains
-                else exclude_domains,
-                allow_external=self.allow_external
-                if self.allow_external
-                else allow_external,
-                include_images=self.include_images
-                if self.include_images
-                else include_images,
-                categories=self.categories if self.categories else categories,
-                extract_depth=self.extract_depth
-                if self.extract_depth
-                else extract_depth,
-                include_favicon=self.include_favicon
-                if self.include_favicon
-                else include_favicon,
+                select_domains=(
+                    self.select_domains if self.select_domains else select_domains
+                ),
+                exclude_paths=(
+                    self.exclude_paths if self.exclude_paths else exclude_paths
+                ),
+                exclude_domains=(
+                    self.exclude_domains if self.exclude_domains else exclude_domains
+                ),
+                allow_external=(
+                    self.allow_external if self.allow_external else allow_external
+                ),
+                include_images=(
+                    self.include_images if self.include_images else include_images
+                ),
+                extract_depth=(
+                    self.extract_depth if self.extract_depth else extract_depth
+                ),
+                include_favicon=(
+                    self.include_favicon if self.include_favicon else include_favicon
+                ),
                 format=self.format,
             )
 
@@ -391,7 +359,6 @@ class TavilyCrawl(BaseTool):  # type: ignore[override]
                     "select_domains": select_domains,
                     "exclude_paths": exclude_paths,
                     "exclude_domains": exclude_domains,
-                    "categories": categories,
                     "format": self.format,
                 }
                 suggestions = _generate_suggestions(search_params)
@@ -400,7 +367,7 @@ class TavilyCrawl(BaseTool):  # type: ignore[override]
                 error_message = (
                     f"No crawl results found for '{url}'. "
                     f"Suggestions: {', '.join(suggestions)}. "
-                    f"Try modifying your crawl parameters with one of these approaches."  # noqa: E501
+                    f"Try modifying your crawl parameters with one of these approaches." 
                 )
                 raise ToolException(error_message)
             return raw_results
@@ -410,7 +377,75 @@ class TavilyCrawl(BaseTool):  # type: ignore[override]
         except Exception as e:
             return {"error": e}
 
-    async def _arun(
+    async def _arun_agent(
+        self,
+        url: str,
+        instructions: Optional[str] = None,
+        crawl_depth: Optional[Literal["fast", "basic", "deep"]] = None,
+        run_manager: Optional[AsyncCallbackManagerForToolRun] = None,
+    ) -> Dict[str, Any]:
+        """Execute a crawl asynchronously using the agent-optimized schema."""
+        # Map crawl_depth to specific parameters if provided
+        if crawl_depth:
+            depth_params = self._map_crawl_depth(crawl_depth)
+            max_depth = depth_params["max_depth"]
+            max_breadth = depth_params["max_breadth"]
+            limit = depth_params["limit"]
+        else:
+            # Use default values from the mapping for "basic" mode
+            depth_params = self._map_crawl_depth("basic")
+            max_depth = depth_params["max_depth"]
+            max_breadth = depth_params["max_breadth"]
+            limit = depth_params["limit"]
+
+        # Use instance attributes if set, otherwise use mapped values
+        final_max_depth = self.max_depth if self.max_depth is not None else max_depth
+        final_max_breadth = self.max_breadth if self.max_breadth is not None else max_breadth
+        final_limit = self.limit if self.limit is not None else limit
+        final_instructions = self.instructions if self.instructions is not None else instructions
+
+        try:
+            raw_results = await self.api_wrapper.raw_results_async(
+                url=url,
+                max_depth=final_max_depth,
+                max_breadth=final_max_breadth,
+                limit=final_limit,
+                instructions=final_instructions,
+                select_paths=self.select_paths,
+                select_domains=self.select_domains,
+                exclude_paths=self.exclude_paths,
+                exclude_domains=self.exclude_domains,
+                allow_external=self.allow_external,
+                include_images=self.include_images,
+                extract_depth=self.extract_depth,
+                include_favicon=self.include_favicon,
+                format=self.format,
+            )
+
+            # Check if results are empty and raise a specific exception
+            if not raw_results.get("results", []):
+                search_params = {
+                    "instructions": final_instructions,
+                    "select_paths": self.select_paths,
+                    "select_domains": self.select_domains,
+                    "exclude_paths": self.exclude_paths,
+                    "exclude_domains": self.exclude_domains,
+                }
+                suggestions = _generate_suggestions(search_params)
+
+                error_message = (
+                    f"No crawl results found for '{url}'. "
+                    f"Suggestions: {', '.join(suggestions)}. "
+                    f"Try modifying your crawl parameters with one of these approaches." 
+                )
+                raise ToolException(error_message)
+            return raw_results
+        except ToolException:
+            raise
+        except Exception as e:
+            return {"error": e}
+
+    async def _arun_full(
         self,
         url: str,
         max_depth: Optional[int] = None,
@@ -423,21 +458,6 @@ class TavilyCrawl(BaseTool):  # type: ignore[override]
         exclude_domains: Optional[List[str]] = None,
         allow_external: Optional[bool] = None,
         include_images: Optional[bool] = None,
-        categories: Optional[
-            List[
-                Literal[
-                    "Careers",
-                    "Blogs",
-                    "Documentation",
-                    "About",
-                    "Pricing",
-                    "Community",
-                    "Developers",
-                    "Contact",
-                    "Media",
-                ]
-            ]
-        ] = None,
         extract_depth: Optional[Literal["basic", "advanced"]] = None,
         include_favicon: Optional[bool] = None,
         run_manager: Optional[AsyncCallbackManagerForToolRun] = None,
@@ -451,28 +471,27 @@ class TavilyCrawl(BaseTool):  # type: ignore[override]
                 limit=self.limit if self.limit else limit,
                 instructions=self.instructions if self.instructions else instructions,
                 select_paths=self.select_paths if self.select_paths else select_paths,
-                select_domains=self.select_domains
-                if self.select_domains
-                else select_domains,
-                exclude_paths=self.exclude_paths
-                if self.exclude_paths
-                else exclude_paths,
-                exclude_domains=self.exclude_domains
-                if self.exclude_domains
-                else exclude_domains,
-                allow_external=self.allow_external
-                if self.allow_external
-                else allow_external,
-                include_images=self.include_images
-                if self.include_images
-                else include_images,
-                categories=self.categories if self.categories else categories,
-                extract_depth=self.extract_depth
-                if self.extract_depth
-                else extract_depth,
-                include_favicon=self.include_favicon
-                if self.include_favicon
-                else include_favicon,
+                select_domains=(
+                    self.select_domains if self.select_domains else select_domains
+                ),
+                exclude_paths=(
+                    self.exclude_paths if self.exclude_paths else exclude_paths
+                ),
+                exclude_domains=(
+                    self.exclude_domains if self.exclude_domains else exclude_domains
+                ),
+                allow_external=(
+                    self.allow_external if self.allow_external else allow_external
+                ),
+                include_images=(
+                    self.include_images if self.include_images else include_images
+                ),
+                extract_depth=(
+                    self.extract_depth if self.extract_depth else extract_depth
+                ),
+                include_favicon=(
+                    self.include_favicon if self.include_favicon else include_favicon
+                ),
                 format=self.format,
             )
 
@@ -482,7 +501,6 @@ class TavilyCrawl(BaseTool):  # type: ignore[override]
                     "instructions": instructions,
                     "select_paths": select_paths,
                     "select_domains": select_domains,
-                    "categories": categories,
                 }
                 suggestions = _generate_suggestions(search_params)
 
@@ -490,7 +508,7 @@ class TavilyCrawl(BaseTool):  # type: ignore[override]
                 error_message = (
                     f"No crawl results found for '{url}'. "
                     f"Suggestions: {', '.join(suggestions)}. "
-                    f"Try modifying your crawl parameters with one of these approaches."  # noqa: E501
+                    f"Try modifying your crawl parameters with one of these approaches." 
                 )
                 raise ToolException(error_message)
             return raw_results
@@ -499,3 +517,48 @@ class TavilyCrawl(BaseTool):  # type: ignore[override]
             raise
         except Exception as e:
             return {"error": e}
+
+    @overload
+    async def _arun(
+        self,
+        url: str,
+        instructions: Optional[str] = None,
+        crawl_depth: Optional[Literal["fast", "basic", "deep"]] = None,
+        run_manager: Optional[AsyncCallbackManagerForToolRun] = None,
+    ) -> Dict[str, Any]: ...
+
+    @overload
+    async def _arun(
+        self,
+        url: str,
+        max_depth: Optional[int] = None,
+        max_breadth: Optional[int] = None,
+        limit: Optional[int] = None,
+        instructions: Optional[str] = None,
+        select_paths: Optional[List[str]] = None,
+        select_domains: Optional[List[str]] = None,
+        exclude_paths: Optional[List[str]] = None,
+        exclude_domains: Optional[List[str]] = None,
+        allow_external: Optional[bool] = None,
+        include_images: Optional[bool] = None,
+        extract_depth: Optional[Literal["basic", "advanced"]] = None,
+        include_favicon: Optional[bool] = None,
+        run_manager: Optional[AsyncCallbackManagerForToolRun] = None,
+    ) -> Dict[str, Any]: ...
+
+    async def _arun(self, **kwargs: Any) -> Dict[str, Any]:
+        """Route to appropriate async implementation based on agent_mode."""
+        if getattr(self, "agent_mode", False):
+            # Extract only agent-compatible parameters
+            agent_kwargs = {}
+            if "url" in kwargs:
+                agent_kwargs["url"] = kwargs["url"]
+            if "instructions" in kwargs:
+                agent_kwargs["instructions"] = kwargs["instructions"]
+            if "crawl_depth" in kwargs:
+                agent_kwargs["crawl_depth"] = kwargs["crawl_depth"]
+            if "run_manager" in kwargs:
+                agent_kwargs["run_manager"] = kwargs["run_manager"]
+            return await self._arun_agent(**agent_kwargs)
+        else:
+            return await self._arun_full(**kwargs)
