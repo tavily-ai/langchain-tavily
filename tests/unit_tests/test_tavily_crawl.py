@@ -41,6 +41,7 @@ class TestTavilyCrawlToolUnit(ToolsUnitTests):  # Fixed class name to match its 
             "include_images": False,
             "categories": None,
             "extract_depth": "basic",
+            "chunks_per_source": None,
         }
 
     @property

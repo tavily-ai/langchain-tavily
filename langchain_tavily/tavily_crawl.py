@@ -146,6 +146,14 @@ class TavilyCrawl(BaseTool):
     Default is `False`.
     """
 
+    chunks_per_source: Optional[int] = None
+    """Number of content chunks to extract from each page.
+    
+    Must be between 1 and 10.
+    
+    Default is `None` for regular mode and `3` for agent mode.
+    """
+
     api_wrapper: TavilyCrawlAPIWrapper = Field(default_factory=TavilyCrawlAPIWrapper)  # type: ignore[arg-type]
 
     def __init__(self, agent_mode: bool = True, **kwargs: Any) -> None:
@@ -160,9 +168,12 @@ class TavilyCrawl(BaseTool):
 
         super().__init__(**kwargs)
 
+        # Explicitly set the agent_mode instance attribute
+        self.agent_mode = agent_mode
+
         # If agent mode is enabled, switch to a simplified args schema and
         # update description to reflect agent-focused usage.
-        if getattr(self, "agent_mode", False):
+        if self.agent_mode:
             # Switch the invocation schema for this instance
             self.args_schema = TavilyCrawlAgentInput  # type: ignore[assignment]
 
@@ -215,9 +226,11 @@ class TavilyCrawl(BaseTool):
                 exclude_domains=self.exclude_domains,
                 allow_external=self.allow_external,
                 include_images=self.include_images,
+                categories=None,
                 extract_depth=self.extract_depth,
                 include_favicon=self.include_favicon,
                 format=self.format,
+                chunks_per_source=self.chunks_per_source,
             )
 
             # Check if results are empty and raise a specific exception
@@ -269,6 +282,7 @@ class TavilyCrawl(BaseTool):
         include_images: Optional[bool] = None,
         extract_depth: Optional[Literal["basic", "advanced"]] = None,
         include_favicon: Optional[bool] = None,
+        chunks_per_source: Optional[int] = None,
         run_manager: Optional[CallbackManagerForToolRun] = None,
     ) -> Dict[str, Any]: ...
 
@@ -304,6 +318,7 @@ class TavilyCrawl(BaseTool):
         include_images: Optional[bool] = None,
         extract_depth: Optional[Literal["basic", "advanced"]] = None,
         include_favicon: Optional[bool] = None,
+        chunks_per_source: Optional[int] = None,
         run_manager: Optional[CallbackManagerForToolRun] = None,
     ) -> Dict[str, Any]:
         """Execute a crawl using the Tavily Crawl API.
@@ -342,6 +357,7 @@ class TavilyCrawl(BaseTool):
                 include_images=(
                     self.include_images if self.include_images else include_images
                 ),
+                categories=None,
                 extract_depth=(
                     self.extract_depth if self.extract_depth else extract_depth
                 ),
@@ -349,6 +365,9 @@ class TavilyCrawl(BaseTool):
                     self.include_favicon if self.include_favicon else include_favicon
                 ),
                 format=self.format,
+                chunks_per_source=(
+                    self.chunks_per_source if self.chunks_per_source else chunks_per_source
+                ),
             )
 
             # Check if results are empty and raise a specific exception
@@ -417,9 +436,11 @@ class TavilyCrawl(BaseTool):
                 exclude_domains=self.exclude_domains,
                 allow_external=self.allow_external,
                 include_images=self.include_images,
+                categories=None,
                 extract_depth=self.extract_depth,
                 include_favicon=self.include_favicon,
                 format=self.format,
+                chunks_per_source=self.chunks_per_source,
             )
 
             # Check if results are empty and raise a specific exception
@@ -460,6 +481,7 @@ class TavilyCrawl(BaseTool):
         include_images: Optional[bool] = None,
         extract_depth: Optional[Literal["basic", "advanced"]] = None,
         include_favicon: Optional[bool] = None,
+        chunks_per_source: Optional[int] = None,
         run_manager: Optional[AsyncCallbackManagerForToolRun] = None,
     ) -> Dict[str, Any]:
         """Use the tool asynchronously."""
@@ -486,6 +508,7 @@ class TavilyCrawl(BaseTool):
                 include_images=(
                     self.include_images if self.include_images else include_images
                 ),
+                categories=None,
                 extract_depth=(
                     self.extract_depth if self.extract_depth else extract_depth
                 ),
@@ -493,6 +516,9 @@ class TavilyCrawl(BaseTool):
                     self.include_favicon if self.include_favicon else include_favicon
                 ),
                 format=self.format,
+                chunks_per_source=(
+                    self.chunks_per_source if self.chunks_per_source else chunks_per_source
+                ),
             )
 
             # Check if results are empty and raise a specific exception
@@ -543,6 +569,7 @@ class TavilyCrawl(BaseTool):
         include_images: Optional[bool] = None,
         extract_depth: Optional[Literal["basic", "advanced"]] = None,
         include_favicon: Optional[bool] = None,
+        chunks_per_source: Optional[int] = None,
         run_manager: Optional[AsyncCallbackManagerForToolRun] = None,
     ) -> Dict[str, Any]: ...
 

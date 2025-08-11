@@ -116,6 +116,13 @@ class TavilyCrawlInput(BaseModel):
         description="Whether to include the favicon URL for each result.",
     )
 
+    chunks_per_source: Optional[int] = Field(
+        default=None,
+        ge=1,
+        le=10,
+        description="Number of content chunks to extract from each page.",
+    )
+
 
 class TavilyCrawlAgentInput(BaseModel):
     """Simplified input for agent-optimized TavilyCrawl invocation."""

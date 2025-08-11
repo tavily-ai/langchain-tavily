@@ -324,6 +324,7 @@ class TavilyCrawlAPIWrapper(BaseModel):
         extract_depth: Optional[Literal["basic", "advanced"]],
         include_favicon: Optional[bool],
         format: Optional[str],
+        chunks_per_source: Optional[int],
     ) -> Dict[str, Any]:
         params = {
             "url": url,
@@ -341,6 +342,7 @@ class TavilyCrawlAPIWrapper(BaseModel):
             "extract_depth": extract_depth,
             "include_favicon": include_favicon,
             "format": format,
+            "chunks_per_source": chunks_per_source,
         }
 
         # Remove None values
@@ -399,6 +401,7 @@ class TavilyCrawlAPIWrapper(BaseModel):
         extract_depth: Optional[Literal["basic", "advanced"]],
         include_favicon: Optional[bool],
         format: Optional[str],
+        chunks_per_source: Optional[int],
     ) -> Dict[str, Any]:
         """Get results from the Tavily Crawl API asynchronously."""
 
@@ -420,6 +423,7 @@ class TavilyCrawlAPIWrapper(BaseModel):
                 "extract_depth": extract_depth,
                 "include_favicon": include_favicon,
                 "format": format,
+                "chunks_per_source": chunks_per_source,
             }
 
             # Remove None values
