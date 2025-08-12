@@ -306,21 +306,6 @@ class TavilyCrawlAPIWrapper(BaseModel):
         exclude_domains: Optional[List[str]],
         allow_external: Optional[bool],
         include_images: Optional[bool],
-        categories: Optional[
-            List[
-                Literal[
-                    "Careers",
-                    "Blogs",
-                    "Documentation",
-                    "About",
-                    "Pricing",
-                    "Community",
-                    "Developers",
-                    "Contact",
-                    "Media",
-                ]
-            ]
-        ],
         extract_depth: Optional[Literal["basic", "advanced"]],
         include_favicon: Optional[bool],
         format: Optional[str],
@@ -338,7 +323,6 @@ class TavilyCrawlAPIWrapper(BaseModel):
             "exclude_domains": exclude_domains,
             "allow_external": allow_external,
             "include_images": include_images,
-            "categories": categories,
             "extract_depth": extract_depth,
             "include_favicon": include_favicon,
             "format": format,
@@ -383,21 +367,6 @@ class TavilyCrawlAPIWrapper(BaseModel):
         exclude_domains: Optional[List[str]],
         allow_external: Optional[bool],
         include_images: Optional[bool],
-        categories: Optional[
-            List[
-                Literal[
-                    "Careers",
-                    "Blogs",
-                    "Documentation",
-                    "About",
-                    "Pricing",
-                    "Community",
-                    "Developers",
-                    "Contact",
-                    "Media",
-                ]
-            ]
-        ],
         extract_depth: Optional[Literal["basic", "advanced"]],
         include_favicon: Optional[bool],
         format: Optional[str],
@@ -419,7 +388,6 @@ class TavilyCrawlAPIWrapper(BaseModel):
                 "exclude_domains": exclude_domains,
                 "allow_external": allow_external,
                 "include_images": include_images,
-                "categories": categories,
                 "extract_depth": extract_depth,
                 "include_favicon": include_favicon,
                 "format": format,

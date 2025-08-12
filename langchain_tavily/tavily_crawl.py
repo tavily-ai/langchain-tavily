@@ -171,6 +171,12 @@ class TavilyCrawl(BaseTool):
         # Explicitly set the agent_mode instance attribute
         self.agent_mode = agent_mode
 
+        # Set chunks_per_source default based on agent_mode (if not explicitly provided)
+        if self.chunks_per_source is None:
+            if self.agent_mode:
+                self.chunks_per_source = 3  # Default for agent mode
+            # else: leave as None for regular mode
+
         # If agent mode is enabled, switch to a simplified args schema and
         # update description to reflect agent-focused usage.
         if self.agent_mode:
@@ -226,7 +232,6 @@ class TavilyCrawl(BaseTool):
                 exclude_domains=self.exclude_domains,
                 allow_external=self.allow_external,
                 include_images=self.include_images,
-                categories=None,
                 extract_depth=self.extract_depth,
                 include_favicon=self.include_favicon,
                 format=self.format,
@@ -357,7 +362,6 @@ class TavilyCrawl(BaseTool):
                 include_images=(
                     self.include_images if self.include_images else include_images
                 ),
-                categories=None,
                 extract_depth=(
                     self.extract_depth if self.extract_depth else extract_depth
                 ),
@@ -436,7 +440,6 @@ class TavilyCrawl(BaseTool):
                 exclude_domains=self.exclude_domains,
                 allow_external=self.allow_external,
                 include_images=self.include_images,
-                categories=None,
                 extract_depth=self.extract_depth,
                 include_favicon=self.include_favicon,
                 format=self.format,
@@ -508,7 +511,6 @@ class TavilyCrawl(BaseTool):
                 include_images=(
                     self.include_images if self.include_images else include_images
                 ),
-                categories=None,
                 extract_depth=(
                     self.extract_depth if self.extract_depth else extract_depth
                 ),

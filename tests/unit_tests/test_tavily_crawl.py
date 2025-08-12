@@ -39,7 +39,6 @@ class TestTavilyCrawlToolUnit(ToolsUnitTests):  # Fixed class name to match its 
             "exclude_domains": None,
             "allow_external": False,
             "include_images": False,
-            "categories": None,
             "extract_depth": "basic",
             "chunks_per_source": None,
         }

@@ -270,7 +270,6 @@ tool = TavilyCrawl(
     # exclude_domains=None,
     # allow_external=False,
     # include_images=False,
-    # categories=None,
     # extract_depth=None,
     # include_favicon=False,
     # format=None
@@ -281,7 +280,7 @@ tool = TavilyCrawl(
 
 The Tavily crawl tool accepts the following arguments during invocation:
 - `url` (required): The root URL to begin the crawl.
-- All other parameters can also be set during invocation: `max_depth`, `max_breadth`, `limit`, `instructions`, `select_paths`, `select_domains`, `exclude_paths`, `exclude_domains`,`allow_external`, `include_images`, `categories`, `extract_depth`, and `include_favicon`
+- All other parameters can also be set during invocation: `max_depth`, `max_breadth`, `limit`, `instructions`, `select_paths`, `select_domains`, `exclude_paths`, `exclude_domains`,`allow_external`, `include_images`, `extract_depth`, and `include_favicon`
 
 NOTE: If you set an argument during instantiation this value will persist and overwrite the value passed during invocation.
 
@@ -289,8 +288,7 @@ NOTE: If you set an argument during instantiation this value will persist and ov
 # Basic crawl of a website
 result = tool.invoke({
     "url": "https://docs.tavily.com",
-    "instructions": "Find SDK documentation",
-    "categories": ["Documentation"]
+    "instructions": "Find SDK documentation"
 })
 ```
 
