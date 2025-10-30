@@ -55,6 +55,7 @@ class TavilySearchAPIWrapper(BaseModel):
         auto_parameters: Optional[bool],
         start_date: Optional[str],
         end_date: Optional[str],
+        safe_search: Optional[bool],
     ) -> Dict[str, Any]:
         params = {
             "query": query,
@@ -73,6 +74,7 @@ class TavilySearchAPIWrapper(BaseModel):
             "auto_parameters": auto_parameters,
             "start_date": start_date,
             "end_date": end_date,
+            "safe_search": safe_search,
         }
 
         # Remove None values
@@ -117,6 +119,7 @@ class TavilySearchAPIWrapper(BaseModel):
         auto_parameters: Optional[bool],
         start_date: Optional[str],
         end_date: Optional[str],
+        safe_search: Optional[bool],
     ) -> Dict[str, Any]:
         """Get results from the Tavily Search API asynchronously."""
 
@@ -139,6 +142,7 @@ class TavilySearchAPIWrapper(BaseModel):
                 "auto_parameters": auto_parameters,
                 "start_date": start_date,
                 "end_date": end_date,
+                "safe_search": safe_search,
             }
 
             # Remove None values

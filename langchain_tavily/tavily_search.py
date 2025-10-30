@@ -1,12 +1,12 @@
 """Tavily tools."""
 
-from typing import Any, Dict, List, Literal, Optional, Type, Union
+from typing import Annotated, Any, Dict, List, Literal, Optional, Type, Union
 
 from langchain_core.callbacks import (
     AsyncCallbackManagerForToolRun,
     CallbackManagerForToolRun,
 )
-from langchain_core.tools import BaseTool, ToolException
+from langchain_core.tools import BaseTool, InjectedToolArg, ToolException
 from pydantic import BaseModel, Field
 
 from langchain_tavily._utilities import TavilySearchAPIWrapper
@@ -322,7 +322,12 @@ class TavilySearch(BaseTool):  # type: ignore[override]
     """
     include_favicon: Optional[bool] = None
     """Whether to include the favicon URL for each result.
-    
+
+    Default is False.
+    """
+    safe_search: Optional[bool] = None
+    """Enable safe search filtering to exclude explicit or inappropriate content.
+
     Default is False.
     """
     api_wrapper: TavilySearchAPIWrapper = Field(default_factory=TavilySearchAPIWrapper)  # type: ignore[arg-type]
@@ -351,6 +356,7 @@ class TavilySearch(BaseTool):  # type: ignore[override]
         include_favicon: Optional[bool] = None,
         start_date: Optional[str] = None,
         end_date: Optional[str] = None,
+        safe_search: Annotated[Optional[bool], InjectedToolArg] = False,
         run_manager: Optional[CallbackManagerForToolRun] = None,
     ) -> Dict[str, Any]:
         """Execute a search query using the Tavily Search API.
@@ -393,6 +399,7 @@ class TavilySearch(BaseTool):  # type: ignore[override]
                 auto_parameters=self.auto_parameters,
                 start_date=start_date,
                 end_date=end_date,
+                safe_search=self.safe_search if self.safe_search else safe_search,
             )
 
             # Check if results are empty and raise a specific exception
@@ -432,6 +439,7 @@ class TavilySearch(BaseTool):  # type: ignore[override]
         include_favicon: Optional[bool] = False,
         start_date: Optional[str] = None,
         end_date: Optional[str] = None,
+        safe_search: Annotated[Optional[bool], InjectedToolArg] = False,
         run_manager: Optional[AsyncCallbackManagerForToolRun] = None,
     ) -> Dict[str, Any]:
         """Use the tool asynchronously."""
@@ -461,6 +469,7 @@ class TavilySearch(BaseTool):  # type: ignore[override]
                 auto_parameters=self.auto_parameters,
                 start_date=start_date,
                 end_date=end_date,
+                safe_search=self.safe_search if self.safe_search else safe_search,
             )
 
             # Check if results are empty and raise a specific exception
