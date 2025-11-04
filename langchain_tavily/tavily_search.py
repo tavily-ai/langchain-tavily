@@ -183,54 +183,55 @@ class TavilySearch(BaseTool):  # type: ignore[override]
     """Tool that queries the Tavily Search API and gets back json.
 
     Setup:
-        Install ``langchain-tavily`` and set environment variable ``TAVILY_API_KEY``.
+        Install `langchain-tavily` and set environment variable `TAVILY_API_KEY`.
 
-        .. code-block:: bash
-
-            pip install -U langchain-tavily
-            export TAVILY_API_KEY="your-api-key"
+        ```bash
+        pip install -U langchain-tavily
+        export TAVILY_API_KEY="your-api-key"
+        ```
 
     Instantiate:
 
-        .. code-block:: python
-            from langchain_tavily import TavilySearch
+        ```python
+        from langchain_tavily import TavilySearch
 
-            tool = TavilySearch(
-                max_results=1,
-                topic="general",
-                # include_answer=False,
-                # include_raw_content=False,
-                # include_images=False,
-                # include_image_descriptions=False,
-                # search_depth="basic",
-                # time_range="day",
-                # include_domains=None,
-                # exclude_domains=None,
-                # country=None
-                # include_favicon=False
-            )
+        tool = TavilySearch(
+            max_results=1,
+            topic="general",
+            # include_answer=False,
+            # include_raw_content=False,
+            # include_images=False,
+            # include_image_descriptions=False,
+            # search_depth="basic",
+            # time_range="day",
+            # include_domains=None,
+            # exclude_domains=None,
+            # country=None
+            # include_favicon=False
+        )
+        ```
 
     Invoke directly with args:
 
-        .. code-block:: python
+        ```python
+        tool.invoke({"query": "What happened at the last wimbledon"})
+        ```
 
-            tool.invoke({"query": "What happened at the last wimbledon"})
-
-        .. code-block:: json
-
-            {
-                'query': 'What happened at the last wimbledon',
-                'follow_up_questions': None,
-                'answer': None,
-                'images': [],
-                'results': [{'title': "Andy Murray pulls out of the men's singles draw at his last Wimbledon",
-                            'url': 'https://www.nbcnews.com/news/sports/andy-murray-wimbledon-tennis-singles-draw-rcna159912',
-                            'content': "NBC News Now LONDON — Andy Murray, one of the last decade's most successful ..."
-                            'score': 0.6755297,
-                            'raw_content': None
-                            }],
-                'response_time': 1.31
-            }
+        ```json
+        {
+            'query': 'What happened at the last wimbledon',
+            'follow_up_questions': None,
+            'answer': None,
+            'images': [],
+            'results': [{'title': "Andy Murray pulls out of the men's singles draw at his last Wimbledon",
+                        'url': 'https://www.nbcnews.com/news/sports/andy-murray-wimbledon-tennis-singles-draw-rcna159912',
+                        'content': "NBC News Now LONDON — Andy Murray, one of the last decade's most successful ..."
+                        'score': 0.6755297,
+                        'raw_content': None
+                        }],
+            'response_time': 1.31
+        }
+        ```
 
     """  # noqa: E501
 
