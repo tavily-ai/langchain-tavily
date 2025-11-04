@@ -7,13 +7,15 @@ from langchain_core.callbacks import (
     CallbackManagerForToolRun,
 )
 from langchain_core.tools import BaseTool, ToolException
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 from langchain_tavily._utilities import TavilySearchAPIWrapper
 
 
 class TavilySearchInput(BaseModel):
     """Input for [TavilySearch]"""
+
+    model_config = ConfigDict(extra="allow")
 
     query: str = Field(description=("Search query to look up"))
     include_domains: Optional[List[str]] = Field(
@@ -353,6 +355,7 @@ class TavilySearch(BaseTool):  # type: ignore[override]
         start_date: Optional[str] = None,
         end_date: Optional[str] = None,
         run_manager: Optional[CallbackManagerForToolRun] = None,
+        **kwargs: Any,
     ) -> Dict[str, Any]:
         """Execute a search query using the Tavily Search API.
 
@@ -394,6 +397,7 @@ class TavilySearch(BaseTool):  # type: ignore[override]
                 auto_parameters=self.auto_parameters,
                 start_date=start_date,
                 end_date=end_date,
+                **kwargs,
             )
 
             # Check if results are empty and raise a specific exception
@@ -434,6 +438,7 @@ class TavilySearch(BaseTool):  # type: ignore[override]
         start_date: Optional[str] = None,
         end_date: Optional[str] = None,
         run_manager: Optional[AsyncCallbackManagerForToolRun] = None,
+        **kwargs: Any,
     ) -> Dict[str, Any]:
         """Use the tool asynchronously."""
         try:
@@ -462,6 +467,7 @@ class TavilySearch(BaseTool):  # type: ignore[override]
                 auto_parameters=self.auto_parameters,
                 start_date=start_date,
                 end_date=end_date,
+                **kwargs,
             )
 
             # Check if results are empty and raise a specific exception

@@ -7,13 +7,15 @@ from langchain_core.callbacks import (
     CallbackManagerForToolRun,
 )
 from langchain_core.tools import BaseTool, ToolException
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 from langchain_tavily._utilities import TavilyMapAPIWrapper
 
 
 class TavilyMapInput(BaseModel):
     """Input for [TavilyMap]"""
+
+    model_config = ConfigDict(extra="allow")
 
     url: str = Field(description=("The root URL to begin the mapping."))
     max_depth: Optional[int] = Field(
@@ -292,6 +294,7 @@ class TavilyMap(BaseTool):  # type: ignore[override]
             ]
         ] = None,
         run_manager: Optional[CallbackManagerForToolRun] = None,
+        **kwargs: Any,
     ) -> Dict[str, Any]:
         """Execute a mapping using the Tavily Map API.
 
@@ -328,6 +331,7 @@ class TavilyMap(BaseTool):  # type: ignore[override]
                 if self.allow_external
                 else allow_external,
                 categories=self.categories if self.categories else categories,
+                **kwargs,
             )
 
             # Check if results are empty and raise a specific exception

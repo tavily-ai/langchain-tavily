@@ -7,7 +7,7 @@ from langchain_core.callbacks import (
     CallbackManagerForToolRun,
 )
 from langchain_core.tools import BaseTool, ToolException
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 from langchain_tavily._utilities import TavilyExtractAPIWrapper
 
@@ -17,6 +17,8 @@ class TavilyExtractInput(BaseModel):
     Input for [TavilyExtract]
     Extract web page content from one or more specified URLs using Tavily Extract.
     """
+
+    model_config = ConfigDict(extra="allow")
 
     urls: List[str] = Field(description="list of urls to extract")
     extract_depth: Optional[Literal["basic", "advanced"]] = Field(
@@ -121,6 +123,7 @@ class TavilyExtract(BaseTool):  # type: ignore[override, override]
         include_images: Optional[bool] = None,
         include_favicon: Optional[bool] = None,
         run_manager: Optional[CallbackManagerForToolRun] = None,
+        **kwargs: Any,
     ) -> Dict[str, Any]:
         """Use the tool."""
         try:
@@ -137,6 +140,7 @@ class TavilyExtract(BaseTool):  # type: ignore[override, override]
                 if self.include_favicon
                 else include_favicon,
                 format=self.format,
+                **kwargs,
             )
 
             # Check if results are empty and raise a specific exception
@@ -170,6 +174,7 @@ class TavilyExtract(BaseTool):  # type: ignore[override, override]
         include_images: Optional[bool] = None,
         include_favicon: Optional[bool] = None,
         run_manager: Optional[AsyncCallbackManagerForToolRun] = None,
+        **kwargs: Any,
     ) -> Dict[str, Any]:
         """Use the tool asynchronously."""
         try:
@@ -185,6 +190,7 @@ class TavilyExtract(BaseTool):  # type: ignore[override, override]
                 if self.include_favicon
                 else include_favicon,
                 format=self.format,
+                **kwargs,
             )
 
             # Check if results are empty and raise a specific exception

@@ -55,6 +55,7 @@ class TavilySearchAPIWrapper(BaseModel):
         auto_parameters: Optional[bool],
         start_date: Optional[str],
         end_date: Optional[str],
+        **kwargs: Any,
     ) -> Dict[str, Any]:
         params = {
             "query": query,
@@ -73,6 +74,7 @@ class TavilySearchAPIWrapper(BaseModel):
             "auto_parameters": auto_parameters,
             "start_date": start_date,
             "end_date": end_date,
+            **kwargs,
         }
 
         # Remove None values
@@ -83,7 +85,6 @@ class TavilySearchAPIWrapper(BaseModel):
             "Content-Type": "application/json",
             "X-Client-Source": "langchain-tavily",
         }
-
         base_url = self.api_base_url or TAVILY_API_URL
         response = requests.post(
             # type: ignore
@@ -117,6 +118,7 @@ class TavilySearchAPIWrapper(BaseModel):
         auto_parameters: Optional[bool],
         start_date: Optional[str],
         end_date: Optional[str],
+        **kwargs: Any,
     ) -> Dict[str, Any]:
         """Get results from the Tavily Search API asynchronously."""
 
@@ -139,6 +141,7 @@ class TavilySearchAPIWrapper(BaseModel):
                 "auto_parameters": auto_parameters,
                 "start_date": start_date,
                 "end_date": end_date,
+                **kwargs,
             }
 
             # Remove None values
@@ -193,6 +196,7 @@ class TavilyExtractAPIWrapper(BaseModel):
         include_images: Optional[bool],
         include_favicon: Optional[bool],
         format: Optional[str],
+        **kwargs: Any,
     ) -> Dict[str, Any]:
         params = {
             "urls": urls,
@@ -200,6 +204,7 @@ class TavilyExtractAPIWrapper(BaseModel):
             "include_favicon": include_favicon,
             "extract_depth": extract_depth,
             "format": format,
+            **kwargs,
         }
 
         # Remove None values
@@ -234,6 +239,7 @@ class TavilyExtractAPIWrapper(BaseModel):
         include_favicon: Optional[bool],
         extract_depth: Optional[Literal["basic", "advanced"]],
         format: Optional[str],
+        **kwargs: Any,
     ) -> Dict[str, Any]:
         """Get results from the Tavily Extract API asynchronously."""
 
@@ -245,6 +251,7 @@ class TavilyExtractAPIWrapper(BaseModel):
                 "include_favicon": include_favicon,
                 "extract_depth": extract_depth,
                 "format": format,
+                **kwargs,
             }
 
             # Remove None values
@@ -324,6 +331,7 @@ class TavilyCrawlAPIWrapper(BaseModel):
         extract_depth: Optional[Literal["basic", "advanced"]],
         include_favicon: Optional[bool],
         format: Optional[str],
+        **kwargs: Any,
     ) -> Dict[str, Any]:
         params = {
             "url": url,
@@ -341,6 +349,7 @@ class TavilyCrawlAPIWrapper(BaseModel):
             "extract_depth": extract_depth,
             "include_favicon": include_favicon,
             "format": format,
+            **kwargs,
         }
 
         # Remove None values
@@ -399,6 +408,7 @@ class TavilyCrawlAPIWrapper(BaseModel):
         extract_depth: Optional[Literal["basic", "advanced"]],
         include_favicon: Optional[bool],
         format: Optional[str],
+        **kwargs: Any,
     ) -> Dict[str, Any]:
         """Get results from the Tavily Crawl API asynchronously."""
 
@@ -420,6 +430,7 @@ class TavilyCrawlAPIWrapper(BaseModel):
                 "extract_depth": extract_depth,
                 "include_favicon": include_favicon,
                 "format": format,
+                **kwargs,
             }
 
             # Remove None values
@@ -495,6 +506,7 @@ class TavilyMapAPIWrapper(BaseModel):
                 ]
             ]
         ],
+        **kwargs: Any,
     ) -> Dict[str, Any]:
         params = {
             "url": url,
@@ -508,6 +520,7 @@ class TavilyMapAPIWrapper(BaseModel):
             "exclude_domains": exclude_domains,
             "allow_external": allow_external,
             "categories": categories,
+            **kwargs,
         }
 
         # Remove None values
@@ -562,6 +575,7 @@ class TavilyMapAPIWrapper(BaseModel):
                 ]
             ]
         ],
+        **kwargs: Any,
     ) -> Dict[str, Any]:
         """Get results from the Tavily Map API asynchronously."""
 
@@ -579,6 +593,7 @@ class TavilyMapAPIWrapper(BaseModel):
                 "exclude_domains": exclude_domains,
                 "allow_external": allow_external,
                 "categories": categories,
+                **kwargs,
             }
 
             # Remove None values
