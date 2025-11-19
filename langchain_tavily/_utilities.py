@@ -618,3 +618,167 @@ class TavilyMapAPIWrapper(BaseModel):
         results_json_str = await fetch()
 
         return json.loads(results_json_str)
+
+
+class TavilyResearchAPIWrapper(BaseModel):
+    """Wrapper for Tavily Research API."""
+
+    tavily_api_key: SecretStr
+    api_base_url: Optional[str] = None
+
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+
+    @model_validator(mode="before")
+    @classmethod
+    def validate_environment(cls, values: Dict) -> Any:
+        """Validate that api key and endpoint exists in environment."""
+        tavily_api_key = get_from_dict_or_env(
+            values, "tavily_api_key", "TAVILY_API_KEY"
+        )
+        values["tavily_api_key"] = tavily_api_key
+
+        return values
+
+    def raw_results(
+        self,
+        input: str,
+        research_model: Optional[Literal["tvly-mini", "tvly-pro", "auto"]],
+        output_schema: Optional[Dict[str, Any]],
+        stream: Optional[bool],
+        citation_format: Optional[Literal["numbered", "mla", "apa", "chicago"]],
+        mcps: Optional[List[Dict[str, Any]]],
+        **kwargs: Any,
+    ) -> Dict[str, Any]:
+        params = {
+            "input": input,
+            "model": research_model,
+            "output_schema": output_schema,
+            "stream": stream,
+            "citation_format": citation_format,
+            "mcps": mcps,
+            **kwargs,
+        }
+
+        # Remove None values
+        params = {k: v for k, v in params.items() if v is not None}
+
+        headers = {
+            "Authorization": f"Bearer {self.tavily_api_key.get_secret_value()}",
+            "Content-Type": "application/json",
+            "X-Client-Source": "langchain-tavily",
+        }
+        base_url = self.api_base_url or TAVILY_API_URL
+        response = requests.post(
+            # type: ignore
+            f"{base_url}/research",
+            json=params,
+            headers=headers,
+        )
+        if response.status_code != 200:
+            detail = response.json().get("detail", {})
+            error_message = (
+                detail.get("error") if isinstance(detail, dict) else "Unknown error"
+            )
+            raise ValueError(f"Error {response.status_code}: {error_message}")
+        return response.json()
+
+    async def raw_results_async(
+        self,
+        input: str,
+        research_model: Optional[Literal["tvly-mini", "tvly-pro", "auto"]],
+        output_schema: Optional[Dict[str, Any]],
+        stream: Optional[bool],
+        citation_format: Optional[Literal["numbered", "mla", "apa", "chicago"]],
+        mcps: Optional[List[Dict[str, Any]]],
+        **kwargs: Any,
+    ) -> Dict[str, Any]:
+        """Get results from the Tavily Research API asynchronously."""
+
+        # Function to perform the API call
+        async def fetch() -> str:
+            params = {
+                "input": input,
+                "model": research_model,
+                "output_schema": output_schema,
+                "stream": stream,
+                "citation_format": citation_format,
+                "mcps": mcps,
+                **kwargs,
+            }
+
+            # Remove None values
+            params = {k: v for k, v in params.items() if v is not None}
+
+            headers = {
+                "Authorization": f"Bearer {self.tavily_api_key.get_secret_value()}",
+                "Content-Type": "application/json",
+                "X-Client-Source": "langchain-tavily",
+            }
+
+            base_url = self.api_base_url or TAVILY_API_URL
+            async with aiohttp.ClientSession() as session:
+                async with session.post(
+                    f"{base_url}/research", json=params, headers=headers
+                ) as res:
+                    if res.status == 200:
+                        data = await res.text()
+                        return data
+                    else:
+                        raise Exception(f"Error {res.status}: {res.reason}")
+
+        results_json_str = await fetch()
+
+        return json.loads(results_json_str)
+
+    def get_research(
+        self,
+        request_id: str,
+    ) -> Dict[str, Any]:
+        """Get research results by request_id."""
+        headers = {
+            "Authorization": f"Bearer {self.tavily_api_key.get_secret_value()}",
+            "Content-Type": "application/json",
+            "X-Client-Source": "langchain-tavily",
+        }
+        base_url = self.api_base_url or TAVILY_API_URL
+        response = requests.get(
+            # type: ignore
+            f"{base_url}/research/{request_id}",
+            headers=headers,
+        )
+        if response.status_code != 200:
+            detail = response.json().get("detail", {})
+            error_message = (
+                detail.get("error") if isinstance(detail, dict) else "Unknown error"
+            )
+            raise ValueError(f"Error {response.status_code}: {error_message}")
+        return response.json()
+
+    async def get_research_async(
+        self,
+        request_id: str,
+    ) -> Dict[str, Any]:
+        """Get research results by request_id asynchronously."""
+        headers = {
+            "Authorization": f"Bearer {self.tavily_api_key.get_secret_value()}",
+            "Content-Type": "application/json",
+            "X-Client-Source": "langchain-tavily",
+        }
+        base_url = self.api_base_url or TAVILY_API_URL
+        async with aiohttp.ClientSession() as session:
+            async with session.get(
+                f"{base_url}/research/{request_id}", headers=headers
+            ) as res:
+                if res.status == 200:
+                    data = await res.text()
+                    return json.loads(data)
+                else:
+                    detail = await res.json()
+                    error_message = (
+                        detail.get("detail", {}).get("error")
+                        if isinstance(detail, dict)
+                        else "Unknown error"
+                    )
+                    raise Exception(f"Error {res.status}: {error_message}")

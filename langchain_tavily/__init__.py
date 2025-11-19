@@ -4,6 +4,7 @@ from typing import Dict, Any, List
 from langchain_tavily.tavily_crawl import TavilyCrawl
 from langchain_tavily.tavily_extract import TavilyExtract
 from langchain_tavily.tavily_map import TavilyMap
+from langchain_tavily.tavily_research import TavilyResearch, TavilyGetResearch
 from langchain_tavily.tavily_search import TavilySearch
 
 try:
@@ -18,5 +19,7 @@ __all__: List[str] = [
     "TavilyExtract",
     "TavilyCrawl",
     "TavilyMap",
+    "TavilyResearch",
+    "TavilyGetResearch",
     "__version__",
 ]
