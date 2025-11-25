@@ -5,9 +5,10 @@ https://docs.tavily.com/docs/tavily-api/introduction
 """
 
 import json
-from typing import Any, Dict, List, Literal, Optional, Union
+from typing import Any, AsyncGenerator, Dict, Generator, List, Literal, Optional, Union
 
 import aiohttp
+from aiohttp import ClientTimeout
 import requests
 from langchain_core.utils import get_from_dict_or_env
 from pydantic import BaseModel, ConfigDict, SecretStr, model_validator
@@ -650,7 +651,7 @@ class TavilyResearchAPIWrapper(BaseModel):
         citation_format: Optional[Literal["numbered", "mla", "apa", "chicago"]],
         mcps: Optional[List[Dict[str, Any]]],
         **kwargs: Any,
-    ) -> Dict[str, Any]:
+    ) -> Union[Dict[str, Any], Generator[bytes, None, None]]:
         params = {
             "input": input,
             "model": research_model,
@@ -670,19 +671,45 @@ class TavilyResearchAPIWrapper(BaseModel):
             "X-Client-Source": "langchain-tavily",
         }
         base_url = self.api_base_url or TAVILY_API_URL
-        response = requests.post(
-            # type: ignore
-            f"{base_url}/research",
-            json=params,
-            headers=headers,
-        )
-        if response.status_code != 200:
-            detail = response.json().get("detail", {})
-            error_message = (
-                detail.get("error") if isinstance(detail, dict) else "Unknown error"
+        
+        if stream:
+            response = requests.post(
+                # type: ignore
+                f"{base_url}/research",
+                json=params,
+                headers=headers,
+                stream=True,
             )
-            raise ValueError(f"Error {response.status_code}: {error_message}")
-        return response.json()
+            if response.status_code != 200:
+                detail = response.json().get("detail", {})
+                error_message = (
+                    detail.get("error") if isinstance(detail, dict) else "Unknown error"
+                )
+                raise ValueError(f"Error {response.status_code}: {error_message}")
+            
+            def stream_generator() -> Generator[bytes, None, None]:
+                try:
+                    for chunk in response.iter_content(chunk_size=None):
+                        if chunk:
+                            yield chunk
+                finally:
+                    response.close()
+            
+            return stream_generator()
+        else:
+            response = requests.post(
+                # type: ignore
+                f"{base_url}/research",
+                json=params,
+                headers=headers,
+            )
+            if response.status_code != 200:
+                detail = response.json().get("detail", {})
+                error_message = (
+                    detail.get("error") if isinstance(detail, dict) else "Unknown error"
+                )
+                raise ValueError(f"Error {response.status_code}: {error_message}")
+            return response.json()
 
     async def raw_results_async(
         self,
@@ -693,31 +720,53 @@ class TavilyResearchAPIWrapper(BaseModel):
         citation_format: Optional[Literal["numbered", "mla", "apa", "chicago"]],
         mcps: Optional[List[Dict[str, Any]]],
         **kwargs: Any,
-    ) -> Dict[str, Any]:
+    ) -> Union[Dict[str, Any], AsyncGenerator[bytes, None]]:
         """Get results from the Tavily Research API asynchronously."""
 
-        # Function to perform the API call
+        params = {
+            "input": input,
+            "model": research_model,
+            "output_schema": output_schema,
+            "stream": stream,
+            "citation_format": citation_format,
+            "mcps": mcps,
+            **kwargs,
+        }
+
+        # Remove None values
+        params = {k: v for k, v in params.items() if v is not None}
+
+        headers = {
+            "Authorization": f"Bearer {self.tavily_api_key.get_secret_value()}",
+            "Content-Type": "application/json",
+            "X-Client-Source": "langchain-tavily",
+        }
+
+        base_url = self.api_base_url or TAVILY_API_URL
+        
+        if stream is True:
+            timeout = ClientTimeout(total=None)
+            
+            async def stream_generator() -> AsyncGenerator[bytes, None]:
+                try:
+                    async with aiohttp.ClientSession(timeout=timeout) as session:
+                        async with session.post(
+                            f"{base_url}/research", json=params, headers=headers
+                        ) as res:
+                            if res.status != 200:
+                                error_text = await res.text()
+                                raise Exception(f"Error {res.status}: {error_text}")
+                            
+                            async for chunk in res.content.iter_any():
+                                if chunk:
+                                    yield chunk
+                except Exception as e:
+                    raise Exception(f"Error during research stream: {str(e)}")
+            
+            return stream_generator()
+        
+        # Non-streaming response
         async def fetch() -> str:
-            params = {
-                "input": input,
-                "model": research_model,
-                "output_schema": output_schema,
-                "stream": stream,
-                "citation_format": citation_format,
-                "mcps": mcps,
-                **kwargs,
-            }
-
-            # Remove None values
-            params = {k: v for k, v in params.items() if v is not None}
-
-            headers = {
-                "Authorization": f"Bearer {self.tavily_api_key.get_secret_value()}",
-                "Content-Type": "application/json",
-                "X-Client-Source": "langchain-tavily",
-            }
-
-            base_url = self.api_base_url or TAVILY_API_URL
             async with aiohttp.ClientSession() as session:
                 async with session.post(
                     f"{base_url}/research", json=params, headers=headers

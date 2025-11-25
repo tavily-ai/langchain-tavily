@@ -1,6 +1,6 @@
 """Tool for the Tavily Research API."""
 
-from typing import Any, Dict, List, Literal, Optional, Type
+from typing import Any, AsyncGenerator, Dict, Generator, List, Literal, Optional, Type, Union
 
 from langchain_core.callbacks import (
     AsyncCallbackManagerForToolRun,
@@ -190,16 +190,19 @@ class TavilyResearch(BaseTool):  # type: ignore[override, override]
         mcps: Optional[List[MCPObject]] = None,
         run_manager: Optional[CallbackManagerForToolRun] = None,
         **kwargs: Any,
-    ) -> Dict[str, Any]:
+    ) -> Union[Dict[str, Any], Generator[bytes, None, None]]:
         """Execute a research task using the Tavily Research API.
 
         Returns:
-            Dict[str, Any]: Research task response containing:
-                - request_id: ID to use for retrieving research results
-                - created_at: Timestamp when the task was created
-                - status: Current status of the research task (e.g., "pending", "in_progress")
-                - input: The research task input
-                - model: The research model used
+            When stream=False or None:
+                Dict[str, Any]: Research task response containing:
+                    - request_id: ID to use for retrieving research results
+                    - created_at: Timestamp when the task was created
+                    - status: Current status of the research task (e.g., "pending", "in_progress")
+                    - input: The research task input
+                    - model: The research model used
+            When stream=True:
+                Generator[bytes, None, None]: A generator that yields response chunks as bytes
         """
         try:
             # Convert MCPObject models to dicts for API
@@ -216,11 +219,13 @@ class TavilyResearch(BaseTool):  # type: ignore[override, override]
                     for mcp in mcps
                 ]
             
+            is_streaming = stream if stream is not None else (self.stream if self.stream is not None else False)
+            
             raw_results = self.api_wrapper.raw_results(
                 input=input,
                 research_model=research_model if research_model is not None else self.research_model,
                 output_schema=output_schema,
-                stream=stream,
+                stream=is_streaming,
                 citation_format=self.citation_format
                 if self.citation_format
                 else citation_format,
@@ -245,8 +250,20 @@ class TavilyResearch(BaseTool):  # type: ignore[override, override]
         mcps: Optional[List[MCPObject]] = None,
         run_manager: Optional[AsyncCallbackManagerForToolRun] = None,
         **kwargs: Any,
-    ) -> Dict[str, Any]:
-        """Use the tool asynchronously."""
+    ) -> Union[Dict[str, Any], AsyncGenerator[bytes, None]]:
+        """Use the tool asynchronously.
+        
+        Returns:
+            When stream=False or None:
+                Dict[str, Any]: Research task response containing:
+                    - request_id: ID to use for retrieving research results
+                    - created_at: Timestamp when the task was created
+                    - status: Current status of the research task (e.g., "pending", "in_progress")
+                    - input: The research task input
+                    - model: The research model used
+            When stream=True:
+                AsyncGenerator[bytes, None]: An async generator that yields response chunks as bytes
+        """
         try:
             # Convert MCPObject models to dicts for API
             mcps_dict = None
@@ -262,23 +279,27 @@ class TavilyResearch(BaseTool):  # type: ignore[override, override]
                     for mcp in mcps
                 ]
             
+            is_streaming = stream if stream is not None else (self.stream if self.stream is not None else False)
+            
             raw_results = await self.api_wrapper.raw_results_async(
                 input=input,
                 research_model=research_model if research_model is not None else self.research_model,
                 output_schema=output_schema,
-                stream=stream,
+                stream=is_streaming,
                 citation_format=self.citation_format
                 if self.citation_format
                 else citation_format,
                 mcps=mcps_dict,
                 **kwargs,
             )
-
             return raw_results
         except ToolException:
             # Re-raise tool exceptions
             raise
         except Exception as e:
+            is_streaming = stream if stream is not None else (self.stream if self.stream is not None else False)
+            if is_streaming:
+                raise
             return {"error": str(e)}
 
 
