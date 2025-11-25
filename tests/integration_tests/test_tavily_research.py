@@ -14,6 +14,7 @@ class TestTavilyResearchToolIntegration(ToolsIntegrationTests):
     def tool_constructor_params(self) -> dict:
         # Parameters for initializing the TavilyResearch tool
         return {
+            "tavily_api_key": "fake_key_for_testing",
             "model": "tvly-mini",
         }
 
@@ -36,7 +37,9 @@ class TestTavilyGetResearchToolIntegration(ToolsIntegrationTests):
     @property
     def tool_constructor_params(self) -> dict:
         # Parameters for initializing the TavilyGetResearch tool
-        return {}
+        return {
+            "tavily_api_key": "fake_key_for_testing",
+        }
 
     @property
     def tool_invoke_params_example(self) -> dict:
