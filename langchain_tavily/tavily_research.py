@@ -42,13 +42,13 @@ class TavilyResearchInput(BaseModel):
     input: str = Field(
         description="The research task description. This is the main query that describes what you want to research."
     )
-    model: Optional[Literal["tvly-mini", "tvly-pro", "auto"]] = Field(
+    model: Optional[Literal["mini", "pro", "auto"]] = Field(
         default=None,
         description="""Controls the depth and thoroughness of the research.
         
-        Use "tvly-mini" for quick, surface-level research on common topics.
+        Use "mini" for quick, surface-level research on common topics.
         
-        Use "tvly-pro" for comprehensive, in-depth research requiring extensive analysis 
+        Use "pro" for comprehensive, in-depth research requiring extensive analysis 
         and multiple sources. Best for complex topics or when detailed information is needed.
         
         Use "auto" to let Tavily automatically determine the appropriate depth 
@@ -139,8 +139,8 @@ class TavilyResearch(BaseTool):  # type: ignore[override, override]
     handle_tool_error: bool = True
 
     # Default parameters
-    research_model: Optional[Literal["tvly-mini", "tvly-pro", "auto"]] = Field(default="auto", alias="model")
-    """The depth of the research. It can be 'tvly-mini', 'tvly-pro', or 'auto'
+    research_model: Optional[Literal["mini", "pro", "auto"]] = Field(default="auto", alias="model")
+    """The depth of the research. It can be 'mini', 'pro', or 'auto'
     
     Default is 'auto' (uses API default)
     """
@@ -183,7 +183,7 @@ class TavilyResearch(BaseTool):  # type: ignore[override, override]
     def _run(
         self,
         input: str,
-        research_model: Optional[Literal["tvly-mini", "tvly-pro", "auto"]] = None,
+        research_model: Optional[Literal["mini", "pro", "auto"]] = None,
         output_schema: Optional[Dict[str, Any]] = None,
         stream: Optional[bool] = None,
         citation_format: Optional[Literal["numbered", "mla", "apa", "chicago"]] = None,
@@ -243,7 +243,7 @@ class TavilyResearch(BaseTool):  # type: ignore[override, override]
     async def _arun(
         self,
         input: str,
-        research_model: Optional[Literal["tvly-mini", "tvly-pro", "auto"]] = None,
+        research_model: Optional[Literal["mini", "pro", "auto"]] = None,
         output_schema: Optional[Dict[str, Any]] = None,
         stream: Optional[bool] = None,
         citation_format: Optional[Literal["numbered", "mla", "apa", "chicago"]] = None,

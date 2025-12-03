@@ -29,7 +29,7 @@ class TestTavilyResearchToolUnit(ToolsUnitTests):
         # Parameters for initializing the TavilyResearch tool
         return {
             "tavily_api_key": "fake_key_for_testing",
-            "model": "tvly-mini",
+            "model": "mini",
             "citation_format": "numbered",
         }
 

@@ -15,7 +15,7 @@ class TestTavilyResearchToolIntegration(ToolsIntegrationTests):
         # Parameters for initializing the TavilyResearch tool
         return {
             "tavily_api_key": "fake_key_for_testing",
-            "model": "tvly-mini",
+            "model": "mini",
         }
 
     @property

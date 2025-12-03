@@ -645,7 +645,7 @@ class TavilyResearchAPIWrapper(BaseModel):
     def raw_results(
         self,
         input: str,
-        research_model: Optional[Literal["tvly-mini", "tvly-pro", "auto"]],
+        research_model: Optional[Literal["mini", "pro", "auto"]],
         output_schema: Optional[Dict[str, Any]],
         stream: Optional[bool],
         citation_format: Optional[Literal["numbered", "mla", "apa", "chicago"]],
@@ -714,7 +714,7 @@ class TavilyResearchAPIWrapper(BaseModel):
     async def raw_results_async(
         self,
         input: str,
-        research_model: Optional[Literal["tvly-mini", "tvly-pro", "auto"]],
+        research_model: Optional[Literal["mini", "pro", "auto"]],
         output_schema: Optional[Dict[str, Any]],
         stream: Optional[bool],
         citation_format: Optional[Literal["numbered", "mla", "apa", "chicago"]],
