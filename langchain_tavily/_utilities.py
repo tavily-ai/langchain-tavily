@@ -649,7 +649,6 @@ class TavilyResearchAPIWrapper(BaseModel):
         output_schema: Optional[Dict[str, Any]],
         stream: Optional[bool],
         citation_format: Optional[Literal["numbered", "mla", "apa", "chicago"]],
-        mcps: Optional[List[Dict[str, Any]]],
         **kwargs: Any,
     ) -> Union[Dict[str, Any], Generator[bytes, None, None]]:
         params = {
@@ -658,7 +657,6 @@ class TavilyResearchAPIWrapper(BaseModel):
             "output_schema": output_schema,
             "stream": stream,
             "citation_format": citation_format,
-            "mcps": mcps,
             **kwargs,
         }
 
@@ -718,7 +716,6 @@ class TavilyResearchAPIWrapper(BaseModel):
         output_schema: Optional[Dict[str, Any]],
         stream: Optional[bool],
         citation_format: Optional[Literal["numbered", "mla", "apa", "chicago"]],
-        mcps: Optional[List[Dict[str, Any]]],
         **kwargs: Any,
     ) -> Union[Dict[str, Any], AsyncGenerator[bytes, None]]:
         """Get results from the Tavily Research API asynchronously."""
@@ -729,7 +726,6 @@ class TavilyResearchAPIWrapper(BaseModel):
             "output_schema": output_schema,
             "stream": stream,
             "citation_format": citation_format,
-            "mcps": mcps,
             **kwargs,
         }
 
@@ -797,7 +793,7 @@ class TavilyResearchAPIWrapper(BaseModel):
             f"{base_url}/research/{request_id}",
             headers=headers,
         )
-        if response.status_code != 200:
+        if response.status_code not in [200, 202]:
             detail = response.json().get("detail", {})
             error_message = (
                 detail.get("error") if isinstance(detail, dict) else "Unknown error"
@@ -820,7 +816,7 @@ class TavilyResearchAPIWrapper(BaseModel):
             async with session.get(
                 f"{base_url}/research/{request_id}", headers=headers
             ) as res:
-                if res.status == 200:
+                if res.status in [200, 202]:
                     data = await res.text()
                     return json.loads(data)
                 else:

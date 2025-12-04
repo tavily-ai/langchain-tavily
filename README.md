@@ -378,11 +378,10 @@ Here we show how to instantiate an instance of the Tavily Research tool. After i
 
 The tool accepts various parameters during instantiation:
 
-- `model` (optional, str): Controls the depth and thoroughness of the research. Can be "mini" (quick, surface-level), "pro" (comprehensive, in-depth), or "auto" (automatically determined). Default is "auto".
+- `model` (optional, str): The model used by the research agent. Can be "mini" (quick, surface-level), "pro" (comprehensive, in-depth), or "auto" (automatically determined). Default is "auto".
 - `output_schema` (optional, dict): JSON Schema dict for structured output format. Default is None (returns unstructured text content).
 - `stream` (optional, bool): Whether to stream the research task results. Default is False.
 - `citation_format` (optional, str): Citation format for sources in the research report. Can be "numbered", "mla", "apa", or "chicago". Default is "numbered".
-- `mcps` (optional, List[MCPObject]): List of MCP (Model Context Protocol) objects to use for the research task. Default is None.
 
 For a comprehensive overview of the available parameters, refer to the [Tavily Research API documentation](https://docs.tavily.com/documentation/api-reference/endpoint/research)
 
@@ -390,11 +389,10 @@ For a comprehensive overview of the available parameters, refer to the [Tavily R
 from langchain_tavily import TavilyResearch
 
 tool = TavilyResearch(
-    model="auto",
+    model="mini",
     # output_schema=None,
     # stream=False,
     # citation_format="numbered",
-    # mcps=None
 )
 ```
 
@@ -402,8 +400,8 @@ tool = TavilyResearch(
 
 The Tavily research tool accepts the following arguments during invocation:
 
-- `input` (required): The research task description. This is the main query that describes what you want to research.
-- The following arguments can also be set during invocation: `model`, `output_schema`, `stream`, `citation_format`, and `mcps`.
+- `input` (required): TThe research task or question to investigate.
+- The following arguments can also be set during invocation: `model`, `output_schema`, `stream`, and `citation_format`.
 
 NOTE: If you set an argument during instantiation this value will persist and overwrite the value passed during invocation.
 
@@ -457,7 +455,6 @@ output:
         {
             'title': 'AI Research Paper',
             'url': 'https://example.com/ai-paper',
-            'content': '...'
         },
         ...
     ]
@@ -480,128 +477,3 @@ stream = tool.invoke({
 for chunk in stream:
     print(chunk.decode('utf-8'))
 ```
-
-## Tavily Research Agent
-
-This example demonstrates how to build a powerful web research agent using Tavily's search and extract Langchain tools.
-
-### Features
-
-- Internet Search: Query the web for up-to-date information using Tavily's search API
-- Content Extraction: Extract and analyze specific content from web pages
-- Seamless Integration: Works with OpenAI's function calling capability for reliable tool use
-
-```python
-# !pip install -qU langchain langchain-openai langchain-tavily
-from typing import Any, Dict, Optional
-import datetime
-
-from langchain.agents import create_openai_tools_agent, AgentExecutor
-from langchain.chat_models import init_chat_model
-from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
-from langchain_openai import ChatOpenAI
-from langchain_tavily import TavilySearch, TavilyExtract
-from langchain.schema import HumanMessage, SystemMessage
-
-# Initialize LLM
-llm = ChatOpenAI(temperature=0, model="gpt-4o")
-
-# Initialize Tavily Search Tool
-tavily_search_tool = TavilySearch(
-    max_results=5,
-    topic="general",
-)
-# Initialize Tavily Extract Tool
-tavily_extract_tool = TavilyExtract()
-
-tools = [tavily_search_tool, tavily_extract_tool]
-
-# Set up Prompt with 'agent_scratchpad'
-today = datetime.datetime.today().strftime("%D")
-prompt = ChatPromptTemplate.from_messages([
-    ("system", f"""You are a helpful reaserch assistant, you will be given a query and you will need to
-    search the web for the most relevant information then extract content to gain more insights. The date today is {today}."""),
-    MessagesPlaceholder(variable_name="messages"),
-    MessagesPlaceholder(variable_name="agent_scratchpad"),  # Required for tool calls
-])
-# Create an agent that can use tools
-agent = create_openai_tools_agent(
-    llm=llm,
-    tools=tools,
-    prompt=prompt
-)
-
-# Create an Agent Executor to handle tool execution
-agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=True)
-
-user_input =  "Research the latest developments in quantum computing and provide a detailed summary of how it might impact cybersecurity in the next decade."
-
-# Construct input properly as a dictionary
-response = agent_executor.invoke({"messages": [HumanMessage(content=user_input)]})
-```
-
-## Tavily Search and Crawl Agent Example
-
-This example demonstrates how to build a powerful web research agent using Tavily's search and crawl Langchain tools to find and analyze information from websites.
-
-### Features
-
-- Internet Search: Query the web for up-to-date information using Tavily's search API
-- Website Crawling: Crawl websites to find specific information and content
-- Seamless Integration: Works with OpenAI's function calling capability for reliable tool use
-
-```python
-from typing import Any, Dict, Optional
-import datetime
-
-from langchain.agents import create_openai_tools_agent, AgentExecutor
-from langchain.chat_models import init_chat_model
-from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
-from langchain_openai import ChatOpenAI
-from langchain_tavily import TavilySearch, TavilyCrawl
-from langchain.schema import HumanMessage, SystemMessage
-
-# Initialize LLM
-llm = init_chat_model(model="gpt-4.1", model_provider="openai", temperature=0)
-
-# Initialize Tavily Search Tool
-tavily_search_tool = TavilySearch(
-    max_results=5,
-    topic="general",
-)
-
-tavily_crawl_tool = TavilyCrawl()
-
-# Set up Prompt with 'agent_scratchpad'
-today = datetime.datetime.today().strftime("%D")
-prompt = ChatPromptTemplate.from_messages([
-    ("system", f"""You are a helpful reaserch assistant, you will be given a query and you will need to
-    search the web and crawl the web for the most relevant information. The date today is {today}."""),
-    MessagesPlaceholder(variable_name="messages"),
-    MessagesPlaceholder(variable_name="agent_scratchpad"),  # Required for tool calls
-])
-
-# Create an agent that can use tools
-agent = create_openai_tools_agent(
-    llm=llm,
-    tools=[tavily_search_tool, tavily_crawl_tool],
-    prompt=prompt
-)
-
-# Create an Agent Executor to handle tool execution
-agent_executor = AgentExecutor(agent=agent, tools=[tavily_search_tool, tavily_crawl_tool], verbose=True)
-
-user_input =  "Find the base url of apple and then crawl the base url to find all iphone models"
-
-# Construct input properly as a dictionary
-response = agent_executor.invoke({"messages": [HumanMessage(content=user_input)]})
-```
-
-This example shows how to:
-
-1. Initialize both Tavily Search and Crawl tools
-2. Set up an agent with a custom prompt that includes the current date
-3. Create an agent executor that can use both tools
-4. Process a user query that requires both searching and crawling capabilities
-
-The agent will first use the search tool to find Apple's base URL, then use the crawl tool to explore the website and find information about iPhone models.
