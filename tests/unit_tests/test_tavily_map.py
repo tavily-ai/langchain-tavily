@@ -51,3 +51,15 @@ class TestTavilyMapToolUnit(ToolsUnitTests):  # Fixed class name to match its pu
         have {"name", "id", "args"} keys.
         """
         return {"url": "https://en.wikipedia.org/wiki/Japan"}
+
+    def test_include_usage_forwarded(self) -> None:
+        mock_response = {"results": ["https://example.com"]}
+        with patch(
+            "langchain_tavily.tavily_map.TavilyMapAPIWrapper.raw_results",
+            return_value=mock_response,
+        ) as mock_raw:
+            tool = TavilyMap(tavily_api_key="fake_key_for_testing")
+            tool._run(url="https://en.wikipedia.org/wiki/Japan", include_usage=True)
+
+        assert mock_raw.called
+        assert mock_raw.call_args.kwargs["include_usage"] is True

@@ -31,6 +31,8 @@ if not os.environ.get("TAVILY_API_KEY"):
     os.environ["TAVILY_API_KEY"] = getpass.getpass("Tavily API key:\n")
 ```
 
+> **Usage reporting note:** Every Tavily endpoint now accepts an optional `include_usage` boolean flag. Set it to `True` when you need credit usage information in the response. Credit usage defaults to `False` and may be reported as `0` until Tavily's internal thresholds are reached for a given endpoint.
+
 ## Tavily Search
 
 Here we show how to instantiate an instance of the Tavily search tool. The tool accepts various parameters to customize the search. After instantiation we invoke the tool with a simple query. This tool allows you to complete search queries using Tavily's Search API endpoint.
@@ -51,6 +53,7 @@ The tool accepts various parameters during instantiation:
 - `include_domains` (optional, List[str]): List of domains to specifically include. Default is None.
 - `exclude_domains` (optional, List[str]): List of domains to specifically exclude. Default is None.
 - `country` (optional, str): Boost search results from a specific country. This will prioritize content from the selected country in the search results. Available only if topic is general.
+- `include_usage` (optional, bool): Whether to include credit usage information in the response. Defaults to False and may initially report as 0 until thresholds are met.
 
 For a comprehensive overview of the available parameters, refer to the [Tavily Search API documentation](https://docs.tavily.com/documentation/api-reference/endpoint/search)
 
@@ -78,7 +81,7 @@ tool = TavilySearch(
 The Tavily search tool accepts the following arguments during invocation:
 
 - `query` (required): A natural language search query
-- The following arguments can also be set during invocation : `include_images`, `include_favicon`, `search_depth` , `time_range`, `include_domains`, `exclude_domains`
+- The following arguments can also be set during invocation : `include_images`, `include_favicon`, `include_usage`, `search_depth`, `time_range`, `include_domains`, `exclude_domains`
 - For reliability and performance reasons, certain parameters that affect response size cannot be modified during invocation: `include_answer` and `include_raw_content`. These limitations prevent unexpected context window issues and ensure consistent results.
 
 NOTE: If you set an argument during instantiation this value will persist and overwrite the value passed during invocation.
@@ -176,6 +179,7 @@ The tool accepts various parameters during instantiation:
 - `include_images` (optional, bool): Whether to include images in the extraction. Default is False.
 - `include_favicon` (optional, bool): Whether to include the favicon URL for each result. Default is False.
 - `format` (optional, str): The format of the extracted web page content. "markdown" returns content in markdown format. "text" returns plain text and may increase latency.
+- `include_usage` (optional, bool): Whether to include credit usage information in the response. Defaults to False and may show 0 until usage thresholds are met.
 
 For a comprehensive overview of the available parameters, refer to the [Tavily Extract API documentation](https://docs.tavily.com/documentation/api-reference/endpoint/extract)
 
@@ -195,7 +199,7 @@ tool = TavilyExtract(
 The Tavily extract tool accepts the following arguments during invocation:
 
 - `urls` (required): A list of URLs to extract content from.
-- The parameters `extract_depth`, `include_images`, and `include_favicon` can also be set during invocation
+- The parameters `extract_depth`, `include_images`, `include_favicon`, and `include_usage` can also be set during invocation
 
 NOTE: If you set an argument during instantiation this value will persist and overwrite the value passed during invocation.
 
@@ -242,6 +246,7 @@ The tool accepts various parameters during instantiation:
 - `extract_depth` (optional, str): Depth of content extraction, either "basic" or "advanced". Default is "basic".
 - `include_favicon` (optional, bool): Whether to include the favicon URL for each result. Default is False.
 - `format` (optional, str): The format of the extracted web page content. "markdown" returns content in markdown format. "text" returns plain text and may increase latency.
+- `include_usage` (optional, bool): Whether to include credit usage information in the response. Defaults to False and may report as 0 until Tavily's reporting thresholds are reached.
 
 For a comprehensive overview of the available parameters, refer to the [Tavily Crawl API documentation](https://docs.tavily.com/documentation/api-reference/endpoint/crawl)
 
@@ -270,7 +275,7 @@ tool = TavilyCrawl(
 
 The Tavily crawl tool accepts the following arguments during invocation:
 - `url` (required): The root URL to begin the crawl.
-- All other parameters can also be set during invocation: `max_depth`, `max_breadth`, `limit`, `instructions`, `select_paths`, `select_domains`, `exclude_paths`, `exclude_domains`,`allow_external`, `include_images`, `categories`, `extract_depth`, and `include_favicon`
+- All other parameters can also be set during invocation: `max_depth`, `max_breadth`, `limit`, `instructions`, `select_paths`, `select_domains`, `exclude_paths`, `exclude_domains`,`allow_external`, `include_images`, `categories`, `extract_depth`, `include_favicon`, and `include_usage`
 
 NOTE: If you set an argument during instantiation this value will persist and overwrite the value passed during invocation.
 
@@ -319,6 +324,7 @@ The tool accepts various parameters during instantiation:
 - `exclude_domains` (optional, List[str]): Regex patterns to exclude specific domains or subdomains from mapping 
 - `allow_external` (optional, bool): Allow following external domain links. Default is False.
 - `categories` (optional, str): Filter URLs by predefined categories ("Careers", "Blogs", "Documentation", "About", "Pricing", "Community", "Developers", "Contact", "Media").
+- `include_usage` (optional, bool): Whether to include credit usage information in the response. Defaults to False and may report as 0 until Tavily's reporting thresholds for the map endpoint are met.
 
 For a comprehensive overview of the available parameters, refer to the [Tavily Map API documentation](https://docs.tavily.com/documentation/api-reference/endpoint/map)
 
@@ -343,7 +349,7 @@ tool = TavilyMap(
 
 The Tavily map tool accepts the following arguments during invocation:
 - `url` (required): The root URL to begin the mapping.
-- All other parameters can also be set during invocation: `max_depth`, `max_breadth`, `limit`, `instructions`, `select_paths`, `select_domains`, `exclude_paths`, `exclude_domains`, `allow_external`, and `categories`.
+- All other parameters can also be set during invocation: `max_depth`, `max_breadth`, `limit`, `instructions`, `select_paths`, `select_domains`, `exclude_paths`, `exclude_domains`, `allow_external`, `categories`, and `include_usage`.
 
 NOTE: If you set an argument during instantiation this value will persist and overwrite the value passed during invocation.
 
@@ -490,4 +496,8 @@ This example shows how to:
 4. Process a user query that requires both searching and crawling capabilities
 
 The agent will first use the search tool to find Apple's base URL, then use the crawl tool to explore the website and find information about iPhone models.
+
+### Include Usage With OpenAI or Anthropic Agents
+
+When wiring these tools into `langchain_openai.ChatOpenAI` or `langchain_anthropic.ChatAnthropic`, set `include_usage=True` on the tool (or pass `{"include_usage": True}` in the agent call) whenever you want Tavily to return credit usage. The flag is optional, defaults to `False`, and reported usage may stay at `0` until Tavily's usage accounting reaches the necessary thresholds for the request.
 

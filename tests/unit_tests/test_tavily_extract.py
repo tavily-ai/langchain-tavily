@@ -42,3 +42,17 @@ class TestTavilyExtractToolUnit(ToolsUnitTests):
         have {"name", "id", "args"} keys.
         """
         return {"urls": ["https://en.wikipedia.org/wiki/Lionel_Messi"]}
+
+    def test_include_usage_forwarded(self) -> None:
+        mock_response = {"results": [{"url": "https://example.com"}], "failed_results": []}
+        with patch(
+            "langchain_tavily.tavily_extract.TavilyExtractAPIWrapper.raw_results",
+            return_value=mock_response,
+        ) as mock_raw:
+            tool = TavilyExtract(tavily_api_key="fake_key_for_testing")
+            tool._run(
+                urls=["https://en.wikipedia.org/wiki/Lionel_Messi"], include_usage=True
+            )
+
+        assert mock_raw.called
+        assert mock_raw.call_args.kwargs["include_usage"] is True

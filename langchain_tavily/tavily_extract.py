@@ -47,6 +47,13 @@ class TavilyExtractInput(BaseModel):
         default=False,
         description="Whether to include the favicon URL for each result.",
     )
+    include_usage: Optional[bool] = Field(
+        default=False,
+        description="""Whether to include credit usage information in the response.
+
+        Usage may report as 0 until reporting thresholds are met.
+        """,
+    )
 
 
 def _generate_suggestions(params: Dict[str, Any]) -> List[str]:
@@ -103,6 +110,11 @@ class TavilyExtract(BaseTool):  # type: ignore[override, override]
     
     Default is False.
     """
+    include_usage: Optional[bool] = None
+    """Whether to include credit usage information in the response.
+    
+    Default is False.
+    """
     apiwrapper: TavilyExtractAPIWrapper = Field(default_factory=TavilyExtractAPIWrapper)  # type: ignore[arg-type]
 
     def __init__(self, **kwargs: Any) -> None:
@@ -122,6 +134,7 @@ class TavilyExtract(BaseTool):  # type: ignore[override, override]
         extract_depth: Optional[Literal["basic", "advanced"]] = None,
         include_images: Optional[bool] = None,
         include_favicon: Optional[bool] = None,
+        include_usage: Optional[bool] = None,
         run_manager: Optional[CallbackManagerForToolRun] = None,
         **kwargs: Any,
     ) -> Dict[str, Any]:
@@ -139,6 +152,9 @@ class TavilyExtract(BaseTool):  # type: ignore[override, override]
                 include_favicon=self.include_favicon
                 if self.include_favicon
                 else include_favicon,
+                include_usage=self.include_usage
+                if self.include_usage is not None
+                else include_usage,
                 format=self.format,
                 **kwargs,
             )
@@ -173,6 +189,7 @@ class TavilyExtract(BaseTool):  # type: ignore[override, override]
         extract_depth: Optional[Literal["basic", "advanced"]] = None,
         include_images: Optional[bool] = None,
         include_favicon: Optional[bool] = None,
+        include_usage: Optional[bool] = None,
         run_manager: Optional[AsyncCallbackManagerForToolRun] = None,
         **kwargs: Any,
     ) -> Dict[str, Any]:
@@ -189,6 +206,9 @@ class TavilyExtract(BaseTool):  # type: ignore[override, override]
                 include_favicon=self.include_favicon
                 if self.include_favicon
                 else include_favicon,
+                include_usage=self.include_usage
+                if self.include_usage is not None
+                else include_usage,
                 format=self.format,
                 **kwargs,
             )

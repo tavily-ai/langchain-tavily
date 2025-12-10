@@ -45,3 +45,15 @@ class TestTavilySearchToolUnit(ToolsUnitTests):  # Fixed class name to match its
         have {"name", "id", "args"} keys.
         """
         return {"query": "best time to visit japan"}
+
+    def test_include_usage_forwarded(self) -> None:
+        mock_response = {"results": [{"url": "https://example.com", "content": ""}]}
+        with patch(
+            "langchain_tavily.tavily_search.TavilySearchAPIWrapper.raw_results",
+            return_value=mock_response,
+        ) as mock_raw:
+            tool = TavilySearch(tavily_api_key="fake_key_for_testing")
+            tool._run(query="best time to visit japan", include_usage=True)
+
+        assert mock_raw.called
+        assert mock_raw.call_args.kwargs["include_usage"] is True

@@ -111,6 +111,14 @@ class TavilySearchInput(BaseModel):
         Default is False to minimize response size and API usage.
         """,  # noqa: E501
     )
+    include_usage: Optional[bool] = Field(
+        default=False,
+        description="""Whether to include credit usage information in the response.
+
+        Leave as False to minimize payload size. When enabled, credit usage may
+        initially report as 0 until the request meets reporting thresholds.
+        """,  # noqa: E501
+    )
     start_date: Optional[str] = Field(
         default=None,
         description="""Filters search results to include only content published on or after this date.
@@ -328,6 +336,11 @@ class TavilySearch(BaseTool):  # type: ignore[override]
     
     Default is False.
     """
+    include_usage: Optional[bool] = None
+    """Whether to include credit usage information in the response.
+    
+    Default is False.
+    """
     api_wrapper: TavilySearchAPIWrapper = Field(default_factory=TavilySearchAPIWrapper)  # type: ignore[arg-type]
 
     def __init__(self, **kwargs: Any) -> None:
@@ -352,6 +365,7 @@ class TavilySearch(BaseTool):  # type: ignore[override]
         time_range: Optional[Literal["day", "week", "month", "year"]] = None,
         topic: Optional[Literal["general", "news", "finance"]] = None,
         include_favicon: Optional[bool] = None,
+        include_usage: Optional[bool] = None,
         start_date: Optional[str] = None,
         end_date: Optional[str] = None,
         run_manager: Optional[CallbackManagerForToolRun] = None,
@@ -389,6 +403,9 @@ class TavilySearch(BaseTool):  # type: ignore[override]
                 include_favicon=self.include_favicon
                 if self.include_favicon
                 else include_favicon,
+                include_usage=self.include_usage
+                if self.include_usage is not None
+                else include_usage,
                 country=self.country,
                 max_results=self.max_results,
                 include_answer=self.include_answer,
@@ -435,6 +452,7 @@ class TavilySearch(BaseTool):  # type: ignore[override]
         time_range: Optional[Literal["day", "week", "month", "year"]] = None,
         topic: Optional[Literal["general", "news", "finance"]] = "general",
         include_favicon: Optional[bool] = False,
+        include_usage: Optional[bool] = None,
         start_date: Optional[str] = None,
         end_date: Optional[str] = None,
         run_manager: Optional[AsyncCallbackManagerForToolRun] = None,
@@ -459,6 +477,9 @@ class TavilySearch(BaseTool):  # type: ignore[override]
                 include_favicon=self.include_favicon
                 if self.include_favicon
                 else include_favicon,
+                include_usage=self.include_usage
+                if self.include_usage is not None
+                else include_usage,
                 country=self.country,
                 max_results=self.max_results,
                 include_answer=self.include_answer,

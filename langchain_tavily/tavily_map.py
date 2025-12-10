@@ -143,6 +143,14 @@ class TavilyMapInput(BaseModel):
         ex. "Crawl tavily.com for API documentation" ---> categories="Documentation"
     """,  # noqa: E501
     )
+    include_usage: Optional[bool] = Field(
+        default=False,
+        description="""Whether to include credit usage information in the response.
+
+        Usage numbers may report as 0 until Tavily accumulates enough data for
+        that request.
+        """,
+    )
 
 
 def _generate_suggestions(params: Dict[str, Any]) -> List[str]:
@@ -252,6 +260,11 @@ class TavilyMap(BaseTool):  # type: ignore[override]
     ] = None
     """Filter URLs using predefined categories like 'Documentation', 'Blogs', etc.
     """
+    include_usage: Optional[bool] = None
+    """Whether to include credit usage information in the response.
+    
+    Default is False.
+    """
     api_wrapper: TavilyMapAPIWrapper = Field(default_factory=TavilyMapAPIWrapper)  # type: ignore[arg-type]
 
     def __init__(self, **kwargs: Any) -> None:
@@ -293,6 +306,7 @@ class TavilyMap(BaseTool):  # type: ignore[override]
                 ]
             ]
         ] = None,
+        include_usage: Optional[bool] = None,
         run_manager: Optional[CallbackManagerForToolRun] = None,
         **kwargs: Any,
     ) -> Dict[str, Any]:
@@ -331,6 +345,9 @@ class TavilyMap(BaseTool):  # type: ignore[override]
                 if self.allow_external
                 else allow_external,
                 categories=self.categories if self.categories else categories,
+                include_usage=self.include_usage
+                if self.include_usage is not None
+                else include_usage,
                 **kwargs,
             )
 
@@ -387,6 +404,7 @@ class TavilyMap(BaseTool):  # type: ignore[override]
                 ]
             ]
         ] = None,
+        include_usage: Optional[bool] = None,
         run_manager: Optional[AsyncCallbackManagerForToolRun] = None,
     ) -> Dict[str, Any]:
         """Use the tool asynchronously."""
@@ -411,6 +429,9 @@ class TavilyMap(BaseTool):  # type: ignore[override]
                 if self.allow_external
                 else allow_external,
                 categories=self.categories if self.categories else categories,
+                include_usage=self.include_usage
+                if self.include_usage is not None
+                else include_usage,
             )
 
             # Check if results are empty and raise a specific exception
