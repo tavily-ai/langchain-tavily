@@ -45,3 +45,26 @@ class TestTavilySearchToolUnit(ToolsUnitTests):  # Fixed class name to match its
         have {"name", "id", "args"} keys.
         """
         return {"query": "best time to visit japan"}
+
+    def test_include_usage_controls_response_payload(self) -> None:
+        tool = TavilySearch()
+        tool.api_wrapper = MagicMock()
+        tool.api_wrapper.raw_results.return_value = {
+            "results": [{"title": "example"}],
+            "usage": 3,
+        }
+
+        result = tool.invoke({"query": "best cafes"})
+        assert "usage" not in result
+
+        tool_with_usage = TavilySearch(include_usage=True)
+        tool_with_usage.api_wrapper = MagicMock()
+        tool_with_usage.api_wrapper.raw_results.return_value = {
+            "results": [{"title": "example"}],
+            "usage": 4,
+        }
+        result_with_usage = tool_with_usage.invoke({"query": "best cafes"})
+        assert result_with_usage["usage"] == 4
+
+        _, kwargs = tool_with_usage.api_wrapper.raw_results.call_args
+        assert kwargs["include_usage"] is True

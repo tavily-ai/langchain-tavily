@@ -47,6 +47,18 @@ class TavilyExtractInput(BaseModel):
         default=False,
         description="Whether to include the favicon URL for each result.",
     )
+    include_usage: Optional[bool] = Field(
+        default=False,
+        description="""Include Tavily credit usage metadata in the response.
+
+        Set to True to audit credits consumed for the extraction request.
+        Leave as False (default) to omit usage from the response payload.
+
+        Credit usage may return 0 when minimum billing thresholds are not met.
+        See https://github.com/tavily-ai/new-docs/blob/main/docs/credits-pricing.md
+        for details.
+        """,  # noqa: E501
+    )
 
 
 def _generate_suggestions(params: Dict[str, Any]) -> List[str]:
@@ -103,6 +115,11 @@ class TavilyExtract(BaseTool):  # type: ignore[override, override]
     
     Default is False.
     """
+    include_usage: Optional[bool] = None
+    """Whether to include Tavily credit usage metadata in the response.
+    
+    Default is False.
+    """
     apiwrapper: TavilyExtractAPIWrapper = Field(default_factory=TavilyExtractAPIWrapper)  # type: ignore[arg-type]
 
     def __init__(self, **kwargs: Any) -> None:
@@ -122,10 +139,15 @@ class TavilyExtract(BaseTool):  # type: ignore[override, override]
         extract_depth: Optional[Literal["basic", "advanced"]] = None,
         include_images: Optional[bool] = None,
         include_favicon: Optional[bool] = None,
+        include_usage: Optional[bool] = None,
         run_manager: Optional[CallbackManagerForToolRun] = None,
         **kwargs: Any,
     ) -> Dict[str, Any]:
         """Use the tool."""
+        resolved_include_usage = (
+            self.include_usage if self.include_usage is not None else include_usage
+        )
+
         try:
             # Execute search with parameters directly
             raw_results = self.apiwrapper.raw_results(
@@ -140,6 +162,7 @@ class TavilyExtract(BaseTool):  # type: ignore[override, override]
                 if self.include_favicon
                 else include_favicon,
                 format=self.format,
+                include_usage=resolved_include_usage,
                 **kwargs,
             )
 
@@ -160,6 +183,8 @@ class TavilyExtract(BaseTool):  # type: ignore[override, override]
                     f"Try modifying your extract parameters with one of these approaches."  # noqa: E501
                 )
                 raise ToolException(error_message)
+            if resolved_include_usage is not True:
+                raw_results.pop("usage", None)
             return raw_results
         except ToolException:
             # Re-raise tool exceptions
@@ -173,10 +198,15 @@ class TavilyExtract(BaseTool):  # type: ignore[override, override]
         extract_depth: Optional[Literal["basic", "advanced"]] = None,
         include_images: Optional[bool] = None,
         include_favicon: Optional[bool] = None,
+        include_usage: Optional[bool] = None,
         run_manager: Optional[AsyncCallbackManagerForToolRun] = None,
         **kwargs: Any,
     ) -> Dict[str, Any]:
         """Use the tool asynchronously."""
+        resolved_include_usage = (
+            self.include_usage if self.include_usage is not None else include_usage
+        )
+
         try:
             raw_results = await self.apiwrapper.raw_results_async(
                 urls=urls,
@@ -190,6 +220,7 @@ class TavilyExtract(BaseTool):  # type: ignore[override, override]
                 if self.include_favicon
                 else include_favicon,
                 format=self.format,
+                include_usage=resolved_include_usage,
                 **kwargs,
             )
 
@@ -208,6 +239,8 @@ class TavilyExtract(BaseTool):  # type: ignore[override, override]
                     f"Try modifying your extract parameters with one of these approaches."  # noqa: E501
                 )
                 raise ToolException(error_message)
+            if resolved_include_usage is not True:
+                raw_results.pop("usage", None)
             return raw_results
         except ToolException:
             # Re-raise tool exceptions

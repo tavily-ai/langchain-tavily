@@ -52,3 +52,25 @@ class TestTavilyCrawlToolUnit(ToolsUnitTests):  # Fixed class name to match its 
         have {"name", "id", "args"} keys.
         """
         return {"url": "https://en.wikipedia.org/wiki/Japan"}
+
+    def test_include_usage_controls_crawl_response(self) -> None:
+        tool = TavilyCrawl()
+        tool.api_wrapper = MagicMock()
+        tool.api_wrapper.raw_results.return_value = {
+            "results": [{"url": "https://example.com"}],
+            "usage": 5,
+        }
+        result = tool.invoke({"url": "https://example.com"})
+        assert "usage" not in result
+
+        tool_with_usage = TavilyCrawl(include_usage=True)
+        tool_with_usage.api_wrapper = MagicMock()
+        tool_with_usage.api_wrapper.raw_results.return_value = {
+            "results": [{"url": "https://example.com"}],
+            "usage": 5,
+        }
+        result_with_usage = tool_with_usage.invoke({"url": "https://example.com"})
+        assert result_with_usage["usage"] == 5
+
+        _, kwargs = tool_with_usage.api_wrapper.raw_results.call_args
+        assert kwargs["include_usage"] is True

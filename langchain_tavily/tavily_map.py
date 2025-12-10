@@ -143,6 +143,18 @@ class TavilyMapInput(BaseModel):
         ex. "Crawl tavily.com for API documentation" ---> categories="Documentation"
     """,  # noqa: E501
     )
+    include_usage: Optional[bool] = Field(
+        default=False,
+        description="""Include Tavily credit usage metadata in the map response.
+
+        Enable when you need to track credits spent on a mapping request.
+        Leave disabled (default) to omit this field for backwards compatibility.
+
+        Credit usage may return 0 if minimum billing thresholds are not met.
+        See https://github.com/tavily-ai/new-docs/blob/main/docs/credits-pricing.md
+        for more details.
+        """,  # noqa: E501
+    )
 
 
 def _generate_suggestions(params: Dict[str, Any]) -> List[str]:
@@ -252,6 +264,11 @@ class TavilyMap(BaseTool):  # type: ignore[override]
     ] = None
     """Filter URLs using predefined categories like 'Documentation', 'Blogs', etc.
     """
+    include_usage: Optional[bool] = None
+    """Whether to include Tavily credit usage metadata in the response.
+    
+    Default is False.
+    """
     api_wrapper: TavilyMapAPIWrapper = Field(default_factory=TavilyMapAPIWrapper)  # type: ignore[arg-type]
 
     def __init__(self, **kwargs: Any) -> None:
@@ -293,6 +310,7 @@ class TavilyMap(BaseTool):  # type: ignore[override]
                 ]
             ]
         ] = None,
+        include_usage: Optional[bool] = None,
         run_manager: Optional[CallbackManagerForToolRun] = None,
         **kwargs: Any,
     ) -> Dict[str, Any]:
@@ -309,6 +327,10 @@ class TavilyMap(BaseTool):  # type: ignore[override]
             - response_time (float): Time in seconds it took to complete the request
 
         """
+        resolved_include_usage = (
+            self.include_usage if self.include_usage is not None else include_usage
+        )
+
         try:
             # Execute search with parameters directly
             raw_results = self.api_wrapper.raw_results(
@@ -331,6 +353,7 @@ class TavilyMap(BaseTool):  # type: ignore[override]
                 if self.allow_external
                 else allow_external,
                 categories=self.categories if self.categories else categories,
+                include_usage=resolved_include_usage,
                 **kwargs,
             )
 
@@ -353,6 +376,8 @@ class TavilyMap(BaseTool):  # type: ignore[override]
                     f"Try modifying your crawl parameters with one of these approaches."  # noqa: E501
                 )
                 raise ToolException(error_message)
+            if resolved_include_usage is not True:
+                raw_results.pop("usage", None)
             return raw_results
         except ToolException:
             # Re-raise tool exceptions
@@ -387,9 +412,15 @@ class TavilyMap(BaseTool):  # type: ignore[override]
                 ]
             ]
         ] = None,
+        include_usage: Optional[bool] = None,
         run_manager: Optional[AsyncCallbackManagerForToolRun] = None,
+        **kwargs: Any,
     ) -> Dict[str, Any]:
         """Use the tool asynchronously."""
+        resolved_include_usage = (
+            self.include_usage if self.include_usage is not None else include_usage
+        )
+
         try:
             raw_results = await self.api_wrapper.raw_results_async(
                 url=url,
@@ -411,6 +442,8 @@ class TavilyMap(BaseTool):  # type: ignore[override]
                 if self.allow_external
                 else allow_external,
                 categories=self.categories if self.categories else categories,
+                include_usage=resolved_include_usage,
+                **kwargs,
             )
 
             # Check if results are empty and raise a specific exception
@@ -430,6 +463,8 @@ class TavilyMap(BaseTool):  # type: ignore[override]
                     f"Try modifying your crawl parameters with one of these approaches."  # noqa: E501
                 )
                 raise ToolException(error_message)
+            if resolved_include_usage is not True:
+                raw_results.pop("usage", None)
             return raw_results
         except ToolException:
             # Re-raise tool exceptions

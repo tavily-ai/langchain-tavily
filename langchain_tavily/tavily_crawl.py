@@ -158,6 +158,18 @@ class TavilyCrawlInput(BaseModel):
         default=False,
         description="Whether to include the favicon URL for each result.",
     )
+    include_usage: Optional[bool] = Field(
+        default=False,
+        description="""Include Tavily credit usage metadata in the crawl response.
+
+        Enable when you are auditing crawl credit consumption.
+        Leave disabled (default) to omit this field for backwards compatibility.
+
+        Credit usage may return 0 if minimum billing thresholds are not met.
+        See https://github.com/tavily-ai/new-docs/blob/main/docs/credits-pricing.md
+        for more details.
+        """,  # noqa: E501
+    )
 
 
 def _generate_suggestions(params: Dict[str, Any]) -> List[str]:
@@ -292,6 +304,11 @@ class TavilyCrawl(BaseTool):  # type: ignore[override]
     
     Default is False.
     """
+    include_usage: Optional[bool] = None
+    """Whether to include Tavily credit usage metadata in the response.
+    
+    Default is False.
+    """
 
     api_wrapper: TavilyCrawlAPIWrapper = Field(default_factory=TavilyCrawlAPIWrapper)  # type: ignore[arg-type]
 
@@ -337,6 +354,7 @@ class TavilyCrawl(BaseTool):  # type: ignore[override]
         ] = None,
         extract_depth: Optional[Literal["basic", "advanced"]] = None,
         include_favicon: Optional[bool] = None,
+        include_usage: Optional[bool] = None,
         run_manager: Optional[CallbackManagerForToolRun] = None,
         **kwargs: Any,
     ) -> Dict[str, Any]:
@@ -352,6 +370,10 @@ class TavilyCrawl(BaseTool):  # type: ignore[override]
             - response_time (float): Time in seconds it took to complete the request
 
         """
+        resolved_include_usage = (
+            self.include_usage if self.include_usage is not None else include_usage
+        )
+
         try:
             # Execute search with parameters directly
             raw_results = self.api_wrapper.raw_results(
@@ -384,6 +406,7 @@ class TavilyCrawl(BaseTool):  # type: ignore[override]
                 if self.include_favicon
                 else include_favicon,
                 format=self.format,
+                include_usage=resolved_include_usage,
                 **kwargs,
             )
 
@@ -407,6 +430,8 @@ class TavilyCrawl(BaseTool):  # type: ignore[override]
                     f"Try modifying your crawl parameters with one of these approaches."  # noqa: E501
                 )
                 raise ToolException(error_message)
+            if resolved_include_usage is not True:
+                raw_results.pop("usage", None)
             return raw_results
         except ToolException:
             # Re-raise tool exceptions
@@ -444,10 +469,15 @@ class TavilyCrawl(BaseTool):  # type: ignore[override]
         ] = None,
         extract_depth: Optional[Literal["basic", "advanced"]] = None,
         include_favicon: Optional[bool] = None,
+        include_usage: Optional[bool] = None,
         run_manager: Optional[AsyncCallbackManagerForToolRun] = None,
         **kwargs: Any,
     ) -> Dict[str, Any]:
         """Use the tool asynchronously."""
+        resolved_include_usage = (
+            self.include_usage if self.include_usage is not None else include_usage
+        )
+
         try:
             raw_results = await self.api_wrapper.raw_results_async(
                 url=url,
@@ -479,6 +509,7 @@ class TavilyCrawl(BaseTool):  # type: ignore[override]
                 if self.include_favicon
                 else include_favicon,
                 format=self.format,
+                include_usage=resolved_include_usage,
                 **kwargs,
             )
 
@@ -499,6 +530,8 @@ class TavilyCrawl(BaseTool):  # type: ignore[override]
                     f"Try modifying your crawl parameters with one of these approaches."  # noqa: E501
                 )
                 raise ToolException(error_message)
+            if resolved_include_usage is not True:
+                raw_results.pop("usage", None)
             return raw_results
         except ToolException:
             # Re-raise tool exceptions

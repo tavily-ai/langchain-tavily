@@ -111,6 +111,18 @@ class TavilySearchInput(BaseModel):
         Default is False to minimize response size and API usage.
         """,  # noqa: E501
     )
+    include_usage: Optional[bool] = Field(
+        default=False,
+        description="""Include Tavily credit usage metadata in the response.
+
+        Set to True when you need to audit credit consumption for a given query.
+        Leave as False (default) to omit this field from the response.
+
+        Credit usage may return 0 if minimum billing thresholds are not met.
+        See https://github.com/tavily-ai/new-docs/blob/main/docs/credits-pricing.md
+        for additional details.
+        """,  # noqa: E501
+    )
     start_date: Optional[str] = Field(
         default=None,
         description="""Filters search results to include only content published on or after this date.
@@ -328,6 +340,11 @@ class TavilySearch(BaseTool):  # type: ignore[override]
     
     Default is False.
     """
+    include_usage: Optional[bool] = None
+    """Whether to include Tavily credit usage metadata in the response.
+    
+    Default is False.
+    """
     api_wrapper: TavilySearchAPIWrapper = Field(default_factory=TavilySearchAPIWrapper)  # type: ignore[arg-type]
 
     def __init__(self, **kwargs: Any) -> None:
@@ -354,6 +371,7 @@ class TavilySearch(BaseTool):  # type: ignore[override]
         include_favicon: Optional[bool] = None,
         start_date: Optional[str] = None,
         end_date: Optional[str] = None,
+        include_usage: Optional[bool] = None,
         run_manager: Optional[CallbackManagerForToolRun] = None,
         **kwargs: Any,
     ) -> Dict[str, Any]:
@@ -370,6 +388,10 @@ class TavilySearch(BaseTool):  # type: ignore[override]
                 - images: List of relevant images (if include_images=True)
                 - response_time: Time taken for the search
         """
+        resolved_include_usage = (
+            self.include_usage if self.include_usage is not None else include_usage
+        )
+
         try:
             # Execute search with parameters directly
             raw_results = self.api_wrapper.raw_results(
@@ -397,6 +419,7 @@ class TavilySearch(BaseTool):  # type: ignore[override]
                 auto_parameters=self.auto_parameters,
                 start_date=start_date,
                 end_date=end_date,
+                include_usage=resolved_include_usage,
                 **kwargs,
             )
 
@@ -418,6 +441,8 @@ class TavilySearch(BaseTool):  # type: ignore[override]
                     f"Try modifying your search parameters with one of these approaches."  # noqa: E501
                 )
                 raise ToolException(error_message)
+            if resolved_include_usage is not True:
+                raw_results.pop("usage", None)
             return raw_results
         except ToolException:
             # Re-raise tool exceptions
@@ -437,10 +462,15 @@ class TavilySearch(BaseTool):  # type: ignore[override]
         include_favicon: Optional[bool] = False,
         start_date: Optional[str] = None,
         end_date: Optional[str] = None,
+        include_usage: Optional[bool] = None,
         run_manager: Optional[AsyncCallbackManagerForToolRun] = None,
         **kwargs: Any,
     ) -> Dict[str, Any]:
         """Use the tool asynchronously."""
+        resolved_include_usage = (
+            self.include_usage if self.include_usage is not None else include_usage
+        )
+
         try:
             raw_results = await self.api_wrapper.raw_results_async(
                 query=query,
@@ -467,6 +497,7 @@ class TavilySearch(BaseTool):  # type: ignore[override]
                 auto_parameters=self.auto_parameters,
                 start_date=start_date,
                 end_date=end_date,
+                include_usage=resolved_include_usage,
                 **kwargs,
             )
 
@@ -488,6 +519,8 @@ class TavilySearch(BaseTool):  # type: ignore[override]
                     f"Try modifying your search parameters with one of these approaches."  # noqa: E501
                 )
                 raise ToolException(error_message)
+            if resolved_include_usage is not True:
+                raw_results.pop("usage", None)
             return raw_results
         except ToolException:
             # Re-raise tool exceptions
