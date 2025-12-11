@@ -31,16 +31,6 @@ if not os.environ.get("TAVILY_API_KEY"):
     os.environ["TAVILY_API_KEY"] = getpass.getpass("Tavily API key:\n")
 ```
 
-## Credit Usage Reporting
-
-All Tavily endpoints (`/search`, `/extract`, `/crawl`, `/map`) now accept an optional boolean `include_usage` parameter in both the Python and JavaScript LangChain SDKs. When set to `True`, the Tavily response includes a `usage` field that reflects the credits billed for that request; when omitted or set to `False`, the field is removed for backwards compatibility. Credit usage may return `0` if the minimum billing thresholds are not met. See the [Credits & Pricing documentation](https://github.com/tavily-ai/new-docs/blob/main/docs/credits-pricing.md) for additional details.
-
-Use this parameter when you need to audit or surface Tavily credit consumption. For example:
-
-- Python: `TavilySearch(include_usage=True)` or `tool.invoke({"query": "...", "include_usage": True})`
-- JavaScript: `new TavilySearch({ include_usage: true })` or `tool.invoke({ query: "...", include_usage: true })`
-
-In both cases, only requests made with `include_usage=True` will expose the `usage` field in the tool output.
 
 ## Tavily Search
 
@@ -57,7 +47,7 @@ The tool accepts various parameters during instantiation:
 - `include_images` (optional, bool): Include a list of query related images in the response. Default is False.
 - `include_image_descriptions` (optional, bool): Include descriptive text for each image. Default is False.
 - `include_favicon` (optional, bool): Whether to include the favicon URL for each result. Default is False.
-- `include_usage` (optional, bool): Include Tavily credit usage metadata in the response. Default is False (the `usage` field is omitted unless this is set to True). Credit usage may return 0; see the [Credits & Pricing guide](https://github.com/tavily-ai/new-docs/blob/main/docs/credits-pricing.md) for details.
+- `include_usage` (optional, bool): Whether to include credit usage information in the response.
 - `search_depth` (optional, str): Depth of the search, either "basic" or "advanced". Default is "basic".
 - `time_range` (optional, str): The time range back from the current date to filter results - "day", "week", "month", or "year". Default is None.
 - `include_domains` (optional, List[str]): List of domains to specifically include. Default is None.
@@ -124,7 +114,6 @@ output:
 }
 ```
 
-The `usage` field is only present when `include_usage=True`.
 
 ### Agent Tool Calling
 
@@ -189,7 +178,7 @@ The tool accepts various parameters during instantiation:
 - `extract_depth` (optional, str): The depth of the extraction, either "basic" or "advanced". Default is "basic ".
 - `include_images` (optional, bool): Whether to include images in the extraction. Default is False.
 - `include_favicon` (optional, bool): Whether to include the favicon URL for each result. Default is False.
-- `include_usage` (optional, bool): Include Tavily credit usage metadata. Default is False; the `usage` field is suppressed unless this is set to True. Usage may be 0 (see the [Credits & Pricing guide](https://github.com/tavily-ai/new-docs/blob/main/docs/credits-pricing.md)).
+- `include_usage` (optional, bool): Whether to include credit usage information in the response. NOTE:The value may be 0 if the total successful URL extractions has not yet reached 5 calls. See our [Credits & Pricing documentation](https://docs.tavily.com/documentation/api-credits) for details.
 - `format` (optional, str): The format of the extracted web page content. "markdown" returns content in markdown format. "text" returns plain text and may increase latency.
 
 For a comprehensive overview of the available parameters, refer to the [Tavily Extract API documentation](https://docs.tavily.com/documentation/api-reference/endpoint/extract)
@@ -235,7 +224,6 @@ output:
 }
 ```
 
-The `usage` field only appears alongside this payload when `include_usage=True`.
 
 ## Tavily Crawl
 
@@ -258,7 +246,7 @@ The tool accepts various parameters during instantiation:
 - `categories` (optional, str): Filter URLs by predefined categories. Can be "Careers", "Blogs", "Documentation", "About", "Pricing", "Community", "Developers", "Contact", or "Media". Default is None.
 - `extract_depth` (optional, str): Depth of content extraction, either "basic" or "advanced". Default is "basic".
 - `include_favicon` (optional, bool): Whether to include the favicon URL for each result. Default is False.
-- `include_usage` (optional, bool): Include Tavily credit usage metadata. Default is False; see [Credits & Pricing](https://github.com/tavily-ai/new-docs/blob/main/docs/credits-pricing.md).
+- `include_usage` (optional, bool): Whether to include credit usage information in the response. NOTE:The value may be 0 if the total use of /extract and /map calls has not yet reached minimum needed. See our [Credits & Pricing documentation](https://docs.tavily.com/documentation/api-credits) for details.
 - `format` (optional, str): The format of the extracted web page content. "markdown" returns content in markdown format. "text" returns plain text and may increase latency.
 
 For a comprehensive overview of the available parameters, refer to the [Tavily Crawl API documentation](https://docs.tavily.com/documentation/api-reference/endpoint/crawl)
@@ -319,7 +307,6 @@ output:
 }
 ```
 
-Set `include_usage=True` to add the Tavily `usage` field to this response.
 
 ## Tavily Map
 
@@ -339,7 +326,7 @@ The tool accepts various parameters during instantiation:
 - `exclude_domains` (optional, List[str]): Regex patterns to exclude specific domains or subdomains from mapping 
 - `allow_external` (optional, bool): Allow following external domain links. Default is False.
 - `categories` (optional, str): Filter URLs by predefined categories ("Careers", "Blogs", "Documentation", "About", "Pricing", "Community", "Developers", "Contact", "Media").
-- `include_usage` (optional, bool): Include Tavily credit usage metadata. Default is False.
+- `include_usage` (optional, bool): Whether to include credit usage information in the response.NOTE:The value may be 0 if the total successful pages mapped has not yet reached 10 calls. See our [Credits & Pricing documentation](https://docs.tavily.com/documentation/api-credits) for details.
 
 For a comprehensive overview of the available parameters, refer to the [Tavily Map API documentation](https://docs.tavily.com/documentation/api-reference/endpoint/map)
 
@@ -385,9 +372,6 @@ output:
     'response_time': 10.28
 }
 ```
-
-`usage` will be present alongside this payload only when `include_usage=True`.
-
 
 
 ## Tavily Research Agent
@@ -513,8 +497,4 @@ This example shows how to:
 4. Process a user query that requires both searching and crawling capabilities
 
 The agent will first use the search tool to find Apple's base URL, then use the crawl tool to explore the website and find information about iPhone models.
-
-### OpenAI & Anthropic integrations
-
-When wiring Tavily tools into OpenAI (`ChatOpenAI`, `init_chat_model(model_provider="openai")`) or Anthropic (`ChatAnthropic`, `init_chat_model(model_provider="anthropic")`) agents—whether in LangChain Python or LangChain.js—you can enable credit tracking by setting `include_usage=True` on the Tavily tool instances or per invocation. Only calls made with this flag will include the `usage` field in the tool responses, and the value may be `0` if the minimum billing threshold is not met. Refer to the [Credits & Pricing documentation](https://github.com/tavily-ai/new-docs/blob/main/docs/credits-pricing.md) for more details on how Tavily calculates credits.
 
