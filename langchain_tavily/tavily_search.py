@@ -113,14 +113,7 @@ class TavilySearchInput(BaseModel):
     )
     include_usage: Optional[bool] = Field(
         default=False,
-        description="""Include Tavily credit usage metadata in the response.
-
-        Set to True when you need to audit credit consumption for a given query.
-        Leave as False (default) to omit this field from the response.
-
-        Credit usage may return 0 if minimum billing thresholds are not met.
-        See https://github.com/tavily-ai/new-docs/blob/main/docs/credits-pricing.md
-        for additional details.
+        description="""Whether to include credit usage information in the response.
         """,  # noqa: E501
     )
     start_date: Optional[str] = Field(
@@ -222,6 +215,7 @@ class TavilySearch(BaseTool):  # type: ignore[override]
             # exclude_domains=None,
             # country=None
             # include_favicon=False
+            # include_usage=False
         )
         ```
 
@@ -341,7 +335,7 @@ class TavilySearch(BaseTool):  # type: ignore[override]
     Default is False.
     """
     include_usage: Optional[bool] = None
-    """Whether to include Tavily credit usage metadata in the response.
+    """Whether to include credit usage information in the response..
     
     Default is False.
     """
@@ -388,10 +382,6 @@ class TavilySearch(BaseTool):  # type: ignore[override]
                 - images: List of relevant images (if include_images=True)
                 - response_time: Time taken for the search
         """
-        resolved_include_usage = (
-            self.include_usage if self.include_usage is not None else include_usage
-        )
-
         try:
             # Execute search with parameters directly
             raw_results = self.api_wrapper.raw_results(
@@ -419,7 +409,7 @@ class TavilySearch(BaseTool):  # type: ignore[override]
                 auto_parameters=self.auto_parameters,
                 start_date=start_date,
                 end_date=end_date,
-                include_usage=resolved_include_usage,
+                include_usage=self.include_usage if self.include_usage is not None else include_usage,
                 **kwargs,
             )
 
@@ -441,8 +431,6 @@ class TavilySearch(BaseTool):  # type: ignore[override]
                     f"Try modifying your search parameters with one of these approaches."  # noqa: E501
                 )
                 raise ToolException(error_message)
-            if resolved_include_usage is not True:
-                raw_results.pop("usage", None)
             return raw_results
         except ToolException:
             # Re-raise tool exceptions
@@ -467,10 +455,6 @@ class TavilySearch(BaseTool):  # type: ignore[override]
         **kwargs: Any,
     ) -> Dict[str, Any]:
         """Use the tool asynchronously."""
-        resolved_include_usage = (
-            self.include_usage if self.include_usage is not None else include_usage
-        )
-
         try:
             raw_results = await self.api_wrapper.raw_results_async(
                 query=query,
@@ -497,7 +481,7 @@ class TavilySearch(BaseTool):  # type: ignore[override]
                 auto_parameters=self.auto_parameters,
                 start_date=start_date,
                 end_date=end_date,
-                include_usage=resolved_include_usage,
+                include_usage=self.include_usage if self.include_usage is not None else include_usage,
                 **kwargs,
             )
 
@@ -519,8 +503,6 @@ class TavilySearch(BaseTool):  # type: ignore[override]
                     f"Try modifying your search parameters with one of these approaches."  # noqa: E501
                 )
                 raise ToolException(error_message)
-            if resolved_include_usage is not True:
-                raw_results.pop("usage", None)
             return raw_results
         except ToolException:
             # Re-raise tool exceptions
