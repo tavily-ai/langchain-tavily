@@ -49,14 +49,7 @@ class TavilyExtractInput(BaseModel):
     )
     include_usage: Optional[bool] = Field(
         default=False,
-        description="""Include Tavily credit usage metadata in the response.
-
-        Set to True to audit credits consumed for the extraction request.
-        Leave as False (default) to omit usage from the response payload.
-
-        Credit usage may return 0 when minimum billing thresholds are not met.
-        See https://github.com/tavily-ai/new-docs/blob/main/docs/credits-pricing.md
-        for details.
+        description="""Whether to include credit usage information in the response.
         """,  # noqa: E501
     )
 
@@ -116,7 +109,7 @@ class TavilyExtract(BaseTool):  # type: ignore[override, override]
     Default is False.
     """
     include_usage: Optional[bool] = None
-    """Whether to include Tavily credit usage metadata in the response.
+    """Whether to include credit usage information in the response.
     
     Default is False.
     """
@@ -144,9 +137,6 @@ class TavilyExtract(BaseTool):  # type: ignore[override, override]
         **kwargs: Any,
     ) -> Dict[str, Any]:
         """Use the tool."""
-        resolved_include_usage = (
-            self.include_usage if self.include_usage is not None else include_usage
-        )
 
         try:
             # Execute search with parameters directly
@@ -162,7 +152,7 @@ class TavilyExtract(BaseTool):  # type: ignore[override, override]
                 if self.include_favicon
                 else include_favicon,
                 format=self.format,
-                include_usage=resolved_include_usage,
+                include_usage=self.include_usage if self.include_usage is not None else include_usage,
                 **kwargs,
             )
 
@@ -183,8 +173,6 @@ class TavilyExtract(BaseTool):  # type: ignore[override, override]
                     f"Try modifying your extract parameters with one of these approaches."  # noqa: E501
                 )
                 raise ToolException(error_message)
-            if resolved_include_usage is not True:
-                raw_results.pop("usage", None)
             return raw_results
         except ToolException:
             # Re-raise tool exceptions
@@ -203,9 +191,6 @@ class TavilyExtract(BaseTool):  # type: ignore[override, override]
         **kwargs: Any,
     ) -> Dict[str, Any]:
         """Use the tool asynchronously."""
-        resolved_include_usage = (
-            self.include_usage if self.include_usage is not None else include_usage
-        )
 
         try:
             raw_results = await self.apiwrapper.raw_results_async(
@@ -220,7 +205,7 @@ class TavilyExtract(BaseTool):  # type: ignore[override, override]
                 if self.include_favicon
                 else include_favicon,
                 format=self.format,
-                include_usage=resolved_include_usage,
+                include_usage=self.include_usage if self.include_usage is not None else include_usage,
                 **kwargs,
             )
 
@@ -239,8 +224,6 @@ class TavilyExtract(BaseTool):  # type: ignore[override, override]
                     f"Try modifying your extract parameters with one of these approaches."  # noqa: E501
                 )
                 raise ToolException(error_message)
-            if resolved_include_usage is not True:
-                raw_results.pop("usage", None)
             return raw_results
         except ToolException:
             # Re-raise tool exceptions
