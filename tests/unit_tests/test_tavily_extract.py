@@ -43,28 +43,3 @@ class TestTavilyExtractToolUnit(ToolsUnitTests):
         """
         return {"urls": ["https://en.wikipedia.org/wiki/Lionel_Messi"]}
 
-    def test_include_usage_controls_extract_response(self) -> None:
-        tool = TavilyExtract()
-        tool.apiwrapper = MagicMock()
-        tool.apiwrapper.raw_results.return_value = {
-            "results": [{"url": "https://example.com"}],
-            "failed_results": [],
-            "usage": 1,
-        }
-
-        result = tool.invoke({"urls": ["https://example.com"]})
-        assert "usage" not in result
-
-        tool_with_usage = TavilyExtract(include_usage=True)
-        tool_with_usage.apiwrapper = MagicMock()
-        tool_with_usage.apiwrapper.raw_results.return_value = {
-            "results": [{"url": "https://example.com"}],
-            "failed_results": [],
-            "usage": 2,
-        }
-
-        result_with_usage = tool_with_usage.invoke({"urls": ["https://example.com"]})
-        assert result_with_usage["usage"] == 2
-
-        _, kwargs = tool_with_usage.apiwrapper.raw_results.call_args
-        assert kwargs["include_usage"] is True

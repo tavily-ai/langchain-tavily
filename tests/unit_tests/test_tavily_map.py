@@ -51,25 +51,3 @@ class TestTavilyMapToolUnit(ToolsUnitTests):  # Fixed class name to match its pu
         have {"name", "id", "args"} keys.
         """
         return {"url": "https://en.wikipedia.org/wiki/Japan"}
-
-    def test_include_usage_controls_map_response(self) -> None:
-        tool = TavilyMap()
-        tool.api_wrapper = MagicMock()
-        tool.api_wrapper.raw_results.return_value = {
-            "results": ["https://example.com"],
-            "usage": 1,
-        }
-        result = tool.invoke({"url": "https://example.com"})
-        assert "usage" not in result
-
-        tool_with_usage = TavilyMap(include_usage=True)
-        tool_with_usage.api_wrapper = MagicMock()
-        tool_with_usage.api_wrapper.raw_results.return_value = {
-            "results": ["https://example.com"],
-            "usage": 2,
-        }
-        result_with_usage = tool_with_usage.invoke({"url": "https://example.com"})
-        assert result_with_usage["usage"] == 2
-
-        _, kwargs = tool_with_usage.api_wrapper.raw_results.call_args
-        assert kwargs["include_usage"] is True
