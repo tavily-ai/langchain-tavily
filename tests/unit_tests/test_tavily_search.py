@@ -45,3 +45,4 @@ class TestTavilySearchToolUnit(ToolsUnitTests):  # Fixed class name to match its
         have {"name", "id", "args"} keys.
         """
         return {"query": "best time to visit japan"}
+

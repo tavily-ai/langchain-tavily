@@ -154,10 +154,6 @@ class TavilyCrawlInput(BaseModel):
         with higher success but may increase latency.
         """,  # noqa: E501
     )
-    include_favicon: Optional[bool] = Field(
-        default=False,
-        description="Whether to include the favicon URL for each result.",
-    )
 
 
 def _generate_suggestions(params: Dict[str, Any]) -> List[str]:
@@ -292,6 +288,11 @@ class TavilyCrawl(BaseTool):  # type: ignore[override]
     
     Default is False.
     """
+    include_usage: Optional[bool] = None
+    """Whether to include credit usage information in the response.
+    
+    Default is False.
+    """
 
     api_wrapper: TavilyCrawlAPIWrapper = Field(default_factory=TavilyCrawlAPIWrapper)  # type: ignore[arg-type]
 
@@ -336,7 +337,6 @@ class TavilyCrawl(BaseTool):  # type: ignore[override]
             ]
         ] = None,
         extract_depth: Optional[Literal["basic", "advanced"]] = None,
-        include_favicon: Optional[bool] = None,
         run_manager: Optional[CallbackManagerForToolRun] = None,
         **kwargs: Any,
     ) -> Dict[str, Any]:
@@ -380,10 +380,9 @@ class TavilyCrawl(BaseTool):  # type: ignore[override]
                 extract_depth=self.extract_depth
                 if self.extract_depth
                 else extract_depth,
-                include_favicon=self.include_favicon
-                if self.include_favicon
-                else include_favicon,
+                include_favicon=self.include_favicon,
                 format=self.format,
+                include_usage=self.include_usage,
                 **kwargs,
             )
 
@@ -443,7 +442,6 @@ class TavilyCrawl(BaseTool):  # type: ignore[override]
             ]
         ] = None,
         extract_depth: Optional[Literal["basic", "advanced"]] = None,
-        include_favicon: Optional[bool] = None,
         run_manager: Optional[AsyncCallbackManagerForToolRun] = None,
         **kwargs: Any,
     ) -> Dict[str, Any]:
@@ -475,10 +473,9 @@ class TavilyCrawl(BaseTool):  # type: ignore[override]
                 extract_depth=self.extract_depth
                 if self.extract_depth
                 else extract_depth,
-                include_favicon=self.include_favicon
-                if self.include_favicon
-                else include_favicon,
+                include_favicon=self.include_favicon,
                 format=self.format,
+                include_usage=self.include_usage,
                 **kwargs,
             )
 
