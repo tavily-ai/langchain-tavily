@@ -298,7 +298,6 @@ class TavilyMap(BaseTool):  # type: ignore[override]
                 ]
             ]
         ] = None,
-        include_usage: Optional[bool] = None,
         run_manager: Optional[CallbackManagerForToolRun] = None,
         **kwargs: Any,
     ) -> Dict[str, Any]:
@@ -338,7 +337,7 @@ class TavilyMap(BaseTool):  # type: ignore[override]
                 if self.allow_external
                 else allow_external,
                 categories=self.categories if self.categories else categories,
-                include_usage=self.include_usage if self.include_usage is not None else include_usage,
+                include_usage=self.include_usage,
                 **kwargs,
             )
 
@@ -395,7 +394,6 @@ class TavilyMap(BaseTool):  # type: ignore[override]
                 ]
             ]
         ] = None,
-        include_usage: Optional[bool] = None,
         run_manager: Optional[AsyncCallbackManagerForToolRun] = None,
         **kwargs: Any,
     ) -> Dict[str, Any]:
@@ -422,7 +420,7 @@ class TavilyMap(BaseTool):  # type: ignore[override]
                 if self.allow_external
                 else allow_external,
                 categories=self.categories if self.categories else categories,
-                include_usage=self.include_usage if self.include_usage is not None else include_usage,
+                include_usage=self.include_usage,
                 **kwargs,
             )
 
