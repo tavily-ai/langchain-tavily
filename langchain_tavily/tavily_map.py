@@ -143,11 +143,6 @@ class TavilyMapInput(BaseModel):
         ex. "Crawl tavily.com for API documentation" ---> categories="Documentation"
     """,  # noqa: E501
     )
-    include_usage: Optional[bool] = Field(
-        default=False,
-        description="""Whether to include credit usage information in the response.
-        """,  # noqa: E501
-    )
 
 
 def _generate_suggestions(params: Dict[str, Any]) -> List[str]:

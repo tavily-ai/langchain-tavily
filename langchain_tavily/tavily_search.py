@@ -95,27 +95,6 @@ class TavilySearchInput(BaseModel):
         mainstream media - NOT simply because a query asks for "new" information.
         """,  # noqa: E501
     )
-    include_favicon: Optional[bool] = Field(
-        default=False,
-        description="""Determines whether to include favicon URLs for each search result.
-        
-        When enabled, each search result will include the website's favicon URL,
-        which can be useful for:
-        - Building rich UI interfaces with visual website indicators
-        - Providing visual cues about the source's credibility or brand
-        - Creating bookmark-like displays with recognizable site icons
-        
-        Set to True when creating user interfaces that benefit from visual branding
-        or when favicon information enhances the user experience.
-        
-        Default is False to minimize response size and API usage.
-        """,  # noqa: E501
-    )
-    include_usage: Optional[bool] = Field(
-        default=False,
-        description="""Whether to include credit usage information in the response.
-        """,  # noqa: E501
-    )
     start_date: Optional[str] = Field(
         default=None,
         description="""Filters search results to include only content published on or after this date.

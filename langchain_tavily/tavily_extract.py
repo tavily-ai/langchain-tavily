@@ -43,15 +43,6 @@ class TavilyExtractInput(BaseModel):
         Default is False (extracts text content only).
         """,  # noqa: E501
     )
-    include_favicon: Optional[bool] = Field(
-        default=False,
-        description="Whether to include the favicon URL for each result.",
-    )
-    include_usage: Optional[bool] = Field(
-        default=False,
-        description="""Whether to include credit usage information in the response.
-        """,  # noqa: E501
-    )
 
 
 def _generate_suggestions(params: Dict[str, Any]) -> List[str]:
