@@ -42,3 +42,4 @@ class TestTavilyExtractToolUnit(ToolsUnitTests):
         have {"name", "id", "args"} keys.
         """
         return {"urls": ["https://en.wikipedia.org/wiki/Lionel_Messi"]}
+

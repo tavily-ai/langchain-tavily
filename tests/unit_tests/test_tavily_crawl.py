@@ -52,3 +52,4 @@ class TestTavilyCrawlToolUnit(ToolsUnitTests):  # Fixed class name to match its 
         have {"name", "id", "args"} keys.
         """
         return {"url": "https://en.wikipedia.org/wiki/Japan"}
+
