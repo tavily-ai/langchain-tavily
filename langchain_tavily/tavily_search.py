@@ -344,7 +344,6 @@ class TavilySearch(BaseTool):  # type: ignore[override]
         include_favicon: Optional[bool] = None,
         start_date: Optional[str] = None,
         end_date: Optional[str] = None,
-        include_usage: Optional[bool] = None,
         run_manager: Optional[CallbackManagerForToolRun] = None,
         **kwargs: Any,
     ) -> Dict[str, Any]:
@@ -388,7 +387,7 @@ class TavilySearch(BaseTool):  # type: ignore[override]
                 auto_parameters=self.auto_parameters,
                 start_date=start_date,
                 end_date=end_date,
-                include_usage=self.include_usage if self.include_usage is not None else include_usage,
+                include_usage=self.include_usage,
                 **kwargs,
             )
 
@@ -429,7 +428,6 @@ class TavilySearch(BaseTool):  # type: ignore[override]
         include_favicon: Optional[bool] = False,
         start_date: Optional[str] = None,
         end_date: Optional[str] = None,
-        include_usage: Optional[bool] = None,
         run_manager: Optional[AsyncCallbackManagerForToolRun] = None,
         **kwargs: Any,
     ) -> Dict[str, Any]:
@@ -460,7 +458,7 @@ class TavilySearch(BaseTool):  # type: ignore[override]
                 auto_parameters=self.auto_parameters,
                 start_date=start_date,
                 end_date=end_date,
-                include_usage=self.include_usage if self.include_usage is not None else include_usage,
+                include_usage=self.include_usage,
                 **kwargs,
             )
 
