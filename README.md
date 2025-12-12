@@ -80,7 +80,7 @@ tool = TavilySearch(
 The Tavily search tool accepts the following arguments during invocation:
 
 - `query` (required): A natural language search query
-- The following arguments can also be set during invocation : `include_images`, `include_favicon`, `search_depth`, `time_range`, `include_domains`, `exclude_domains`, `include_usage`
+- The following arguments can also be set during invocation : `include_images`, `search_depth`, `time_range`, `include_domains`, `exclude_domains`
 - For reliability and performance reasons, certain parameters that affect response size cannot be modified during invocation: `include_answer` and `include_raw_content`. These limitations prevent unexpected context window issues and ensure consistent results.
 
 NOTE: If you set an argument during instantiation this value will persist and overwrite the value passed during invocation.
@@ -199,7 +199,7 @@ tool = TavilyExtract(
 The Tavily extract tool accepts the following arguments during invocation:
 
 - `urls` (required): A list of URLs to extract content from.
-- The parameters `extract_depth`, `include_images`, `include_favicon`, and `include_usage` can also be set during invocation
+- The parameters `extract_depth` and `include_images` can also be set during invocation
 
 NOTE: If you set an argument during instantiation this value will persist and overwrite the value passed during invocation.
 
@@ -276,7 +276,7 @@ tool = TavilyCrawl(
 
 The Tavily crawl tool accepts the following arguments during invocation:
 - `url` (required): The root URL to begin the crawl.
-- All other parameters can also be set during invocation: `max_depth`, `max_breadth`, `limit`, `instructions`, `select_paths`, `select_domains`, `exclude_paths`, `exclude_domains`, `allow_external`, `include_images`, `categories`, `extract_depth`, `include_favicon`, and `include_usage`
+- All other parameters can also be set during invocation: `max_depth`, `max_breadth`, `limit`, `instructions`, `select_paths`, `select_domains`, `exclude_paths`, `exclude_domains`, `allow_external`, `include_images`, `categories`, and `extract_depth`.
 
 NOTE: If you set an argument during instantiation this value will persist and overwrite the value passed during invocation.
 
@@ -351,7 +351,7 @@ tool = TavilyMap(
 
 The Tavily map tool accepts the following arguments during invocation:
 - `url` (required): The root URL to begin the mapping.
-- All other parameters can also be set during invocation: `max_depth`, `max_breadth`, `limit`, `instructions`, `select_paths`, `select_domains`, `exclude_paths`, `exclude_domains`, `allow_external`, `categories`, and `include_usage`.
+- All other parameters can also be set during invocation: `max_depth`, `max_breadth`, `limit`, `instructions`, `select_paths`, `select_domains`, `exclude_paths`, `exclude_domains`, `allow_external`,and  `categories`.
 
 NOTE: If you set an argument during instantiation this value will persist and overwrite the value passed during invocation.
 
