@@ -122,7 +122,6 @@ class TavilyExtract(BaseTool):  # type: ignore[override, override]
         urls: List[str],
         extract_depth: Optional[Literal["basic", "advanced"]] = None,
         include_images: Optional[bool] = None,
-        include_favicon: Optional[bool] = None,
         run_manager: Optional[CallbackManagerForToolRun] = None,
         **kwargs: Any,
     ) -> Dict[str, Any]:
@@ -138,9 +137,7 @@ class TavilyExtract(BaseTool):  # type: ignore[override, override]
                 include_images=self.include_images
                 if self.include_images
                 else include_images,
-                include_favicon=self.include_favicon
-                if self.include_favicon
-                else include_favicon,
+                include_favicon=self.include_favicon,
                 format=self.format,
                 include_usage=self.include_usage,
                 **kwargs,
@@ -175,7 +172,6 @@ class TavilyExtract(BaseTool):  # type: ignore[override, override]
         urls: List[str],
         extract_depth: Optional[Literal["basic", "advanced"]] = None,
         include_images: Optional[bool] = None,
-        include_favicon: Optional[bool] = None,
         run_manager: Optional[AsyncCallbackManagerForToolRun] = None,
         **kwargs: Any,
     ) -> Dict[str, Any]:
@@ -190,9 +186,7 @@ class TavilyExtract(BaseTool):  # type: ignore[override, override]
                 include_images=self.include_images
                 if self.include_images
                 else include_images,
-                include_favicon=self.include_favicon
-                if self.include_favicon
-                else include_favicon,
+                include_favicon=self.include_favicon,
                 format=self.format,
                 include_usage=self.include_usage,
                 **kwargs,

@@ -341,7 +341,6 @@ class TavilySearch(BaseTool):  # type: ignore[override]
         include_images: Optional[bool] = None,
         time_range: Optional[Literal["day", "week", "month", "year"]] = None,
         topic: Optional[Literal["general", "news", "finance"]] = None,
-        include_favicon: Optional[bool] = None,
         start_date: Optional[str] = None,
         end_date: Optional[str] = None,
         run_manager: Optional[CallbackManagerForToolRun] = None,
@@ -376,9 +375,7 @@ class TavilySearch(BaseTool):  # type: ignore[override]
                 else include_images,
                 time_range=self.time_range if self.time_range else time_range,
                 topic=self.topic if self.topic else topic,
-                include_favicon=self.include_favicon
-                if self.include_favicon
-                else include_favicon,
+                include_favicon=self.include_favicon,
                 country=self.country,
                 max_results=self.max_results,
                 include_answer=self.include_answer,
@@ -425,7 +422,6 @@ class TavilySearch(BaseTool):  # type: ignore[override]
         include_images: Optional[bool] = False,
         time_range: Optional[Literal["day", "week", "month", "year"]] = None,
         topic: Optional[Literal["general", "news", "finance"]] = "general",
-        include_favicon: Optional[bool] = False,
         start_date: Optional[str] = None,
         end_date: Optional[str] = None,
         run_manager: Optional[AsyncCallbackManagerForToolRun] = None,
@@ -447,9 +443,7 @@ class TavilySearch(BaseTool):  # type: ignore[override]
                 else include_images,
                 time_range=self.time_range if self.time_range else time_range,
                 topic=self.topic if self.topic else topic,
-                include_favicon=self.include_favicon
-                if self.include_favicon
-                else include_favicon,
+                include_favicon=self.include_favicon,
                 country=self.country,
                 max_results=self.max_results,
                 include_answer=self.include_answer,
