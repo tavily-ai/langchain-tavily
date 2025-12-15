@@ -293,6 +293,11 @@ class TavilyCrawl(BaseTool):  # type: ignore[override]
     
     Default is False.
     """
+    chunks_per_source: Optional[int] = None
+    """Number of content chunks to return per source URL.
+    
+    Use this to limit the amount of content returned from each crawled URL.
+    """
 
     api_wrapper: TavilyCrawlAPIWrapper = Field(default_factory=TavilyCrawlAPIWrapper)  # type: ignore[arg-type]
 
@@ -392,6 +397,7 @@ class TavilyCrawl(BaseTool):  # type: ignore[override]
                 include_favicon=self.include_favicon,
                 format=self.format,
                 include_usage=self.include_usage,
+                chunks_per_source=self.chunks_per_source,
                 **kwargs,
             )
 
@@ -494,6 +500,7 @@ class TavilyCrawl(BaseTool):  # type: ignore[override]
                 include_favicon=self.include_favicon,
                 format=self.format,
                 include_usage=self.include_usage,
+                chunks_per_source=self.chunks_per_source,
                 **kwargs,
             )
 

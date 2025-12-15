@@ -43,6 +43,13 @@ class TavilyExtractInput(BaseModel):
         Default is False (extracts text content only).
         """,  # noqa: E501
     )
+    query: Optional[str] = Field(
+        default=None,
+        description="""A query string to filter and prioritize content extraction.
+        
+        When provided, the extraction will focus on content most relevant to the query.
+        """,  # noqa: E501
+    )
 
 
 def _generate_suggestions(params: Dict[str, Any]) -> List[str]:
@@ -104,6 +111,16 @@ class TavilyExtract(BaseTool):  # type: ignore[override, override]
     
     Default is False.
     """
+    query: Optional[str] = None
+    """A query string to filter and prioritize content extraction.
+    
+    When provided, the extraction will focus on content most relevant to the query.
+    """
+    chunks_per_source: Optional[int] = None
+    """Number of content chunks to return per source URL.
+    
+    Use this to limit the amount of content returned from each URL.
+    """
     apiwrapper: TavilyExtractAPIWrapper = Field(default_factory=TavilyExtractAPIWrapper)  # type: ignore[arg-type]
 
     def __init__(self, **kwargs: Any) -> None:
@@ -122,6 +139,7 @@ class TavilyExtract(BaseTool):  # type: ignore[override, override]
         urls: List[str],
         extract_depth: Optional[Literal["basic", "advanced"]] = None,
         include_images: Optional[bool] = None,
+        query: Optional[str] = None,
         run_manager: Optional[CallbackManagerForToolRun] = None,
         **kwargs: Any,
     ) -> Dict[str, Any]:
@@ -149,6 +167,8 @@ class TavilyExtract(BaseTool):  # type: ignore[override, override]
                 include_favicon=self.include_favicon,
                 format=self.format,
                 include_usage=self.include_usage,
+                query=self.query if self.query else query,
+                chunks_per_source=self.chunks_per_source,
                 **kwargs,
             )
 
@@ -181,6 +201,7 @@ class TavilyExtract(BaseTool):  # type: ignore[override, override]
         urls: List[str],
         extract_depth: Optional[Literal["basic", "advanced"]] = None,
         include_images: Optional[bool] = None,
+        query: Optional[str] = None,
         run_manager: Optional[AsyncCallbackManagerForToolRun] = None,
         **kwargs: Any,
     ) -> Dict[str, Any]:
@@ -207,6 +228,8 @@ class TavilyExtract(BaseTool):  # type: ignore[override, override]
                 include_favicon=self.include_favicon,
                 format=self.format,
                 include_usage=self.include_usage,
+                query=self.query if self.query else query,
+                chunks_per_source=self.chunks_per_source,
                 **kwargs,
             )
 

@@ -202,6 +202,8 @@ class TavilyExtractAPIWrapper(BaseModel):
         include_favicon: Optional[bool],
         format: Optional[str],
         include_usage: Optional[bool],
+        query: Optional[str],
+        chunks_per_source: Optional[int],
         **kwargs: Any,
     ) -> Dict[str, Any]:
         params = {
@@ -211,6 +213,8 @@ class TavilyExtractAPIWrapper(BaseModel):
             "extract_depth": extract_depth,
             "format": format,
             "include_usage": include_usage,
+            "query": query,
+            "chunks_per_source": chunks_per_source,
             **kwargs,
         }
 
@@ -247,6 +251,8 @@ class TavilyExtractAPIWrapper(BaseModel):
         extract_depth: Optional[Literal["basic", "advanced"]],
         format: Optional[str],
         include_usage: Optional[bool],
+        query: Optional[str],
+        chunks_per_source: Optional[int],
         **kwargs: Any,
     ) -> Dict[str, Any]:
         """Get results from the Tavily Extract API asynchronously."""
@@ -260,6 +266,8 @@ class TavilyExtractAPIWrapper(BaseModel):
                 "extract_depth": extract_depth,
                 "format": format,
                 "include_usage": include_usage,
+                "query": query,
+                "chunks_per_source": chunks_per_source,
                 **kwargs,
             }
 
@@ -341,6 +349,7 @@ class TavilyCrawlAPIWrapper(BaseModel):
         include_favicon: Optional[bool],
         format: Optional[str],
         include_usage: Optional[bool],
+        chunks_per_source: Optional[int],
         **kwargs: Any,
     ) -> Dict[str, Any]:
         params = {
@@ -360,6 +369,7 @@ class TavilyCrawlAPIWrapper(BaseModel):
             "include_favicon": include_favicon,
             "format": format,
             "include_usage": include_usage,
+            "chunks_per_source": chunks_per_source,
             **kwargs,
         }
 
@@ -420,6 +430,7 @@ class TavilyCrawlAPIWrapper(BaseModel):
         include_favicon: Optional[bool],
         format: Optional[str],
         include_usage: Optional[bool],
+        chunks_per_source: Optional[int],
         **kwargs: Any,
     ) -> Dict[str, Any]:
         """Get results from the Tavily Crawl API asynchronously."""
@@ -443,6 +454,7 @@ class TavilyCrawlAPIWrapper(BaseModel):
                 "include_favicon": include_favicon,
                 "format": format,
                 "include_usage": include_usage,
+                "chunks_per_source": chunks_per_source,
                 **kwargs,
             }
 
