@@ -80,7 +80,7 @@ tool = TavilySearch(
 The Tavily search tool accepts the following arguments during invocation:
 
 - `query` (required): A natural language search query
-- The following arguments can also be set during invocation : `include_images`, `search_depth`, `time_range`, `include_domains`, `exclude_domains`
+- The following arguments can also be set during invocation : `include_images`, `search_depth`, `time_range`, `include_domains`, `exclude_domains`, `topic`, `start_date` and `end_date`.
 - For reliability and performance reasons, certain parameters that affect response size cannot be modified during invocation: `include_answer` and `include_raw_content`. These limitations prevent unexpected context window issues and ensure consistent results.
 
 NOTE: If you set an argument during instantiation this value will persist and overwrite the value passed during invocation.

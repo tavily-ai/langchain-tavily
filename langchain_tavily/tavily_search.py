@@ -360,6 +360,16 @@ class TavilySearch(BaseTool):  # type: ignore[override]
                 - response_time: Time taken for the search
         """
         try:
+            forbidden_params = [
+                "include_usage", "auto_parameters", "max_results", "include_answer", 
+                "include_raw_content", "include_image_descriptions", "include_favicon", "country"
+            ]
+            for param in forbidden_params:
+                if param in kwargs:
+                    raise ValueError(
+                        f"The parameter '{param}' can only be set during instantiation, not during invocation. Please set it when creating the TavilySearch instance."
+                    )
+            
             # Execute search with parameters directly
             raw_results = self.api_wrapper.raw_results(
                 query=query,
@@ -429,6 +439,16 @@ class TavilySearch(BaseTool):  # type: ignore[override]
     ) -> Dict[str, Any]:
         """Use the tool asynchronously."""
         try:
+            forbidden_params = [
+                "include_usage", "auto_parameters", "max_results", "include_answer", 
+                "include_raw_content", "include_image_descriptions", "include_favicon", "country"
+            ]
+            for param in forbidden_params:
+                if param in kwargs:
+                    raise ValueError(
+                        f"The parameter '{param}' can only be set during instantiation, not during invocation. Please set it when creating the TavilySearch instance."
+                    )
+            
             raw_results = await self.api_wrapper.raw_results_async(
                 query=query,
                 include_domains=self.include_domains
