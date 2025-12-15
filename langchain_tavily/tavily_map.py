@@ -316,6 +316,12 @@ class TavilyMap(BaseTool):  # type: ignore[override]
         """
 
         try:
+            # Check if include_usage is passed during invocation
+            if "include_usage" in kwargs:
+                raise ValueError(
+                    "This parameter can only be set during instantiation, not during invocation. Please set it when creating the TavilyMap instance."
+                )
+            
             # Execute search with parameters directly
             raw_results = self.api_wrapper.raw_results(
                 url=url,
@@ -400,6 +406,12 @@ class TavilyMap(BaseTool):  # type: ignore[override]
         """Use the tool asynchronously."""
 
         try:
+            # Check if include_usage is passed during invocation
+            if "include_usage" in kwargs:
+                raise ValueError(
+                    "This parameter can only be set during instantiation, not during invocation. Please set it when creating the TavilyMap instance."
+                )
+            
             raw_results = await self.api_wrapper.raw_results_async(
                 url=url,
                 max_depth=self.max_depth if self.max_depth else max_depth,

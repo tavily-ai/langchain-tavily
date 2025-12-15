@@ -128,6 +128,12 @@ class TavilyExtract(BaseTool):  # type: ignore[override, override]
         """Use the tool."""
 
         try:
+            # Check if include_usage is passed during invocation
+            if "include_usage" in kwargs:
+                raise ValueError(
+                    "This parameter can only be set during instantiation, not during invocation. Please set it when creating the TavilyExtract instance."
+                )
+            
             # Execute search with parameters directly
             raw_results = self.apiwrapper.raw_results(
                 urls=urls,
@@ -178,6 +184,12 @@ class TavilyExtract(BaseTool):  # type: ignore[override, override]
         """Use the tool asynchronously."""
 
         try:
+            # Check if include_usage is passed during invocation
+            if "include_usage" in kwargs:
+                raise ValueError(
+                    "This parameter can only be set during instantiation, not during invocation. Please set it when creating the TavilyExtract instance."
+                )
+            
             raw_results = await self.apiwrapper.raw_results_async(
                 urls=urls,
                 extract_depth=self.extract_depth
