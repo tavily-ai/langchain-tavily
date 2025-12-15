@@ -316,7 +316,6 @@ class TavilyMap(BaseTool):  # type: ignore[override]
         """
 
         try:
-            # Check if include_usage is passed during invocation
             forbidden_params = [
                 "include_usage"
             ]
@@ -410,7 +409,6 @@ class TavilyMap(BaseTool):  # type: ignore[override]
         """Use the tool asynchronously."""
 
         try:
-            # Check if include_usage is passed during invocation
             forbidden_params = [
                 "include_usage"
             ]

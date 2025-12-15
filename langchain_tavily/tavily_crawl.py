@@ -353,7 +353,6 @@ class TavilyCrawl(BaseTool):  # type: ignore[override]
 
         """
         try:
-            # Check if include_usage is passed during invocation
             forbidden_params = [
                 "include_usage", "include_favicon", "format"
             ]
@@ -457,7 +456,6 @@ class TavilyCrawl(BaseTool):  # type: ignore[override]
     ) -> Dict[str, Any]:
         """Use the tool asynchronously."""
         try:
-            # Check if include_usage is passed during invocation
             forbidden_params = [
                 "include_usage", "include_favicon", "format"
             ]

@@ -187,7 +187,6 @@ class TavilyExtract(BaseTool):  # type: ignore[override, override]
         """Use the tool asynchronously."""
 
         try:
-            # Check if include_usage is passed during invocation
             forbidden_params = [
                 "include_usage", "include_favicon", "format"
             ]

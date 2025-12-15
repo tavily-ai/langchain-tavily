@@ -360,7 +360,6 @@ class TavilySearch(BaseTool):  # type: ignore[override]
                 - response_time: Time taken for the search
         """
         try:
-            # Check if include_usage is passed during invocation
             forbidden_params = [
                 "include_usage", "auto_parameters", "max_results", "include_answer", 
                 "include_raw_content", "include_image_descriptions", "include_favicon", "country"
