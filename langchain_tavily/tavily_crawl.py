@@ -354,10 +354,14 @@ class TavilyCrawl(BaseTool):  # type: ignore[override]
         """
         try:
             # Check if include_usage is passed during invocation
-            if any(param in kwargs for param in ["include_usage", "include_favicon", "format"]):
-                raise ValueError(
-                    "This parameter can only be set during instantiation, not during invocation. Please set it when creating the TavilyCrawl instance."
-                )
+            forbidden_params = [
+                "include_usage", "include_favicon", "format"
+            ]
+            for param in forbidden_params:
+                if param in kwargs:
+                    raise ValueError(
+                        f"The parameter '{param}' can only be set during instantiation, not during invocation. Please set it when creating the TavilyCrawl instance."
+                    )
             
             # Execute search with parameters directly
             raw_results = self.api_wrapper.raw_results(
@@ -454,10 +458,14 @@ class TavilyCrawl(BaseTool):  # type: ignore[override]
         """Use the tool asynchronously."""
         try:
             # Check if include_usage is passed during invocation
-            if any(param in kwargs for param in ["include_usage", "include_favicon", "format"]):
-                raise ValueError(
-                    "This parameter can only be set during instantiation, not during invocation. Please set it when creating the TavilyCrawl instance."
-                )
+            forbidden_params = [
+                "include_usage", "include_favicon", "format"
+            ]
+            for param in forbidden_params:
+                if param in kwargs:
+                    raise ValueError(
+                        f"The parameter '{param}' can only be set during instantiation, not during invocation. Please set it when creating the TavilyCrawl instance."
+                    )
             
             raw_results = await self.api_wrapper.raw_results_async(
                 url=url,
