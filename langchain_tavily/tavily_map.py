@@ -317,7 +317,7 @@ class TavilyMap(BaseTool):  # type: ignore[override]
 
         try:
             # Check if include_usage is passed during invocation
-            if "include_usage" in kwargs:
+            if any(param in kwargs for param in ["include_usage"]):
                 raise ValueError(
                     "This parameter can only be set during instantiation, not during invocation. Please set it when creating the TavilyMap instance."
                 )
@@ -407,7 +407,7 @@ class TavilyMap(BaseTool):  # type: ignore[override]
 
         try:
             # Check if include_usage is passed during invocation
-            if "include_usage" in kwargs:
+            if any(param in kwargs for param in ["include_usage"]):
                 raise ValueError(
                     "This parameter can only be set during instantiation, not during invocation. Please set it when creating the TavilyMap instance."
                 )

@@ -128,8 +128,7 @@ class TavilyExtract(BaseTool):  # type: ignore[override, override]
         """Use the tool."""
 
         try:
-            # Check if include_usage is passed during invocation
-            if "include_usage" in kwargs:
+            if any(param in kwargs for param in ["include_usage", "include_favicon", "format"]):
                 raise ValueError(
                     "This parameter can only be set during instantiation, not during invocation. Please set it when creating the TavilyExtract instance."
                 )
@@ -185,7 +184,7 @@ class TavilyExtract(BaseTool):  # type: ignore[override, override]
 
         try:
             # Check if include_usage is passed during invocation
-            if "include_usage" in kwargs:
+            if any(param in kwargs for param in ["include_usage", "include_favicon", "format"]):
                 raise ValueError(
                     "This parameter can only be set during instantiation, not during invocation. Please set it when creating the TavilyExtract instance."
                 )

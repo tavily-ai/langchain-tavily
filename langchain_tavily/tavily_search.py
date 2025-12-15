@@ -361,7 +361,7 @@ class TavilySearch(BaseTool):  # type: ignore[override]
         """
         try:
             # Check if include_usage is passed during invocation
-            if any(param in kwargs for param in ["include_usage", "auto_parameters"]):
+            if any(param in kwargs for param in ["include_usage", "auto_parameters", "max_results", "include_answer", "include_raw_content", "include_image_descriptions", "include_favicon", "country"]):
                 raise ValueError(
                     "This parameter can only be set during instantiation, not during invocation. Please set it when creating the TavilySearch instance."
                 )
@@ -435,7 +435,7 @@ class TavilySearch(BaseTool):  # type: ignore[override]
     ) -> Dict[str, Any]:
         """Use the tool asynchronously."""
         try:
-            if any(param in kwargs for param in ["include_usage", "auto_parameters"]):
+            if any(param in kwargs for param in ["include_usage", "auto_parameters", "max_results", "include_answer", "include_raw_content", "include_image_descriptions", "include_favicon", "country"]):
                 raise ValueError(
                     "This parameter can only be set during instantiation, not during invocation. Please set it when creating the TavilySearch instance."
                 )

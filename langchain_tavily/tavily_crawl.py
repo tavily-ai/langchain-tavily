@@ -354,7 +354,7 @@ class TavilyCrawl(BaseTool):  # type: ignore[override]
         """
         try:
             # Check if include_usage is passed during invocation
-            if "include_usage" in kwargs:
+            if any(param in kwargs for param in ["include_usage", "include_favicon", "format"]):
                 raise ValueError(
                     "This parameter can only be set during instantiation, not during invocation. Please set it when creating the TavilyCrawl instance."
                 )
@@ -454,7 +454,7 @@ class TavilyCrawl(BaseTool):  # type: ignore[override]
         """Use the tool asynchronously."""
         try:
             # Check if include_usage is passed during invocation
-            if "include_usage" in kwargs:
+            if any(param in kwargs for param in ["include_usage", "include_favicon", "format"]):
                 raise ValueError(
                     "This parameter can only be set during instantiation, not during invocation. Please set it when creating the TavilyCrawl instance."
                 )
