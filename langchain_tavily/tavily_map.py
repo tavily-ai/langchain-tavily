@@ -7,13 +7,15 @@ from langchain_core.callbacks import (
     CallbackManagerForToolRun,
 )
 from langchain_core.tools import BaseTool, ToolException
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 from langchain_tavily._utilities import TavilyMapAPIWrapper
 
 
 class TavilyMapInput(BaseModel):
     """Input for [TavilyMap]"""
+
+    model_config = ConfigDict(extra="allow")
 
     url: str = Field(description=("The root URL to begin the mapping."))
     max_depth: Optional[int] = Field(
@@ -250,6 +252,11 @@ class TavilyMap(BaseTool):  # type: ignore[override]
     ] = None
     """Filter URLs using predefined categories like 'Documentation', 'Blogs', etc.
     """
+    include_usage: Optional[bool] = None
+    """Whether to include credit usage information in the response.
+    
+    Default is False.
+    """
     api_wrapper: TavilyMapAPIWrapper = Field(default_factory=TavilyMapAPIWrapper)  # type: ignore[arg-type]
 
     def __init__(self, **kwargs: Any) -> None:
@@ -292,6 +299,7 @@ class TavilyMap(BaseTool):  # type: ignore[override]
             ]
         ] = None,
         run_manager: Optional[CallbackManagerForToolRun] = None,
+        **kwargs: Any,
     ) -> Dict[str, Any]:
         """Execute a mapping using the Tavily Map API.
 
@@ -306,6 +314,7 @@ class TavilyMap(BaseTool):  # type: ignore[override]
             - response_time (float): Time in seconds it took to complete the request
 
         """
+
         try:
             # Execute search with parameters directly
             raw_results = self.api_wrapper.raw_results(
@@ -328,6 +337,8 @@ class TavilyMap(BaseTool):  # type: ignore[override]
                 if self.allow_external
                 else allow_external,
                 categories=self.categories if self.categories else categories,
+                include_usage=self.include_usage,
+                **kwargs,
             )
 
             # Check if results are empty and raise a specific exception
@@ -384,8 +395,10 @@ class TavilyMap(BaseTool):  # type: ignore[override]
             ]
         ] = None,
         run_manager: Optional[AsyncCallbackManagerForToolRun] = None,
+        **kwargs: Any,
     ) -> Dict[str, Any]:
         """Use the tool asynchronously."""
+
         try:
             raw_results = await self.api_wrapper.raw_results_async(
                 url=url,
@@ -407,6 +420,8 @@ class TavilyMap(BaseTool):  # type: ignore[override]
                 if self.allow_external
                 else allow_external,
                 categories=self.categories if self.categories else categories,
+                include_usage=self.include_usage,
+                **kwargs,
             )
 
             # Check if results are empty and raise a specific exception

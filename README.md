@@ -6,20 +6,10 @@
 
 This package contains the LangChain integration with [Tavily](https://tavily.com/)
 
-# **NEW in v0.2.11: Enhanced Type Hints and mypy Support!** 
-Added type hints and py.typed marker to resolve mypy import-untyped errors for better development experience.
-
-# **NEW in v0.2.10: Date Range Search Support!** 
-Now you can filter search results by date range using `start_date` and `end_date` parameters! Use YYYY-MM-DD format to specify the date range for your search results.
-
-# **Favicon Support in v0.2.9!** 
-You can include favicon URLs in your search, extract, and crawl results! Set `include_favicon=True` to get the favicon URL for each result.
-
-# **Introducing [tavily-crawl](https://docs.tavily.com/documentation/api-reference/endpoint/crawl) + [tavily-map](https://docs.tavily.com/documentation/api-reference/endpoint/map) in v0.2.9!** 
-Two powerful new tools have joined the Tavily family! Upgrade now to access:
 ```bash
 pip install -U langchain-tavily
 ```
+
 Don't miss out on these exciting new features! Check out the [full documentation](https://docs.tavily.com/) to learn more.
 
 ---
@@ -53,10 +43,11 @@ The tool accepts various parameters during instantiation:
 - `max_results` (optional, int): Maximum number of search results to return. Default is 5.
 - `topic` (optional, str): Category of the search. Can be "general", "news", or "finance". Default is "general".
 - `include_answer` (optional, bool | str): Include an answer to original query in results. Default is False. String options include "basic" (quick answer) or "advanced" (detailed answer). If True, defaults to "basic".
-- `include_raw_content` (optional,  bool | str): Include the cleaned and parsed HTML content of each search result. "markdown" returns search result content in markdown format. "text" returns the plain text from the results and may increase latency. If True, defaults to "markdown"
+- `include_raw_content` (optional, bool | str): Include the cleaned and parsed HTML content of each search result. "markdown" returns search result content in markdown format. "text" returns the plain text from the results and may increase latency. If True, defaults to "markdown"
 - `include_images` (optional, bool): Include a list of query related images in the response. Default is False.
 - `include_image_descriptions` (optional, bool): Include descriptive text for each image. Default is False.
 - `include_favicon` (optional, bool): Whether to include the favicon URL for each result. Default is False.
+- `include_usage` (optional, bool): Whether to include credit usage information in the response.
 - `search_depth` (optional, str): Depth of the search, either "basic" or "advanced". Default is "basic".
 - `time_range` (optional, str): The time range back from the current date to filter results - "day", "week", "month", or "year". Default is None.
 - `include_domains` (optional, List[str]): List of domains to specifically include. Default is None.
@@ -89,7 +80,7 @@ tool = TavilySearch(
 The Tavily search tool accepts the following arguments during invocation:
 
 - `query` (required): A natural language search query
-- The following arguments can also be set during invocation : `include_images`, `include_favicon`, `search_depth` , `time_range`, `include_domains`, `exclude_domains`
+- The following arguments can also be set during invocation : `include_images`, `search_depth`, `time_range`, `include_domains`, `exclude_domains`
 - For reliability and performance reasons, certain parameters that affect response size cannot be modified during invocation: `include_answer` and `include_raw_content`. These limitations prevent unexpected context window issues and ensure consistent results.
 
 NOTE: If you set an argument during instantiation this value will persist and overwrite the value passed during invocation.
@@ -186,6 +177,7 @@ The tool accepts various parameters during instantiation:
 - `extract_depth` (optional, str): The depth of the extraction, either "basic" or "advanced". Default is "basic ".
 - `include_images` (optional, bool): Whether to include images in the extraction. Default is False.
 - `include_favicon` (optional, bool): Whether to include the favicon URL for each result. Default is False.
+- `include_usage` (optional, bool): Whether to include credit usage information in the response. NOTE:The value may be 0 if the total successful URL extractions has not yet reached 5 calls. See our [Credits & Pricing documentation](https://docs.tavily.com/documentation/api-credits) for details.
 - `format` (optional, str): The format of the extracted web page content. "markdown" returns content in markdown format. "text" returns plain text and may increase latency.
 
 For a comprehensive overview of the available parameters, refer to the [Tavily Extract API documentation](https://docs.tavily.com/documentation/api-reference/endpoint/extract)
@@ -206,7 +198,7 @@ tool = TavilyExtract(
 The Tavily extract tool accepts the following arguments during invocation:
 
 - `urls` (required): A list of URLs to extract content from.
-- The parameters `extract_depth`, `include_images`, and `include_favicon` can also be set during invocation
+- The parameters `extract_depth` and `include_images` can also be set during invocation
 
 NOTE: If you set an argument during instantiation this value will persist and overwrite the value passed during invocation.
 
@@ -245,13 +237,14 @@ The tool accepts various parameters during instantiation:
 - `instructions` (optional, str): Natural language instructions to guide the crawler. Default is None.
 - `select_paths` (optional, List[str]): Regex patterns to select specific URL paths. Default is None.
 - `select_domains` (optional, List[str]): Regex patterns to select specific domains. Default is None.
-- `exclude_paths` (optional, List[str]): Regex patterns to exclude URLs with specific path patterns 
-- `exclude_domains` (optional, List[str]): Regex patterns to exclude specific domains or subdomains from crawling 
+- `exclude_paths` (optional, List[str]): Regex patterns to exclude URLs with specific path patterns
+- `exclude_domains` (optional, List[str]): Regex patterns to exclude specific domains or subdomains from crawling
 - `allow_external` (optional, bool): Allow following external domain links. Default is False.
 - `include_images` (optional, bool): Whether to include images in the crawl results.
 - `categories` (optional, str): Filter URLs by predefined categories. Can be "Careers", "Blogs", "Documentation", "About", "Pricing", "Community", "Developers", "Contact", or "Media". Default is None.
 - `extract_depth` (optional, str): Depth of content extraction, either "basic" or "advanced". Default is "basic".
 - `include_favicon` (optional, bool): Whether to include the favicon URL for each result. Default is False.
+- `include_usage` (optional, bool): Whether to include credit usage information in the response. NOTE:The value may be 0 if the total use of /extract and /map calls has not yet reached minimum needed. See our [Credits & Pricing documentation](https://docs.tavily.com/documentation/api-credits) for details.
 - `format` (optional, str): The format of the extracted web page content. "markdown" returns content in markdown format. "text" returns plain text and may increase latency.
 
 For a comprehensive overview of the available parameters, refer to the [Tavily Crawl API documentation](https://docs.tavily.com/documentation/api-reference/endpoint/crawl)
@@ -280,8 +273,9 @@ tool = TavilyCrawl(
 ### Invoke directly with args
 
 The Tavily crawl tool accepts the following arguments during invocation:
+
 - `url` (required): The root URL to begin the crawl.
-- All other parameters can also be set during invocation: `max_depth`, `max_breadth`, `limit`, `instructions`, `select_paths`, `select_domains`, `exclude_paths`, `exclude_domains`,`allow_external`, `include_images`, `categories`, `extract_depth`, and `include_favicon`
+- All other parameters can also be set during invocation: `max_depth`, `max_breadth`, `limit`, `instructions`, `select_paths`, `select_domains`, `exclude_paths`, `exclude_domains`, `allow_external`, `include_images`, `categories`, and `extract_depth`.
 
 NOTE: If you set an argument during instantiation this value will persist and overwrite the value passed during invocation.
 
@@ -295,6 +289,7 @@ result = tool.invoke({
 ```
 
 output:
+
 ```bash
 {
     'base_url': 'https://docs.tavily.com',
@@ -326,10 +321,11 @@ The tool accepts various parameters during instantiation:
 - `instructions` (optional, str): Natural language instructions to guide the mapping.
 - `select_paths` (optional, List[str]): Regex patterns to select specific URL paths.
 - `select_domains` (optional, List[str]): Regex patterns to select specific domains.
-- `exclude_paths` (optional, List[str]): Regex patterns to exclude URLs with specific path patterns 
-- `exclude_domains` (optional, List[str]): Regex patterns to exclude specific domains or subdomains from mapping 
+- `exclude_paths` (optional, List[str]): Regex patterns to exclude URLs with specific path patterns
+- `exclude_domains` (optional, List[str]): Regex patterns to exclude specific domains or subdomains from mapping
 - `allow_external` (optional, bool): Allow following external domain links. Default is False.
 - `categories` (optional, str): Filter URLs by predefined categories ("Careers", "Blogs", "Documentation", "About", "Pricing", "Community", "Developers", "Contact", "Media").
+- `include_usage` (optional, bool): Whether to include credit usage information in the response.NOTE:The value may be 0 if the total successful pages mapped has not yet reached 10 calls. See our [Credits & Pricing documentation](https://docs.tavily.com/documentation/api-credits) for details.
 
 For a comprehensive overview of the available parameters, refer to the [Tavily Map API documentation](https://docs.tavily.com/documentation/api-reference/endpoint/map)
 
@@ -353,8 +349,9 @@ tool = TavilyMap(
 ### Invoke directly with args
 
 The Tavily map tool accepts the following arguments during invocation:
+
 - `url` (required): The root URL to begin the mapping.
-- All other parameters can also be set during invocation: `max_depth`, `max_breadth`, `limit`, `instructions`, `select_paths`, `select_domains`, `exclude_paths`, `exclude_domains`, `allow_external`, and `categories`.
+- All other parameters can also be set during invocation: `max_depth`, `max_breadth`, `limit`, `instructions`, `select_paths`, `select_domains`, `exclude_paths`, `exclude_domains`, `allow_external`,and `categories`.
 
 NOTE: If you set an argument during instantiation this value will persist and overwrite the value passed during invocation.
 
@@ -368,6 +365,7 @@ result = tool.invoke({
 ```
 
 output:
+
 ```bash
 {
     'base_url': 'https://docs.tavily.com',
@@ -376,129 +374,110 @@ output:
 }
 ```
 
+## Tavily Research
 
+Here we show how to instantiate an instance of the Tavily Research tool. After instantiation we invoke the tool with a research task description. This tool allows you to create comprehensive research reports on any topic using Tavily's Research API endpoint.
 
-## Tavily Research Agent
+### Instantiation
 
-This example demonstrates how to build a powerful web research agent using Tavily's search and extract Langchain tools.
+The tool accepts various parameters during instantiation:
 
-### Features
+- `model` (optional, str): The model used by the research agent. Can be "mini" (quick, surface-level), "pro" (comprehensive, in-depth), or "auto" (automatically determined). Default is "auto".
+- `output_schema` (optional, dict): JSON Schema dict for structured output format. Default is None (returns unstructured text content).
+- `stream` (optional, bool): Whether to stream the research task results. Default is False.
+- `citation_format` (optional, str): Citation format for sources in the research report. Can be "numbered", "mla", "apa", or "chicago". Default is "numbered".
 
-- Internet Search: Query the web for up-to-date information using Tavily's search API
-- Content Extraction: Extract and analyze specific content from web pages
-- Seamless Integration: Works with OpenAI's function calling capability for reliable tool use
-
-```python
-# !pip install -qU langchain langchain-openai langchain-tavily
-from typing import Any, Dict, Optional
-import datetime
-
-from langchain.agents import create_openai_tools_agent, AgentExecutor
-from langchain.chat_models import init_chat_model
-from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
-from langchain_openai import ChatOpenAI
-from langchain_tavily import TavilySearch, TavilyExtract
-from langchain.schema import HumanMessage, SystemMessage
-
-# Initialize LLM
-llm = ChatOpenAI(temperature=0, model="gpt-4o")
-
-# Initialize Tavily Search Tool
-tavily_search_tool = TavilySearch(
-    max_results=5,
-    topic="general",
-)
-# Initialize Tavily Extract Tool
-tavily_extract_tool = TavilyExtract()
-
-tools = [tavily_search_tool, tavily_extract_tool]
-
-# Set up Prompt with 'agent_scratchpad'
-today = datetime.datetime.today().strftime("%D")
-prompt = ChatPromptTemplate.from_messages([
-    ("system", f"""You are a helpful reaserch assistant, you will be given a query and you will need to
-    search the web for the most relevant information then extract content to gain more insights. The date today is {today}."""),
-    MessagesPlaceholder(variable_name="messages"),
-    MessagesPlaceholder(variable_name="agent_scratchpad"),  # Required for tool calls
-])
-# Create an agent that can use tools
-agent = create_openai_tools_agent(
-    llm=llm,
-    tools=tools,
-    prompt=prompt
-)
-
-# Create an Agent Executor to handle tool execution
-agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=True)
-
-user_input =  "Research the latest developments in quantum computing and provide a detailed summary of how it might impact cybersecurity in the next decade."
-
-# Construct input properly as a dictionary
-response = agent_executor.invoke({"messages": [HumanMessage(content=user_input)]})
-```
-
-## Tavily Search and Crawl Agent Example
-
-This example demonstrates how to build a powerful web research agent using Tavily's search and crawl Langchain tools to find and analyze information from websites.
-
-### Features
-
-- Internet Search: Query the web for up-to-date information using Tavily's search API
-- Website Crawling: Crawl websites to find specific information and content
-- Seamless Integration: Works with OpenAI's function calling capability for reliable tool use
+For a comprehensive overview of the available parameters, refer to the [Tavily Research API documentation](https://docs.tavily.com/documentation/api-reference/endpoint/research)
 
 ```python
-from typing import Any, Dict, Optional
-import datetime
+from langchain_tavily import TavilyResearch
 
-from langchain.agents import create_openai_tools_agent, AgentExecutor
-from langchain.chat_models import init_chat_model
-from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
-from langchain_openai import ChatOpenAI
-from langchain_tavily import TavilySearch, TavilyCrawl
-from langchain.schema import HumanMessage, SystemMessage
-
-# Initialize LLM
-llm = init_chat_model(model="gpt-4.1", model_provider="openai", temperature=0)
-
-# Initialize Tavily Search Tool
-tavily_search_tool = TavilySearch(
-    max_results=5,
-    topic="general",
+tool = TavilyResearch(
+    model="mini",
+    # output_schema=None,
+    # stream=False,
+    # citation_format="numbered",
 )
-
-tavily_crawl_tool = TavilyCrawl()
-
-# Set up Prompt with 'agent_scratchpad'
-today = datetime.datetime.today().strftime("%D")
-prompt = ChatPromptTemplate.from_messages([
-    ("system", f"""You are a helpful reaserch assistant, you will be given a query and you will need to
-    search the web and crawl the web for the most relevant information. The date today is {today}."""),
-    MessagesPlaceholder(variable_name="messages"),
-    MessagesPlaceholder(variable_name="agent_scratchpad"),  # Required for tool calls
-])
-
-# Create an agent that can use tools
-agent = create_openai_tools_agent(
-    llm=llm,
-    tools=[tavily_search_tool, tavily_crawl_tool],
-    prompt=prompt
-)
-
-# Create an Agent Executor to handle tool execution
-agent_executor = AgentExecutor(agent=agent, tools=[tavily_search_tool, tavily_crawl_tool], verbose=True)
-
-user_input =  "Find the base url of apple and then crawl the base url to find all iphone models"
-
-# Construct input properly as a dictionary
-response = agent_executor.invoke({"messages": [HumanMessage(content=user_input)]})
 ```
 
-This example shows how to:
-1. Initialize both Tavily Search and Crawl tools
-2. Set up an agent with a custom prompt that includes the current date
-3. Create an agent executor that can use both tools
-4. Process a user query that requires both searching and crawling capabilities
+### Invoke directly with args
 
-The agent will first use the search tool to find Apple's base URL, then use the crawl tool to explore the website and find information about iPhone models.
+The Tavily research tool accepts the following arguments during invocation:
 
+- `input` (required): TThe research task or question to investigate.
+- The following arguments can also be set during invocation: `model`, `output_schema`, `stream`, and `citation_format`.
+
+NOTE: If you set an argument during instantiation this value will persist and overwrite the value passed during invocation.
+
+```python
+# Creating a research task
+response = tool.invoke({
+    "input": "Research the latest developments in AI",
+    "model": "pro",
+    "citation_format": "apa"
+})
+```
+
+output:
+
+```bash
+{
+    'request_id': 'abc123-def456-ghi789',
+    'created_at': '2024-01-15T10:30:00Z',
+    'status': 'pending',
+    'input': 'Research the latest developments in AI',
+    'model': 'pro'
+}
+```
+
+### Retrieving research results
+
+After creating a research task, you can retrieve the results using the `TavilyGetResearch` tool:
+
+```python
+from langchain_tavily import TavilyGetResearch
+
+# Initialize the get research tool
+get_research_tool = TavilyGetResearch()
+
+# Retrieve results using the request_id from the research task
+result = get_research_tool.invoke({
+    "request_id": "abc123-def456-ghi789"
+})
+```
+
+output:
+
+```bash
+{
+    'request_id': 'abc123-def456-ghi789',
+    'created_at': '2024-01-15T10:30:00Z',
+    'completed_at': '2024-01-15T10:35:00Z',
+    'status': 'completed',
+    'content': 'Comprehensive research report on AI developments...',
+    'sources': [
+        {
+            'title': 'AI Research Paper',
+            'url': 'https://example.com/ai-paper',
+        },
+        ...
+    ]
+}
+```
+
+### Streaming research results
+
+You can also stream research results as they become available:
+
+```python
+# Creating a streaming research task
+stream = tool.invoke({
+    "input": "Research the latest developments in AI",
+    "model": "pro",
+    "stream": True
+})
+
+# Processing the stream as it arrives
+for chunk in stream:
+    print(chunk.decode('utf-8'))
+```
