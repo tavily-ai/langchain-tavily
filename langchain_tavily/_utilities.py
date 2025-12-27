@@ -22,6 +22,7 @@ class TavilySearchAPIWrapper(BaseModel):
 
     tavily_api_key: SecretStr
     api_base_url: Optional[str] = None
+    proxies: Optional[dict[str, str]] = None
 
     model_config = ConfigDict(
         extra="forbid",
@@ -79,7 +80,14 @@ class TavilySearchAPIWrapper(BaseModel):
             "include_usage": include_usage,
             **kwargs,
         }
+        
+        resolved_proxies = {
+            "http": self.proxies.get("http") if self.proxies else getenv("TAVILY_HTTP_PROXY"),
+            "https": self.proxies.get("https") if self.proxies else getenv("TAVILY_HTTPS_PROXY"),
+        }
 
+        resolved_proxies = {k: v for k, v in resolved_proxies.items() if v} or None
+        
         # Remove None values
         params = {k: v for k, v in params.items() if v is not None}
 
@@ -94,6 +102,7 @@ class TavilySearchAPIWrapper(BaseModel):
             f"{base_url}/search",
             json=params,
             headers=headers,
+            proxies=resolved_proxies,
         )
         if response.status_code != 200:
             detail = response.json().get("detail", {})
@@ -148,6 +157,8 @@ class TavilySearchAPIWrapper(BaseModel):
                 "include_usage": include_usage,
                 **kwargs,
             }
+            
+            resolved_proxy = self.proxies.get("http") if self.proxies else getenv("TAVILY_HTTP_PROXY")
 
             # Remove None values
             params = {k: v for k, v in params.items() if v is not None}
@@ -160,7 +171,7 @@ class TavilySearchAPIWrapper(BaseModel):
             base_url = self.api_base_url or TAVILY_API_URL
             async with aiohttp.ClientSession() as session:
                 async with session.post(
-                    f"{base_url}/search", json=params, headers=headers
+                    f"{base_url}/search", json=params, headers=headers, proxy=resolved_proxy
                 ) as res:
                     if res.status == 200:
                         data = await res.text()
@@ -178,6 +189,7 @@ class TavilyExtractAPIWrapper(BaseModel):
 
     tavily_api_key: SecretStr
     api_base_url: Optional[str] = None
+    proxies: Optional[dict[str, str]] = None
 
     model_config = ConfigDict(
         extra="forbid",
@@ -217,6 +229,13 @@ class TavilyExtractAPIWrapper(BaseModel):
             "chunks_per_source": chunks_per_source,
             **kwargs,
         }
+        
+        resolved_proxies = {
+            "http": self.proxies.get("http") if self.proxies else getenv("TAVILY_HTTP_PROXY"),
+            "https": self.proxies.get("https") if self.proxies else getenv("TAVILY_HTTPS_PROXY"),
+        }
+
+        resolved_proxies = {k: v for k, v in resolved_proxies.items() if v} or None
 
         # Remove None values
         params = {k: v for k, v in params.items() if v is not None}
@@ -233,6 +252,7 @@ class TavilyExtractAPIWrapper(BaseModel):
             f"{base_url}/extract",
             json=params,
             headers=headers,
+            proxies=resolved_proxies,
         )
 
         if response.status_code != 200:
@@ -270,6 +290,8 @@ class TavilyExtractAPIWrapper(BaseModel):
                 "chunks_per_source": chunks_per_source,
                 **kwargs,
             }
+            
+            resolved_proxy = self.proxies.get("http") if self.proxies else getenv("TAVILY_HTTP_PROXY")
 
             # Remove None values
             params = {k: v for k, v in params.items() if v is not None}
@@ -283,7 +305,7 @@ class TavilyExtractAPIWrapper(BaseModel):
             base_url = self.api_base_url or TAVILY_API_URL
             async with aiohttp.ClientSession() as session:
                 async with session.post(
-                    f"{base_url}/extract", json=params, headers=headers
+                    f"{base_url}/extract", json=params, headers=headers, proxy=resolved_proxy
                 ) as res:
                     if res.status == 200:
                         data = await res.text()
@@ -301,6 +323,7 @@ class TavilyCrawlAPIWrapper(BaseModel):
 
     tavily_api_key: SecretStr
     api_base_url: Optional[str] = None
+    proxies: Optional[dict[str, str]] = None
 
     model_config = ConfigDict(
         extra="forbid",
@@ -372,6 +395,13 @@ class TavilyCrawlAPIWrapper(BaseModel):
             "chunks_per_source": chunks_per_source,
             **kwargs,
         }
+        
+        resolved_proxies = {
+            "http": self.proxies.get("http") if self.proxies else getenv("TAVILY_HTTP_PROXY"),
+            "https": self.proxies.get("https") if self.proxies else getenv("TAVILY_HTTPS_PROXY"),
+        }
+
+        resolved_proxies = {k: v for k, v in resolved_proxies.items() if v} or None
 
         # Remove None values
         params = {k: v for k, v in params.items() if v is not None}
@@ -388,6 +418,7 @@ class TavilyCrawlAPIWrapper(BaseModel):
             f"{base_url}/crawl",
             json=params,
             headers=headers,
+            proxies=resolved_proxies,
         )
 
         if response.status_code != 200:
@@ -457,6 +488,8 @@ class TavilyCrawlAPIWrapper(BaseModel):
                 "chunks_per_source": chunks_per_source,
                 **kwargs,
             }
+            
+            resolved_proxy = self.proxies.get("http") if self.proxies else getenv("TAVILY_HTTP_PROXY")
 
             # Remove None values
             params = {k: v for k, v in params.items() if v is not None}
@@ -470,7 +503,7 @@ class TavilyCrawlAPIWrapper(BaseModel):
             base_url = self.api_base_url or TAVILY_API_URL
             async with aiohttp.ClientSession() as session:
                 async with session.post(
-                    f"{base_url}/crawl", json=params, headers=headers
+                    f"{base_url}/crawl", json=params, headers=headers, proxy=resolved_proxy
                 ) as res:
                     if res.status == 200:
                         data = await res.text()
@@ -488,6 +521,7 @@ class TavilyMapAPIWrapper(BaseModel):
 
     tavily_api_key: SecretStr
     api_base_url: Optional[str] = None
+    proxies: Optional[dict[str, str]] = None
 
     model_config = ConfigDict(
         extra="forbid",
@@ -549,6 +583,13 @@ class TavilyMapAPIWrapper(BaseModel):
             "include_usage": include_usage,
             **kwargs,
         }
+        
+        resolved_proxies = {
+            "http": self.proxies.get("http") if self.proxies else getenv("TAVILY_HTTP_PROXY"),
+            "https": self.proxies.get("https") if self.proxies else getenv("TAVILY_HTTPS_PROXY"),
+        }
+
+        resolved_proxies = {k: v for k, v in resolved_proxies.items() if v} or None
 
         # Remove None values
         params = {k: v for k, v in params.items() if v is not None}
@@ -565,6 +606,7 @@ class TavilyMapAPIWrapper(BaseModel):
             f"{base_url}/map",
             json=params,
             headers=headers,
+            proxies=resolved_proxies,
         )
 
         if response.status_code != 200:
@@ -624,6 +666,8 @@ class TavilyMapAPIWrapper(BaseModel):
                 "include_usage": include_usage,
                 **kwargs,
             }
+            
+            resolved_proxy = self.proxies.get("http") if self.proxies else getenv("TAVILY_HTTP_PROXY")
 
             # Remove None values
             params = {k: v for k, v in params.items() if v is not None}
@@ -636,7 +680,7 @@ class TavilyMapAPIWrapper(BaseModel):
             base_url = self.api_base_url or TAVILY_API_URL
             async with aiohttp.ClientSession() as session:
                 async with session.post(
-                    f"{base_url}/map", json=params, headers=headers
+                    f"{base_url}/map", json=params, headers=headers, proxy=resolved_proxy
                 ) as res:
                     if res.status == 200:
                         data = await res.text()
