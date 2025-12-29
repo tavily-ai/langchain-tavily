@@ -55,9 +55,9 @@ class TavilySearchInput(BaseModel):
         Use "advanced" for complex queries, specialized topics, 
         rare information, or when in-depth analysis is needed.
         
-        Use "fast" for optimized low latency with high relevance (BETA, 1 API Credit).
+        Use "fast" for optimized low latency with high relevance.
         
-        Use "ultra-fast" when latency is prioritized above all else (BETA, 1 API Credit).
+        Use "ultra-fast" when latency is prioritized above all else.
         """,  # noqa: E501
     )
     include_images: Optional[bool] = Field(
@@ -264,7 +264,7 @@ class TavilySearch(BaseTool):  # type: ignore[override]
     default is None
     """
     search_depth: Optional[Literal["basic", "advanced", "fast", "ultra-fast"]] = None
-    """The depth of the search. It can be 'basic', 'advanced', 'fast' (BETA), or 'ultra-fast' (BETA)
+    """The depth of the search. It can be 'basic', 'advanced', 'fast', or 'ultra-fast'
     
     default is "basic"
     """
