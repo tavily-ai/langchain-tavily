@@ -48,7 +48,7 @@ The tool accepts various parameters during instantiation:
 - `include_image_descriptions` (optional, bool): Include descriptive text for each image. Default is False.
 - `include_favicon` (optional, bool): Whether to include the favicon URL for each result. Default is False.
 - `include_usage` (optional, bool): Whether to include credit usage information in the response.
-- `search_depth` (optional, str): Depth of the search, either "basic" or "advanced". Default is "basic".
+- `search_depth` (optional, str): Depth of the search. Options: "basic", "advanced", "fast", or "ultra-fast". Default is "basic".
 - `time_range` (optional, str): The time range back from the current date to filter results - "day", "week", "month", or "year". Default is None.
 - `include_domains` (optional, List[str]): List of domains to specifically include. Default is None.
 - `exclude_domains` (optional, List[str]): List of domains to specifically exclude. Default is None.

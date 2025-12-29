@@ -46,14 +46,18 @@ class TavilySearchInput(BaseModel):
         Default is None (no domain exclusion).
         """,  # noqa: E501
     )
-    search_depth: Optional[Literal["basic", "advanced"]] = Field(
+    search_depth: Optional[Literal["basic", "advanced", "fast", "ultra-fast"]] = Field(
         default="basic",
         description="""Controls search thoroughness and result comprehensiveness.
     
         Use "basic" for simple queries requiring quick, straightforward answers.
         
-        Use "advanced" (default) for complex queries, specialized topics, 
+        Use "advanced" for complex queries, specialized topics, 
         rare information, or when in-depth analysis is needed.
+        
+        Use "fast" for optimized low latency with high relevance.
+        
+        Use "ultra-fast" when latency is prioritized above all else.
         """,  # noqa: E501
     )
     include_images: Optional[bool] = Field(
@@ -259,8 +263,8 @@ class TavilySearch(BaseTool):  # type: ignore[override]
 
     default is None
     """
-    search_depth: Optional[Literal["basic", "advanced"]] = None
-    """The depth of the search. It can be 'basic' or 'advanced'
+    search_depth: Optional[Literal["basic", "advanced", "fast", "ultra-fast"]] = None
+    """The depth of the search. It can be 'basic', 'advanced', 'fast', or 'ultra-fast'
     
     default is "basic"
     """
@@ -337,7 +341,7 @@ class TavilySearch(BaseTool):  # type: ignore[override]
         query: str,
         include_domains: Optional[List[str]] = None,
         exclude_domains: Optional[List[str]] = None,
-        search_depth: Optional[Literal["basic", "advanced"]] = None,
+        search_depth: Optional[Literal["basic", "advanced", "fast", "ultra-fast"]] = None,
         include_images: Optional[bool] = None,
         time_range: Optional[Literal["day", "week", "month", "year"]] = None,
         topic: Optional[Literal["general", "news", "finance"]] = None,
@@ -428,7 +432,7 @@ class TavilySearch(BaseTool):  # type: ignore[override]
         query: str,
         include_domains: Optional[List[str]] = None,
         exclude_domains: Optional[List[str]] = None,
-        search_depth: Optional[Literal["basic", "advanced"]] = "basic",
+        search_depth: Optional[Literal["basic", "advanced", "fast", "ultra-fast"]] = "basic",
         include_images: Optional[bool] = False,
         time_range: Optional[Literal["day", "week", "month", "year"]] = None,
         topic: Optional[Literal["general", "news", "finance"]] = "general",
