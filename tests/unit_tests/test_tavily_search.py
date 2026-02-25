@@ -46,3 +46,64 @@ class TestTavilySearchToolUnit(ToolsUnitTests):  # Fixed class name to match its
         """
         return {"query": "best time to visit japan"}
 
+
+class TestTavilySearchExactMatch:
+    """Tests for exact_match parameter."""
+
+    @pytest.fixture(autouse=True)
+    def setup_mocks(self, request: pytest.FixtureRequest) -> MagicMock:
+        patcher = patch(
+            "langchain_tavily._utilities.TavilySearchAPIWrapper.validate_environment"
+        )
+        mock_validate = patcher.start()
+        request.addfinalizer(patcher.stop)
+        return mock_validate
+
+    def test_exact_match_passed_to_api(self) -> None:
+        """Test that exact_match is correctly passed to the API wrapper."""
+        with patch(
+            "langchain_tavily._utilities.TavilySearchAPIWrapper.raw_results"
+        ) as mock_raw_results:
+            mock_raw_results.return_value = {
+                "query": "test",
+                "results": [{"title": "Test", "url": "https://test.com"}],
+            }
+            tool = TavilySearch(tavily_api_key="fake_key")
+            tool.invoke({"query": '"John Smith" CEO', "exact_match": True})
+
+            mock_raw_results.assert_called_once()
+            call_kwargs = mock_raw_results.call_args[1]
+            assert call_kwargs["exact_match"] is True
+
+    def test_exact_match_not_sent_when_none(self) -> None:
+        """Test that exact_match is not sent when not specified."""
+        with patch(
+            "langchain_tavily._utilities.TavilySearchAPIWrapper.raw_results"
+        ) as mock_raw_results:
+            mock_raw_results.return_value = {
+                "query": "test",
+                "results": [{"title": "Test", "url": "https://test.com"}],
+            }
+            tool = TavilySearch(tavily_api_key="fake_key")
+            tool.invoke({"query": "general search"})
+
+            mock_raw_results.assert_called_once()
+            call_kwargs = mock_raw_results.call_args[1]
+            assert call_kwargs["exact_match"] is None
+
+    def test_exact_match_instantiation(self) -> None:
+        """Test that exact_match can be set during instantiation."""
+        with patch(
+            "langchain_tavily._utilities.TavilySearchAPIWrapper.raw_results"
+        ) as mock_raw_results:
+            mock_raw_results.return_value = {
+                "query": "test",
+                "results": [{"title": "Test", "url": "https://test.com"}],
+            }
+            tool = TavilySearch(tavily_api_key="fake_key", exact_match=True)
+            tool.invoke({"query": "test query"})
+
+            mock_raw_results.assert_called_once()
+            call_kwargs = mock_raw_results.call_args[1]
+            assert call_kwargs["exact_match"] is True
+

@@ -53,6 +53,7 @@ The tool accepts various parameters during instantiation:
 - `include_domains` (optional, List[str]): List of domains to specifically include. Default is None.
 - `exclude_domains` (optional, List[str]): List of domains to specifically exclude. Default is None.
 - `country` (optional, str): Boost search results from a specific country. This will prioritize content from the selected country in the search results. Available only if topic is general.
+- `exact_match` (optional, bool): When set to True, restricts search results to only include pages that contain the exact phrase(s) enclosed in quotes within the query. Default is None.
 
 For a comprehensive overview of the available parameters, refer to the [Tavily Search API documentation](https://docs.tavily.com/documentation/api-reference/endpoint/search)
 
@@ -80,7 +81,7 @@ tool = TavilySearch(
 The Tavily search tool accepts the following arguments during invocation:
 
 - `query` (required): A natural language search query
-- The following arguments can also be set during invocation : `include_images`, `search_depth`, `time_range`, `include_domains`, `exclude_domains`, `topic`, `start_date` and `end_date`.
+- The following arguments can also be set during invocation : `include_images`, `search_depth`, `time_range`, `include_domains`, `exclude_domains`, `topic`, `start_date`, `end_date`, and `exact_match`.
 - For reliability and performance reasons, certain parameters that affect response size cannot be modified during invocation: `include_answer` and `include_raw_content`. These limitations prevent unexpected context window issues and ensure consistent results.
 
 NOTE: If you set an argument during instantiation this value will persist and overwrite the value passed during invocation.
@@ -88,6 +89,9 @@ NOTE: If you set an argument during instantiation this value will persist and ov
 ```python
 # Basic query
 tool.invoke({"query": "What happened at the last wimbledon"})
+
+# Use exact_match to only return results containing the exact phrase(s) inside quotes
+tool.invoke({"query": '"John Smith" CEO Acme Corp', "exact_match": True})
 ```
 
 output:
