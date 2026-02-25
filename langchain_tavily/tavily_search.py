@@ -143,6 +143,19 @@ class TavilySearchInput(BaseModel):
         Default is None (no end date restriction).
         """,  # noqa: E501
     )
+    exact_match: Optional[bool] = Field(
+        default=None,
+        description="""When set to True, restricts search results to only those containing 
+        the exact quoted phrase(s) in the query.
+        
+        Use this parameter when you need precise phrase matching, such as searching for 
+        a specific person's name or exact terminology.
+        
+        Example: query='"John Smith" CEO Acme Corp', exact_match=True
+        
+        Default is None (standard relevance-based search).
+        """,  # noqa: E501
+    )
 
 
 def _generate_suggestions(params: Dict[str, Any]) -> List[str]:
@@ -322,6 +335,12 @@ class TavilySearch(BaseTool):  # type: ignore[override]
     
     Default is False.
     """
+    exact_match: Optional[bool] = None
+    """When set to True, restricts search results to only those containing 
+    the exact quoted phrase(s) in the query.
+    
+    Default is None.
+    """
     api_wrapper: TavilySearchAPIWrapper = Field(default_factory=TavilySearchAPIWrapper)  # type: ignore[arg-type]
 
     def __init__(self, **kwargs: Any) -> None:
@@ -347,6 +366,7 @@ class TavilySearch(BaseTool):  # type: ignore[override]
         topic: Optional[Literal["general", "news", "finance"]] = None,
         start_date: Optional[str] = None,
         end_date: Optional[str] = None,
+        exact_match: Optional[bool] = None,
         run_manager: Optional[CallbackManagerForToolRun] = None,
         **kwargs: Any,
     ) -> Dict[str, Any]:
@@ -399,6 +419,9 @@ class TavilySearch(BaseTool):  # type: ignore[override]
                 start_date=start_date,
                 end_date=end_date,
                 include_usage=self.include_usage,
+                exact_match=self.exact_match
+                if self.exact_match is not None
+                else exact_match,
                 **kwargs,
             )
 
@@ -438,6 +461,7 @@ class TavilySearch(BaseTool):  # type: ignore[override]
         topic: Optional[Literal["general", "news", "finance"]] = "general",
         start_date: Optional[str] = None,
         end_date: Optional[str] = None,
+        exact_match: Optional[bool] = None,
         run_manager: Optional[AsyncCallbackManagerForToolRun] = None,
         **kwargs: Any,
     ) -> Dict[str, Any]:
@@ -477,6 +501,9 @@ class TavilySearch(BaseTool):  # type: ignore[override]
                 start_date=start_date,
                 end_date=end_date,
                 include_usage=self.include_usage,
+                exact_match=self.exact_match
+                if self.exact_match is not None
+                else exact_match,
                 **kwargs,
             )
 
