@@ -57,6 +57,7 @@ class TavilySearchAPIWrapper(BaseModel):
         start_date: Optional[str],
         end_date: Optional[str],
         include_usage: Optional[bool],
+        exact_match: Optional[bool] = None,
         **kwargs: Any,
     ) -> Dict[str, Any]:
         params = {
@@ -77,6 +78,7 @@ class TavilySearchAPIWrapper(BaseModel):
             "start_date": start_date,
             "end_date": end_date,
             "include_usage": include_usage,
+            "exact_match": exact_match,
             **kwargs,
         }
 
@@ -122,6 +124,7 @@ class TavilySearchAPIWrapper(BaseModel):
         start_date: Optional[str],
         end_date: Optional[str],
         include_usage: Optional[bool],
+        exact_match: Optional[bool] = None,
         **kwargs: Any,
     ) -> Dict[str, Any]:
         """Get results from the Tavily Search API asynchronously."""
@@ -146,6 +149,7 @@ class TavilySearchAPIWrapper(BaseModel):
                 "start_date": start_date,
                 "end_date": end_date,
                 "include_usage": include_usage,
+                "exact_match": exact_match,
                 **kwargs,
             }
 
