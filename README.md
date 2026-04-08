@@ -53,6 +53,7 @@ The tool accepts various parameters during instantiation:
 - `include_domains` (optional, List[str]): List of domains to specifically include. Default is None.
 - `exclude_domains` (optional, List[str]): List of domains to specifically exclude. Default is None.
 - `country` (optional, str): Boost search results from a specific country. This will prioritize content from the selected country in the search results. Available only if topic is general.
+- `exact_match` (optional, bool): When True, enables exact string matching for quoted phrases in the query (e.g. `"machine learning" applications in "healthcare"`). Default is False.
 
 For a comprehensive overview of the available parameters, refer to the [Tavily Search API documentation](https://docs.tavily.com/documentation/api-reference/endpoint/search)
 
@@ -72,6 +73,7 @@ tool = TavilySearch(
     # include_domains=None,
     # exclude_domains=None,
     # country=None
+    # exact_match=False,
 )
 ```
 

@@ -199,6 +199,7 @@ class TavilySearch(BaseTool):  # type: ignore[override]
             # country=None
             # include_favicon=False
             # include_usage=False
+            # exact_match=False,
         )
         ```
 
@@ -242,15 +243,23 @@ class TavilySearch(BaseTool):  # type: ignore[override]
     auto_parameters: Optional[bool] = None
     """
     When `auto_parameters` is enabled, Tavily automatically configures search parameters
-    based on your query's content and intent. You can still set other parameters 
-    manually, and your explicit values will override the automatic ones. The parameters 
-    `include_answer`, `include_raw_content`, and `max_results` must always be set 
-    manually, as they directly affect response size. Note: `search_depth` may be 
+    based on your query's content and intent. You can still set other parameters
+    manually, and your explicit values will override the automatic ones. The parameters
+    `include_answer`, `include_raw_content`, and `max_results` must always be set
+    manually, as they directly affect response size. Note: `search_depth` may be
     automatically set to advanced when it's likely to improve results. This uses 2 API
-    credits per request. To avoid the extra cost, you can explicitly set `search_depth` 
-    to `basic`. 
+    credits per request. To avoid the extra cost, you can explicitly set `search_depth`
+    to `basic`.
 
     Default is `False`.
+    """
+
+    exact_match: Optional[bool] = None
+    """When True, quoted phrases in the query are preserved for exact string matching
+    instead of being stripped. Use for due diligence, data enrichment, or legal queries
+    where precise phrase matching is required.
+
+    Default is False.
     """
 
     include_domains: Optional[List[str]] = None
@@ -365,15 +374,16 @@ class TavilySearch(BaseTool):  # type: ignore[override]
         """
         try:
             forbidden_params = [
-                "include_usage", "auto_parameters", "max_results", "include_answer", 
-                "include_raw_content", "include_image_descriptions", "include_favicon", "country"
+                "include_usage", "auto_parameters", "max_results", "include_answer",
+                "include_raw_content", "include_image_descriptions", "include_favicon",
+                "country", "exact_match",
             ]
             for param in forbidden_params:
                 if param in kwargs:
                     raise ValueError(
                         f"The parameter '{param}' can only be set during instantiation, not during invocation. Please set it when creating the TavilySearch instance."
                     )
-            
+
             # Execute search with parameters directly
             raw_results = self.api_wrapper.raw_results(
                 query=query,
@@ -399,6 +409,7 @@ class TavilySearch(BaseTool):  # type: ignore[override]
                 start_date=start_date,
                 end_date=end_date,
                 include_usage=self.include_usage,
+                exact_match=self.exact_match,
                 **kwargs,
             )
 
@@ -444,15 +455,16 @@ class TavilySearch(BaseTool):  # type: ignore[override]
         """Use the tool asynchronously."""
         try:
             forbidden_params = [
-                "include_usage", "auto_parameters", "max_results", "include_answer", 
-                "include_raw_content", "include_image_descriptions", "include_favicon", "country"
+                "include_usage", "auto_parameters", "max_results", "include_answer",
+                "include_raw_content", "include_image_descriptions", "include_favicon",
+                "country", "exact_match",
             ]
             for param in forbidden_params:
                 if param in kwargs:
                     raise ValueError(
                         f"The parameter '{param}' can only be set during instantiation, not during invocation. Please set it when creating the TavilySearch instance."
                     )
-            
+
             raw_results = await self.api_wrapper.raw_results_async(
                 query=query,
                 include_domains=self.include_domains
@@ -477,6 +489,7 @@ class TavilySearch(BaseTool):  # type: ignore[override]
                 start_date=start_date,
                 end_date=end_date,
                 include_usage=self.include_usage,
+                exact_match=self.exact_match,
                 **kwargs,
             )
 
