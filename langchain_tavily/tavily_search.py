@@ -322,6 +322,11 @@ class TavilySearch(BaseTool):  # type: ignore[override]
     
     Default is False.
     """
+    exact_match: Optional[bool] = None
+    """Only return results containing the exact phrase(s) in quotes in your query.
+    
+    Default is False.
+    """
     api_wrapper: TavilySearchAPIWrapper = Field(default_factory=TavilySearchAPIWrapper)  # type: ignore[arg-type]
 
     def __init__(self, **kwargs: Any) -> None:
@@ -366,7 +371,8 @@ class TavilySearch(BaseTool):  # type: ignore[override]
         try:
             forbidden_params = [
                 "include_usage", "auto_parameters", "max_results", "include_answer", 
-                "include_raw_content", "include_image_descriptions", "include_favicon", "country"
+                "include_raw_content", "include_image_descriptions", "include_favicon", "country",
+                "exact_match"
             ]
             for param in forbidden_params:
                 if param in kwargs:
@@ -399,6 +405,7 @@ class TavilySearch(BaseTool):  # type: ignore[override]
                 start_date=start_date,
                 end_date=end_date,
                 include_usage=self.include_usage,
+                exact_match=self.exact_match,
                 **kwargs,
             )
 
@@ -445,7 +452,8 @@ class TavilySearch(BaseTool):  # type: ignore[override]
         try:
             forbidden_params = [
                 "include_usage", "auto_parameters", "max_results", "include_answer", 
-                "include_raw_content", "include_image_descriptions", "include_favicon", "country"
+                "include_raw_content", "include_image_descriptions", "include_favicon", "country",
+                "exact_match"
             ]
             for param in forbidden_params:
                 if param in kwargs:
@@ -477,6 +485,7 @@ class TavilySearch(BaseTool):  # type: ignore[override]
                 start_date=start_date,
                 end_date=end_date,
                 include_usage=self.include_usage,
+                exact_match=self.exact_match,
                 **kwargs,
             )
 
