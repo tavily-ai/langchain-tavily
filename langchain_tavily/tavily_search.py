@@ -12,6 +12,30 @@ from pydantic import BaseModel, ConfigDict, Field
 from langchain_tavily._utilities import TavilySearchAPIWrapper
 
 
+_FORBIDDEN_INVOCATION_PARAMS = (
+    "include_usage",
+    "auto_parameters",
+    "max_results",
+    "include_answer",
+    "include_raw_content",
+    "include_image_descriptions",
+    "include_favicon",
+    "country",
+    "exact_match",
+)
+
+
+def _raise_forbidden_invocation_params(kwargs: Dict[str, Any]) -> None:
+    """Raise when a construction-only parameter is passed at invocation time."""
+    for param in _FORBIDDEN_INVOCATION_PARAMS:
+        if param in kwargs:
+            raise ValueError(
+                f"The parameter '{param}' can only be set during instantiation, "
+                "not during invocation. Please set it when creating the "
+                "TavilySearch instance."
+            )
+
+
 class TavilySearchInput(BaseModel):
     """Input for [TavilySearch]"""
 
@@ -368,18 +392,8 @@ class TavilySearch(BaseTool):  # type: ignore[override]
                 - images: List of relevant images (if include_images=True)
                 - response_time: Time taken for the search
         """
+        _raise_forbidden_invocation_params(kwargs)
         try:
-            forbidden_params = [
-                "include_usage", "auto_parameters", "max_results", "include_answer", 
-                "include_raw_content", "include_image_descriptions", "include_favicon", "country",
-                "exact_match"
-            ]
-            for param in forbidden_params:
-                if param in kwargs:
-                    raise ValueError(
-                        f"The parameter '{param}' can only be set during instantiation, not during invocation. Please set it when creating the TavilySearch instance."
-                    )
-            
             # Execute search with parameters directly
             raw_results = self.api_wrapper.raw_results(
                 query=query,
@@ -449,18 +463,8 @@ class TavilySearch(BaseTool):  # type: ignore[override]
         **kwargs: Any,
     ) -> Dict[str, Any]:
         """Use the tool asynchronously."""
+        _raise_forbidden_invocation_params(kwargs)
         try:
-            forbidden_params = [
-                "include_usage", "auto_parameters", "max_results", "include_answer", 
-                "include_raw_content", "include_image_descriptions", "include_favicon", "country",
-                "exact_match"
-            ]
-            for param in forbidden_params:
-                if param in kwargs:
-                    raise ValueError(
-                        f"The parameter '{param}' can only be set during instantiation, not during invocation. Please set it when creating the TavilySearch instance."
-                    )
-            
             raw_results = await self.api_wrapper.raw_results_async(
                 query=query,
                 include_domains=self.include_domains
