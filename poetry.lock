@@ -1800,7 +1800,7 @@ version = "6.0.2"
 description = "YAML parser and emitter for Python"
 optional = false
 python-versions = ">=3.8"
-groups = ["main", "test"]
+groups = ["main", "dev", "test"]
 files = [
     {file = "PyYAML-6.0.2-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:0a9a2848a5b7feac301353437eb7d5957887edbf81d56e903999a75a3d743086"},
     {file = "PyYAML-6.0.2-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:29717114e51c84ddfba879543fb232a6ed60086602313ca38cce623c1d62cfbf"},
@@ -2122,14 +2122,14 @@ files = [
 
 [[package]]
 name = "vcrpy"
-version = "8.1.0"
+version = "8.2.1"
 description = "Automatically mock your HTTP interactions to simplify and speed up testing"
 optional = false
 python-versions = ">=3.10"
-groups = ["test"]
+groups = ["dev", "test"]
 files = [
-    {file = "vcrpy-8.1.0-py3-none-any.whl", hash = "sha256:fc4fb6e954c6d082ba6d329c6f3d1228f5b1b1d2836f9022c301b587cfad7378"},
-    {file = "vcrpy-8.1.0.tar.gz", hash = "sha256:e585ca3cd9bb751e402728a00394847561250588eebc047b4d3c8948d5487733"},
+    {file = "vcrpy-8.2.1-py3-none-any.whl", hash = "sha256:7ce58c9e2792b246f79d6f4b3e9660676cc6f853be17e1547305b4437ab1ff85"},
+    {file = "vcrpy-8.2.1.tar.gz", hash = "sha256:d73a6e4eb6dae8148e659764b7a00e68cc51ba29ba9e6a85e1f0790ad96b97df"},
 ]
 
 [package.dependencies]
@@ -2137,7 +2137,7 @@ PyYAML = "*"
 wrapt = "*"
 
 [package.extras]
-tests = ["aiohttp", "boto3", "cryptography", "httpbin", "httpcore", "httplib2", "httpx", "pycurl ; platform_python_implementation != \"PyPy\"", "pytest", "pytest-aiohttp", "pytest-asyncio", "pytest-cov", "pytest-httpbin", "requests (>=2.22.0)", "tornado", "urllib3", "werkzeug (==2.0.3)"]
+tests = ["aiohttp", "boto3", "cryptography", "httpbin", "httplib2", "httpx", "httpx-curl-cffi", "httpx2", "pycurl ; platform_python_implementation != \"PyPy\"", "pyreqwest ; python_version >= \"3.11\"", "pytest", "pytest-aiohttp", "pytest-asyncio", "pytest-cov", "pytest-httpbin", "requests (>=2.22.0)", "tornado", "urllib3", "werkzeug (==2.0.3)"]
 
 [[package]]
 name = "watchdog"
@@ -2259,7 +2259,7 @@ version = "1.17.3"
 description = "Module for decorators, wrappers and monkey patching."
 optional = false
 python-versions = ">=3.8"
-groups = ["test"]
+groups = ["dev", "test"]
 files = [
     {file = "wrapt-1.17.3-cp310-cp310-macosx_10_9_universal2.whl", hash = "sha256:88bbae4d40d5a46142e70d58bf664a89b6b4befaea7b2ecc14e03cedb8e06c04"},
     {file = "wrapt-1.17.3-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:e6b13af258d6a9ad602d57d889f83b9d5543acd471eee12eb51f5b01f8eb1bc2"},
