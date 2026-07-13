@@ -75,7 +75,7 @@ class TavilyCrawlInput(BaseModel):
     )
     select_domains: Optional[List[str]] = Field(
         default=None,
-        description="""Regex patterns to select only URLs from specific domains or subdomains.
+        description=r"""Regex patterns to select only URLs from specific domains or subdomains.
    
         Use when the user explicitly asks for a specific domain or subdomain from a website.
 
@@ -94,7 +94,7 @@ class TavilyCrawlInput(BaseModel):
     )
     exclude_domains: Optional[List[str]] = Field(
         default=None,
-        description="""Regex patterns to exclude URLs from specific domains or subdomains.
+        description=r"""Regex patterns to exclude URLs from specific domains or subdomains.
 
         Use when the user explicitly asks to exclude a specific domain or subdomain from a website.
 
@@ -228,7 +228,7 @@ class TavilyCrawl(BaseTool):  # type: ignore[override]
     ex. ["/api/v1.*"]
     """
     select_domains: Optional[List[str]] = None
-    """Regex patterns to select only URLs from specific domains or subdomains.
+    r"""Regex patterns to select only URLs from specific domains or subdomains.
 
     ex. ["^docs\\.example\\.com$"]
     """
@@ -238,7 +238,7 @@ class TavilyCrawl(BaseTool):  # type: ignore[override]
     ex.  [/private/.*, /admin/.*]
     """
     exclude_domains: Optional[List[str]] = None
-    """
+    r"""
     Regex patterns to exclude specific domains or subdomains from crawling 
     ex. [^private\\.example\\.com$]
     """
