@@ -46,3 +46,15 @@ class TestTavilySearchToolUnit(ToolsUnitTests):  # Fixed class name to match its
         """
         return {"query": "best time to visit japan"}
 
+    def test_invoke_raises_for_construction_only_params(self) -> None:
+        tool = TavilySearch(tavily_api_key="fake_key_for_testing", max_results=5)
+
+        with pytest.raises(ValueError, match="max_results"):
+            tool._run("best time to visit japan", max_results=5)
+
+    async def test_ainvoke_raises_for_construction_only_params(self) -> None:
+        tool = TavilySearch(tavily_api_key="fake_key_for_testing", max_results=5)
+
+        with pytest.raises(ValueError, match="max_results"):
+            await tool._arun("best time to visit japan", max_results=5)
+
