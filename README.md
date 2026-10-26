@@ -402,7 +402,7 @@ The tool accepts various parameters during instantiation:
 - `stream` (optional, bool): Whether to stream the research task results. Default is False.
 - `include_domains` / `exclude_domains` (optional, List[str]): Up to 20 domains each. Included domains are preferred, not a hard filter; excluded domains are blocked.
 - `output_length` (optional, str): `short`, `standard`, or `long`.
-- `files` (optional, List[dict]): Supporting files in the [Research API format](https://docs.tavily.com/documentation/api-reference/endpoint/research).
+- `files` (optional, List[dict]): Up to five attachments in the [Research API format](https://docs.tavily.com/documentation/api-reference/endpoint/research): `{"name": "context.md", "data": "<base64-encoded UTF-8 text>", "type": "base64"}` (`type` is optional). Filenames must end in `.txt`, `.md`, or `.json`. Validation counts whitespace-separated words and enforces 80,000 per file and combined; server validation remains authoritative. This tool accepts attachment contents and never reads local file paths.
 - `citation_format` (optional, str): Citation format for sources in the research report. Can be "numbered", "mla", "apa", or "chicago". Default is "numbered".
 
 For a comprehensive overview of the available parameters, refer to the [Tavily Research API documentation](https://docs.tavily.com/documentation/api-reference/endpoint/research)
@@ -422,8 +422,8 @@ tool = TavilyResearch(
 
 The Tavily research tool accepts the following arguments during invocation:
 
-- `input` (required): TThe research task or question to investigate.
-- The following arguments can also be set during invocation: `model`, `output_schema`, `stream`, and `citation_format`.
+- `input` (required): The research task or question to investigate.
+- The following arguments can also be set during invocation: `model`, `output_schema`, `stream`, `citation_format`, `include_domains`, `exclude_domains`, `output_length`, and `files`.
 
 NOTE: If you set an argument during instantiation this value will persist and overwrite the value passed during invocation.
 
@@ -450,7 +450,7 @@ output:
 
 ### Retrieving research results
 
-After creating a research task, you can retrieve the results using the `TavilyGetResearch` tool:
+After creating a research task, use `TavilyGetResearch` with its `request_id`. Pending results retain their task status; call it again later until completed or failed. Completed responses preserve content, sources and any usage metadata. `include_usage` is optional at construction or invocation; an explicit constructor value takes precedence, including `False`.
 
 ```python
 from langchain_tavily import TavilyGetResearch
@@ -460,7 +460,8 @@ get_research_tool = TavilyGetResearch()
 
 # Retrieve results using the request_id from the research task
 result = get_research_tool.invoke({
-    "request_id": "abc123-def456-ghi789"
+    "request_id": "abc123-def456-ghi789",
+    "include_usage": True,
 })
 ```
 

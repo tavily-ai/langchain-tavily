@@ -31,7 +31,7 @@ class TavilyExtractInput(BaseModel):
         description='API extraction timeout in seconds (1-60).',
     )
 
-    urls: List[str] = Field(description="list of urls to extract")
+    urls: List[str] = Field(min_length=1, max_length=20, description="One to twenty URLs to extract")
     extract_depth: Optional[Literal["basic", "advanced"]] = Field(
         default="basic",
         description="""Controls the thoroughness of web content extraction.

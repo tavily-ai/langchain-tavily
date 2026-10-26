@@ -5,6 +5,7 @@ https://docs.tavily.com/docs/tavily-api/introduction
 """
 
 from typing import Any, AsyncGenerator, Dict, Generator, List, Literal, Optional, Union
+from urllib.parse import quote
 
 import aiohttp
 import requests
@@ -863,6 +864,7 @@ class TavilyResearchAPIWrapper(BaseModel):
     def get_research(
         self,
         request_id: str,
+        include_usage: Optional[bool] = None,
     ) -> Dict[str, Any]:
         """Get research results by request_id."""
         headers = _request_headers(
@@ -872,8 +874,12 @@ class TavilyResearchAPIWrapper(BaseModel):
         base_url = self.api_base_url or TAVILY_API_URL
         response = requests.get(
             # type: ignore
-            f"{base_url}/research/{request_id}",
+            f"{base_url}/research/{quote(request_id, safe='')}",
             headers=headers,
+            params=(
+                {} if include_usage is None
+                else {"include_usage": str(include_usage).lower()}
+            ),
         )
         if response.status_code not in [200, 202]:
             raise sync_response_error(
@@ -884,6 +890,7 @@ class TavilyResearchAPIWrapper(BaseModel):
     async def get_research_async(
         self,
         request_id: str,
+        include_usage: Optional[bool] = None,
     ) -> Dict[str, Any]:
         """Get research results by request_id asynchronously."""
         headers = _request_headers(
@@ -893,7 +900,11 @@ class TavilyResearchAPIWrapper(BaseModel):
         base_url = self.api_base_url or TAVILY_API_URL
         async with aiohttp.ClientSession() as session:
             async with session.get(
-                f"{base_url}/research/{request_id}", headers=headers
+                f"{base_url}/research/{quote(request_id, safe='')}", headers=headers,
+                params=(
+                    {} if include_usage is None
+                    else {"include_usage": str(include_usage).lower()}
+                ),
             ) as res:
                 if res.status in [200, 202]:
                     data = await res.text()

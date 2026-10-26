@@ -1,16 +1,80 @@
 """Tool for the Tavily Research API."""
 
-from typing import Any, AsyncGenerator, Dict, Generator, List, Literal, Optional, Type, Union
+import base64
+import binascii
+from typing import (
+    Annotated,
+    Any,
+    AsyncGenerator,
+    Dict,
+    Generator,
+    List,
+    Literal,
+    Optional,
+    Type,
+    Union,
+)
 
 from langchain_core.callbacks import (
     AsyncCallbackManagerForToolRun,
     CallbackManagerForToolRun,
 )
 from langchain_core.tools import BaseTool
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import AfterValidator, BaseModel, ConfigDict, Field
+from typing_extensions import NotRequired, TypedDict
 
 from langchain_tavily._errors import TRANSPORT_ERRORS, transport_error
 from langchain_tavily._utilities import TavilyResearchAPIWrapper
+
+
+class ResearchFile(TypedDict):
+    """Text attachment supplied by the caller; no local files are read."""
+
+    name: Annotated[str, Field(description="Filename ending in .txt, .md, or .json.")]
+    data: Annotated[
+        str,
+        Field(description=(
+            "Base64-encoded UTF-8 text, at most 80,000 words per file "
+            "and across all files."
+        )),
+    ]
+    type: NotRequired[Literal["base64"]]
+
+
+def _validate_files(files: List[ResearchFile]) -> List[ResearchFile]:
+    total = 0
+    for file in files:
+        if not file["name"].lower().endswith((".txt", ".md", ".json")):
+            raise ValueError("Research files must use .txt, .md, or .json filenames")
+        compact = "".join(file["data"].split())
+        try:
+            decoded = base64.b64decode(compact, validate=True)
+            if base64.b64encode(decoded).decode() != compact:
+                raise ValueError("non-canonical base64")
+            words = len(decoded.decode("utf-8").split())
+        except (binascii.Error, UnicodeError, ValueError) as exc:
+            raise ValueError(
+                "Research file data must be valid base64-encoded UTF-8 text"
+            ) from exc
+        if words > 80000:
+            raise ValueError("Research files must not exceed 80,000 words per file")
+        total += words
+    if total > 80000:
+        raise ValueError("Research files must not exceed 80,000 words combined")
+    return files
+
+
+ResearchFiles = Annotated[
+    List[ResearchFile],
+    Field(
+        max_length=5,
+        description=(
+            "Up to five text files, at most 80,000 words per file and combined."
+        ),
+    ),
+    AfterValidator(_validate_files),
+]
+
 
 class TavilyResearchInput(BaseModel):
     """
@@ -32,9 +96,12 @@ class TavilyResearchInput(BaseModel):
         default=None,
         description='Length of the generated report.',
     )
-    files: Optional[List[Dict[str, Any]]] = Field(
+    files: Optional[ResearchFiles] = Field(
         default=None,
-        description='Supporting files in the API file format.',
+        description=(
+            "Up to five base64 text attachments; "
+            "at most 80,000 words per file and combined."
+        ),
     )
 
     input: str = Field(
@@ -111,6 +178,10 @@ class TavilyGetResearchInput(BaseModel):
         description="The unique identifier of the research task."
     )
 
+    include_usage: Optional[bool] = Field(
+        default=None, description="Include credit usage in the Research task result."
+    )
+
 
 class TavilyResearch(BaseTool):  # type: ignore[override, override]
     """Tool that queries the Tavily Research API with dynamically settable parameters."""
@@ -154,7 +225,7 @@ class TavilyResearch(BaseTool):  # type: ignore[override, override]
     include_domains: Optional[List[str]] = None
     exclude_domains: Optional[List[str]] = None
     output_length: Optional[Literal["short", "standard", "long"]] = None
-    files: Optional[List[Dict[str, Any]]] = None
+    files: Optional[ResearchFiles] = None
 
     api_wrapper: TavilyResearchAPIWrapper = Field(
         default_factory=TavilyResearchAPIWrapper
@@ -289,6 +360,9 @@ class TavilyGetResearch(BaseTool):  # type: ignore[override, override]
 
     args_schema: Type[BaseModel] = TavilyGetResearchInput
 
+    include_usage: Optional[bool] = None
+    """Optional application setting; overrides the invocation value when configured."""
+
     api_wrapper: TavilyResearchAPIWrapper = Field(
         default_factory=TavilyResearchAPIWrapper
     )  # type: ignore[arg-type]
@@ -310,6 +384,7 @@ class TavilyGetResearch(BaseTool):  # type: ignore[override, override]
     def _run(
         self,
         request_id: str,
+        include_usage: Optional[bool] = None,
         run_manager: Optional[CallbackManagerForToolRun] = None,
         **kwargs: Any,
     ) -> Dict[str, Any]:
@@ -325,7 +400,14 @@ class TavilyGetResearch(BaseTool):  # type: ignore[override, override]
                 - sources: List of sources used in the research (if completed)
         """
         try:
-            raw_results = self.api_wrapper.get_research(request_id=request_id)
+            raw_results = self.api_wrapper.get_research(
+                request_id=request_id,
+                include_usage=(
+                    self.include_usage
+                    if self.include_usage is not None
+                    else include_usage
+                ),
+            )
             return raw_results
         except TRANSPORT_ERRORS as e:
             raise transport_error(e) from None
@@ -333,12 +415,20 @@ class TavilyGetResearch(BaseTool):  # type: ignore[override, override]
     async def _arun(
         self,
         request_id: str,
+        include_usage: Optional[bool] = None,
         run_manager: Optional[AsyncCallbackManagerForToolRun] = None,
         **kwargs: Any,
     ) -> Dict[str, Any]:
         """Use the tool asynchronously."""
         try:
-            raw_results = await self.api_wrapper.get_research_async(request_id=request_id)
+            raw_results = await self.api_wrapper.get_research_async(
+                request_id=request_id,
+                include_usage=(
+                    self.include_usage
+                    if self.include_usage is not None
+                    else include_usage
+                ),
+            )
             return raw_results
         except TRANSPORT_ERRORS as e:
             raise transport_error(e) from None
