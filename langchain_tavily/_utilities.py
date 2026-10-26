@@ -4,17 +4,48 @@ In order to set this up, follow instructions at:
 https://docs.tavily.com/docs/tavily-api/introduction
 """
 
-import json
 from typing import Any, AsyncGenerator, Dict, Generator, List, Literal, Optional, Union
+from urllib.parse import quote
 
 import aiohttp
-from aiohttp import ClientTimeout
 import requests
+from aiohttp import ClientTimeout
 from langchain_core.utils import get_from_dict_or_env
 from pydantic import BaseModel, ConfigDict, SecretStr, model_validator
 
+from langchain_tavily._errors import (
+    TRANSPORT_ERRORS,
+    response_error,
+    response_json,
+    sync_response_error,
+    sync_response_json,
+    transport_error,
+)
 
 TAVILY_API_URL: str = "https://api.tavily.com"
+
+
+def _request_headers(
+    api_key: SecretStr,
+    client_name: str,
+    project_id: Optional[str],
+    session_id: Optional[str],
+    human_id: Optional[str],
+) -> Dict[str, str]:
+    headers = {
+        "Authorization": f"Bearer {api_key.get_secret_value()}",
+        "Content-Type": "application/json",
+        "X-Client-Source": "api",
+        "X-Client-Name": client_name,
+    }
+    for name, value in (
+        ("X-Project-ID", project_id),
+        ("X-Session-Id", session_id),
+        ("X-Human-Id", human_id),
+    ):
+        if value is not None:
+            headers[name] = value
+    return headers
 
 
 class TavilySearchAPIWrapper(BaseModel):
@@ -22,6 +53,10 @@ class TavilySearchAPIWrapper(BaseModel):
 
     tavily_api_key: SecretStr
     api_base_url: Optional[str] = None
+    client_name: str = "langchain-tavily"
+    project_id: Optional[str] = None
+    session_id: Optional[str] = None
+    human_id: Optional[str] = None
 
     model_config = ConfigDict(
         extra="forbid",
@@ -85,11 +120,10 @@ class TavilySearchAPIWrapper(BaseModel):
         # Remove None values
         params = {k: v for k, v in params.items() if v is not None}
 
-        headers = {
-            "Authorization": f"Bearer {self.tavily_api_key.get_secret_value()}",
-            "Content-Type": "application/json",
-            "X-Client-Source": "langchain-tavily",
-        }
+        headers = _request_headers(
+            self.tavily_api_key, self.client_name, self.project_id,
+            self.session_id, self.human_id,
+        )
         base_url = self.api_base_url or TAVILY_API_URL
         response = requests.post(
             # type: ignore
@@ -98,12 +132,10 @@ class TavilySearchAPIWrapper(BaseModel):
             headers=headers,
         )
         if response.status_code != 200:
-            detail = response.json().get("detail", {})
-            error_message = (
-                detail.get("error") if isinstance(detail, dict) else "Unknown error"
+            raise sync_response_error(
+                response, self.tavily_api_key.get_secret_value()
             )
-            raise ValueError(f"Error {response.status_code}: {error_message}")
-        return response.json()
+        return sync_response_json(response)
 
     async def raw_results_async(
         self,
@@ -156,11 +188,10 @@ class TavilySearchAPIWrapper(BaseModel):
             # Remove None values
             params = {k: v for k, v in params.items() if v is not None}
 
-            headers = {
-                "Authorization": f"Bearer {self.tavily_api_key.get_secret_value()}",
-                "Content-Type": "application/json",
-                "X-Client-Source": "langchain-tavily",
-            }
+            headers = _request_headers(
+                self.tavily_api_key, self.client_name, self.project_id,
+                self.session_id, self.human_id,
+            )
             base_url = self.api_base_url or TAVILY_API_URL
             async with aiohttp.ClientSession() as session:
                 async with session.post(
@@ -170,11 +201,14 @@ class TavilySearchAPIWrapper(BaseModel):
                         data = await res.text()
                         return data
                     else:
-                        raise Exception(f"Error {res.status}: {res.reason}")
+                        raise response_error(
+                            res.status, await res.text(),
+                            self.tavily_api_key.get_secret_value(),
+                        )
 
         results_json_str = await fetch()
 
-        return json.loads(results_json_str)
+        return response_json(results_json_str)
 
 
 class TavilyExtractAPIWrapper(BaseModel):
@@ -182,6 +216,10 @@ class TavilyExtractAPIWrapper(BaseModel):
 
     tavily_api_key: SecretStr
     api_base_url: Optional[str] = None
+    client_name: str = "langchain-tavily"
+    project_id: Optional[str] = None
+    session_id: Optional[str] = None
+    human_id: Optional[str] = None
 
     model_config = ConfigDict(
         extra="forbid",
@@ -225,11 +263,10 @@ class TavilyExtractAPIWrapper(BaseModel):
         # Remove None values
         params = {k: v for k, v in params.items() if v is not None}
 
-        headers = {
-            "Authorization": f"Bearer {self.tavily_api_key.get_secret_value()}",
-            "Content-Type": "application/json",
-            "X-Client-Source": "langchain-tavily",
-        }
+        headers = _request_headers(
+            self.tavily_api_key, self.client_name, self.project_id,
+            self.session_id, self.human_id,
+        )
 
         base_url = self.api_base_url or TAVILY_API_URL
         response = requests.post(
@@ -240,12 +277,10 @@ class TavilyExtractAPIWrapper(BaseModel):
         )
 
         if response.status_code != 200:
-            detail = response.json().get("detail", {})
-            error_message = (
-                detail.get("error") if isinstance(detail, dict) else "Unknown error"
+            raise sync_response_error(
+                response, self.tavily_api_key.get_secret_value()
             )
-            raise ValueError(f"Error {response.status_code}: {error_message}")
-        return response.json()
+        return sync_response_json(response)
 
     async def raw_results_async(
         self,
@@ -278,11 +313,10 @@ class TavilyExtractAPIWrapper(BaseModel):
             # Remove None values
             params = {k: v for k, v in params.items() if v is not None}
 
-            headers = {
-                "Authorization": f"Bearer {self.tavily_api_key.get_secret_value()}",
-                "Content-Type": "application/json",
-                "X-Client-Source": "langchain-tavily",
-            }
+            headers = _request_headers(
+                self.tavily_api_key, self.client_name, self.project_id,
+                self.session_id, self.human_id,
+            )
 
             base_url = self.api_base_url or TAVILY_API_URL
             async with aiohttp.ClientSession() as session:
@@ -293,11 +327,14 @@ class TavilyExtractAPIWrapper(BaseModel):
                         data = await res.text()
                         return data
                     else:
-                        raise Exception(f"Error {res.status}: {res.reason}")
+                        raise response_error(
+                            res.status, await res.text(),
+                            self.tavily_api_key.get_secret_value(),
+                        )
 
         results_json_str = await fetch()
 
-        return json.loads(results_json_str)
+        return response_json(results_json_str)
 
 
 class TavilyCrawlAPIWrapper(BaseModel):
@@ -305,6 +342,10 @@ class TavilyCrawlAPIWrapper(BaseModel):
 
     tavily_api_key: SecretStr
     api_base_url: Optional[str] = None
+    client_name: str = "langchain-tavily"
+    project_id: Optional[str] = None
+    session_id: Optional[str] = None
+    human_id: Optional[str] = None
 
     model_config = ConfigDict(
         extra="forbid",
@@ -380,11 +421,10 @@ class TavilyCrawlAPIWrapper(BaseModel):
         # Remove None values
         params = {k: v for k, v in params.items() if v is not None}
 
-        headers = {
-            "Authorization": f"Bearer {self.tavily_api_key.get_secret_value()}",
-            "Content-Type": "application/json",
-            "X-Client-Source": "langchain-tavily",
-        }
+        headers = _request_headers(
+            self.tavily_api_key, self.client_name, self.project_id,
+            self.session_id, self.human_id,
+        )
 
         base_url = self.api_base_url or TAVILY_API_URL
         response = requests.post(
@@ -395,12 +435,10 @@ class TavilyCrawlAPIWrapper(BaseModel):
         )
 
         if response.status_code != 200:
-            detail = response.json().get("detail", {})
-            error_message = (
-                detail.get("error") if isinstance(detail, dict) else "Unknown error"
+            raise sync_response_error(
+                response, self.tavily_api_key.get_secret_value()
             )
-            raise ValueError(f"Error {response.status_code}: {error_message}")
-        return response.json()
+        return sync_response_json(response)
 
     async def raw_results_async(
         self,
@@ -465,11 +503,10 @@ class TavilyCrawlAPIWrapper(BaseModel):
             # Remove None values
             params = {k: v for k, v in params.items() if v is not None}
 
-            headers = {
-                "Authorization": f"Bearer {self.tavily_api_key.get_secret_value()}",
-                "Content-Type": "application/json",
-                "X-Client-Source": "langchain-tavily",
-            }
+            headers = _request_headers(
+                self.tavily_api_key, self.client_name, self.project_id,
+                self.session_id, self.human_id,
+            )
 
             base_url = self.api_base_url or TAVILY_API_URL
             async with aiohttp.ClientSession() as session:
@@ -480,11 +517,14 @@ class TavilyCrawlAPIWrapper(BaseModel):
                         data = await res.text()
                         return data
                     else:
-                        raise Exception(f"Error {res.status}: {res.reason}")
+                        raise response_error(
+                            res.status, await res.text(),
+                            self.tavily_api_key.get_secret_value(),
+                        )
 
         results_json_str = await fetch()
 
-        return json.loads(results_json_str)
+        return response_json(results_json_str)
 
 
 class TavilyMapAPIWrapper(BaseModel):
@@ -492,6 +532,10 @@ class TavilyMapAPIWrapper(BaseModel):
 
     tavily_api_key: SecretStr
     api_base_url: Optional[str] = None
+    client_name: str = "langchain-tavily"
+    project_id: Optional[str] = None
+    session_id: Optional[str] = None
+    human_id: Optional[str] = None
 
     model_config = ConfigDict(
         extra="forbid",
@@ -557,11 +601,10 @@ class TavilyMapAPIWrapper(BaseModel):
         # Remove None values
         params = {k: v for k, v in params.items() if v is not None}
 
-        headers = {
-            "Authorization": f"Bearer {self.tavily_api_key.get_secret_value()}",
-            "Content-Type": "application/json",
-            "X-Client-Source": "langchain-tavily",
-        }
+        headers = _request_headers(
+            self.tavily_api_key, self.client_name, self.project_id,
+            self.session_id, self.human_id,
+        )
 
         base_url = self.api_base_url or TAVILY_API_URL
         response = requests.post(
@@ -572,12 +615,10 @@ class TavilyMapAPIWrapper(BaseModel):
         )
 
         if response.status_code != 200:
-            detail = response.json().get("detail", {})
-            error_message = (
-                detail.get("error") if isinstance(detail, dict) else "Unknown error"
+            raise sync_response_error(
+                response, self.tavily_api_key.get_secret_value()
             )
-            raise ValueError(f"Error {response.status_code}: {error_message}")
-        return response.json()
+        return sync_response_json(response)
 
     async def raw_results_async(
         self,
@@ -632,11 +673,10 @@ class TavilyMapAPIWrapper(BaseModel):
             # Remove None values
             params = {k: v for k, v in params.items() if v is not None}
 
-            headers = {
-                "Authorization": f"Bearer {self.tavily_api_key.get_secret_value()}",
-                "Content-Type": "application/json",
-                "X-Client-Source": "langchain-tavily",
-            }
+            headers = _request_headers(
+                self.tavily_api_key, self.client_name, self.project_id,
+                self.session_id, self.human_id,
+            )
             base_url = self.api_base_url or TAVILY_API_URL
             async with aiohttp.ClientSession() as session:
                 async with session.post(
@@ -646,11 +686,14 @@ class TavilyMapAPIWrapper(BaseModel):
                         data = await res.text()
                         return data
                     else:
-                        raise Exception(f"Error {res.status}: {res.reason}")
+                        raise response_error(
+                            res.status, await res.text(),
+                            self.tavily_api_key.get_secret_value(),
+                        )
 
         results_json_str = await fetch()
 
-        return json.loads(results_json_str)
+        return response_json(results_json_str)
 
 
 class TavilyResearchAPIWrapper(BaseModel):
@@ -658,6 +701,10 @@ class TavilyResearchAPIWrapper(BaseModel):
 
     tavily_api_key: SecretStr
     api_base_url: Optional[str] = None
+    client_name: str = "langchain-tavily"
+    project_id: Optional[str] = None
+    session_id: Optional[str] = None
+    human_id: Optional[str] = None
 
     model_config = ConfigDict(
         extra="forbid",
@@ -695,11 +742,10 @@ class TavilyResearchAPIWrapper(BaseModel):
         # Remove None values
         params = {k: v for k, v in params.items() if v is not None}
 
-        headers = {
-            "Authorization": f"Bearer {self.tavily_api_key.get_secret_value()}",
-            "Content-Type": "application/json",
-            "X-Client-Source": "langchain-tavily",
-        }
+        headers = _request_headers(
+            self.tavily_api_key, self.client_name, self.project_id,
+            self.session_id, self.human_id,
+        )
         base_url = self.api_base_url or TAVILY_API_URL
         
         if stream:
@@ -711,17 +757,20 @@ class TavilyResearchAPIWrapper(BaseModel):
                 stream=True,
             )
             if response.status_code != 200:
-                detail = response.json().get("detail", {})
-                error_message = (
-                    detail.get("error") if isinstance(detail, dict) else "Unknown error"
-                )
-                raise ValueError(f"Error {response.status_code}: {error_message}")
+                try:
+                    raise sync_response_error(
+                        response, self.tavily_api_key.get_secret_value()
+                    )
+                finally:
+                    response.close()
             
             def stream_generator() -> Generator[bytes, None, None]:
                 try:
                     for chunk in response.iter_content(chunk_size=None):
                         if chunk:
                             yield chunk
+                except TRANSPORT_ERRORS as e:
+                    raise transport_error(e) from None
                 finally:
                     response.close()
             
@@ -733,13 +782,11 @@ class TavilyResearchAPIWrapper(BaseModel):
                 json=params,
                 headers=headers,
             )
-            if response.status_code != 200:
-                detail = response.json().get("detail", {})
-                error_message = (
-                    detail.get("error") if isinstance(detail, dict) else "Unknown error"
+            if response.status_code not in (200, 201):
+                raise sync_response_error(
+                    response, self.tavily_api_key.get_secret_value()
                 )
-                raise ValueError(f"Error {response.status_code}: {error_message}")
-            return response.json()
+            return sync_response_json(response)
 
     async def raw_results_async(
         self,
@@ -764,11 +811,10 @@ class TavilyResearchAPIWrapper(BaseModel):
         # Remove None values
         params = {k: v for k, v in params.items() if v is not None}
 
-        headers = {
-            "Authorization": f"Bearer {self.tavily_api_key.get_secret_value()}",
-            "Content-Type": "application/json",
-            "X-Client-Source": "langchain-tavily",
-        }
+        headers = _request_headers(
+            self.tavily_api_key, self.client_name, self.project_id,
+            self.session_id, self.human_id,
+        )
 
         base_url = self.api_base_url or TAVILY_API_URL
         
@@ -783,13 +829,16 @@ class TavilyResearchAPIWrapper(BaseModel):
                         ) as res:
                             if res.status != 200:
                                 error_text = await res.text()
-                                raise Exception(f"Error {res.status}: {error_text}")
+                                raise response_error(
+                                    res.status, error_text,
+                                    self.tavily_api_key.get_secret_value(),
+                                )
                             
                             async for chunk in res.content.iter_any():
                                 if chunk:
                                     yield chunk
-                except Exception as e:
-                    raise Exception(f"Error during research stream: {str(e)}")
+                except TRANSPORT_ERRORS as e:
+                    raise transport_error(e) from None
             
             return stream_generator()
         
@@ -799,63 +848,69 @@ class TavilyResearchAPIWrapper(BaseModel):
                 async with session.post(
                     f"{base_url}/research", json=params, headers=headers
                 ) as res:
-                    if res.status == 200:
+                    if res.status in (200, 201):
                         data = await res.text()
                         return data
                     else:
-                        raise Exception(f"Error {res.status}: {res.reason}")
+                        raise response_error(
+                            res.status, await res.text(),
+                            self.tavily_api_key.get_secret_value(),
+                        )
 
         results_json_str = await fetch()
 
-        return json.loads(results_json_str)
+        return response_json(results_json_str)
 
     def get_research(
         self,
         request_id: str,
+        include_usage: Optional[bool] = None,
     ) -> Dict[str, Any]:
         """Get research results by request_id."""
-        headers = {
-            "Authorization": f"Bearer {self.tavily_api_key.get_secret_value()}",
-            "Content-Type": "application/json",
-            "X-Client-Source": "langchain-tavily",
-        }
+        headers = _request_headers(
+            self.tavily_api_key, self.client_name, self.project_id,
+            self.session_id, self.human_id,
+        )
         base_url = self.api_base_url or TAVILY_API_URL
         response = requests.get(
             # type: ignore
-            f"{base_url}/research/{request_id}",
+            f"{base_url}/research/{quote(request_id, safe='')}",
             headers=headers,
+            params=(
+                {} if include_usage is None
+                else {"include_usage": str(include_usage).lower()}
+            ),
         )
         if response.status_code not in [200, 202]:
-            detail = response.json().get("detail", {})
-            error_message = (
-                detail.get("error") if isinstance(detail, dict) else "Unknown error"
+            raise sync_response_error(
+                response, self.tavily_api_key.get_secret_value()
             )
-            raise ValueError(f"Error {response.status_code}: {error_message}")
-        return response.json()
+        return sync_response_json(response)
 
     async def get_research_async(
         self,
         request_id: str,
+        include_usage: Optional[bool] = None,
     ) -> Dict[str, Any]:
         """Get research results by request_id asynchronously."""
-        headers = {
-            "Authorization": f"Bearer {self.tavily_api_key.get_secret_value()}",
-            "Content-Type": "application/json",
-            "X-Client-Source": "langchain-tavily",
-        }
+        headers = _request_headers(
+            self.tavily_api_key, self.client_name, self.project_id,
+            self.session_id, self.human_id,
+        )
         base_url = self.api_base_url or TAVILY_API_URL
         async with aiohttp.ClientSession() as session:
             async with session.get(
-                f"{base_url}/research/{request_id}", headers=headers
+                f"{base_url}/research/{quote(request_id, safe='')}", headers=headers,
+                params=(
+                    {} if include_usage is None
+                    else {"include_usage": str(include_usage).lower()}
+                ),
             ) as res:
                 if res.status in [200, 202]:
                     data = await res.text()
-                    return json.loads(data)
+                    return response_json(data)
                 else:
-                    detail = await res.json()
-                    error_message = (
-                        detail.get("detail", {}).get("error")
-                        if isinstance(detail, dict)
-                        else "Unknown error"
+                    raise response_error(
+                        res.status, await res.text(),
+                        self.tavily_api_key.get_secret_value(),
                     )
-                    raise Exception(f"Error {res.status}: {error_message}")

@@ -9,6 +9,7 @@ from langchain_core.callbacks import (
 from langchain_core.tools import BaseTool, ToolException
 from pydantic import BaseModel, ConfigDict, Field
 
+from langchain_tavily._errors import TRANSPORT_ERRORS, transport_error
 from langchain_tavily._utilities import TavilyMapAPIWrapper
 
 
@@ -16,6 +17,11 @@ class TavilyMapInput(BaseModel):
     """Input for [TavilyMap]"""
 
     model_config = ConfigDict(extra="allow")
+
+    timeout: Optional[float] = Field(
+        default=None,
+        description='API map timeout in seconds (10-150).',
+    )
 
     url: str = Field(description=("The root URL to begin the mapping."))
     max_depth: Optional[int] = Field(
@@ -182,7 +188,6 @@ class TavilyMap(BaseTool):  # type: ignore[override]
         """  # noqa: E501
 
     args_schema: Type[BaseModel] = TavilyMapInput
-    handle_tool_error: bool = True
 
     max_depth: Optional[int] = None
     """Max depth of the crawl. Defines how far from the base URL the crawler can explore.
@@ -257,16 +262,20 @@ class TavilyMap(BaseTool):  # type: ignore[override]
     
     Default is False.
     """
+    timeout: Optional[float] = None
+
     api_wrapper: TavilyMapAPIWrapper = Field(default_factory=TavilyMapAPIWrapper)  # type: ignore[arg-type]
 
     def __init__(self, **kwargs: Any) -> None:
-        # Create api_wrapper with tavily_api_key and api_base_url if provided
-        if "tavily_api_key" in kwargs or "api_base_url" in kwargs:
-            wrapper_kwargs = {}
-            if "tavily_api_key" in kwargs:
-                wrapper_kwargs["tavily_api_key"] = kwargs["tavily_api_key"]
-            if "api_base_url" in kwargs:
-                wrapper_kwargs["api_base_url"] = kwargs["api_base_url"]
+        wrapper_kwargs = {
+            key: kwargs[key]
+            for key in (
+                "tavily_api_key", "api_base_url", "client_name",
+                "project_id", "session_id", "human_id",
+            )
+            if key in kwargs
+        }
+        if wrapper_kwargs:
             kwargs["api_wrapper"] = TavilyMapAPIWrapper(**wrapper_kwargs)
 
         super().__init__(**kwargs)
@@ -326,6 +335,13 @@ class TavilyMap(BaseTool):  # type: ignore[override]
                     )
             
             # Execute search with parameters directly
+            for key in (
+                'timeout',
+            ):
+                value = getattr(self, key)
+                if value is not None:
+                    kwargs[key] = value
+
             raw_results = self.api_wrapper.raw_results(
                 url=url,
                 max_depth=self.max_depth if self.max_depth else max_depth,
@@ -370,11 +386,8 @@ class TavilyMap(BaseTool):  # type: ignore[override]
                 )
                 raise ToolException(error_message)
             return raw_results
-        except ToolException:
-            # Re-raise tool exceptions
-            raise
-        except Exception as e:
-            return {"error": e}
+        except TRANSPORT_ERRORS as e:
+            raise transport_error(e) from None
 
     async def _arun(
         self,
@@ -418,6 +431,13 @@ class TavilyMap(BaseTool):  # type: ignore[override]
                         f"The parameter '{param}' can only be set during instantiation, not during invocation. Please set it when creating the TavilyMap instance."
                         )
             
+            for key in (
+                'timeout',
+            ):
+                value = getattr(self, key)
+                if value is not None:
+                    kwargs[key] = value
+
             raw_results = await self.api_wrapper.raw_results_async(
                 url=url,
                 max_depth=self.max_depth if self.max_depth else max_depth,
@@ -460,8 +480,5 @@ class TavilyMap(BaseTool):  # type: ignore[override]
                 )
                 raise ToolException(error_message)
             return raw_results
-        except ToolException:
-            # Re-raise tool exceptions
-            raise
-        except Exception as e:
-            return {"error": e}
+        except TRANSPORT_ERRORS as e:
+            raise transport_error(e) from None

@@ -9,6 +9,7 @@ from langchain_core.callbacks import (
 from langchain_core.tools import BaseTool, ToolException
 from pydantic import BaseModel, ConfigDict, Field
 
+from langchain_tavily._errors import TRANSPORT_ERRORS, transport_error
 from langchain_tavily._utilities import TavilySearchAPIWrapper
 
 
@@ -16,6 +17,35 @@ class TavilySearchInput(BaseModel):
     """Input for [TavilySearch]"""
 
     model_config = ConfigDict(extra="allow")
+
+    include_domains_mode: Optional[Literal["prefer", "restrict"]] = Field(
+        default=None,
+        description='Domain preference or restriction; requires include_domains.',
+    )
+    include_published_date: Optional[bool] = Field(
+        default=None,
+        description="Include estimated published dates (beta).",
+    )
+    filter_by_published_date: Optional[bool] = Field(
+        default=None,
+        description="Remove undated results and dates outside the requested window.",
+    )
+    language: Optional[str] = Field(
+        default=None,
+        description='Boost results in this language.',
+    )
+    filter_by_language: Optional[bool] = Field(
+        default=None,
+        description='Restrict results to language; requires language.',
+    )
+    safe_search: Optional[bool] = Field(
+        default=None,
+        description='Filter unsafe results; unavailable with fast or ultra-fast depth.',
+    )
+    chunks_per_source: Optional[int] = Field(
+        default=None,
+        description='Chunks per source (1-3) for basic, advanced or fast search.',
+    )
 
     query: str = Field(description=("Search query to look up"))
     include_domains: Optional[List[str]] = Field(
@@ -28,7 +58,7 @@ class TavilySearchInput(BaseModel):
 
         In both cases, you should determine the appropriate domains (e.g., ["nasa.gov"] or ["apple.com"]) and set this parameter.
 
-        Results will ONLY come from the specified domains - no other sources will be included.
+        By default, results are restricted to these domains. With include_domains_mode="prefer", other domains may also appear.
         Default is None (no domain restriction).
         """,  # noqa: E501
     )
@@ -237,7 +267,6 @@ class TavilySearch(BaseTool):  # type: ignore[override]
     )
 
     args_schema: Type[BaseModel] = TavilySearchInput
-    handle_tool_error: bool = True
 
     auto_parameters: Optional[bool] = None
     """
@@ -327,16 +356,26 @@ class TavilySearch(BaseTool):  # type: ignore[override]
     
     Default is False.
     """
+    include_domains_mode: Optional[Literal["prefer", "restrict"]] = None
+    include_published_date: Optional[bool] = None
+    filter_by_published_date: Optional[bool] = None
+    language: Optional[str] = None
+    filter_by_language: Optional[bool] = None
+    safe_search: Optional[bool] = None
+    chunks_per_source: Optional[int] = None
+
     api_wrapper: TavilySearchAPIWrapper = Field(default_factory=TavilySearchAPIWrapper)  # type: ignore[arg-type]
 
     def __init__(self, **kwargs: Any) -> None:
-        # Create api_wrapper with tavily_api_key and api_base_url if provided
-        if "tavily_api_key" in kwargs or "api_base_url" in kwargs:
-            wrapper_kwargs = {}
-            if "tavily_api_key" in kwargs:
-                wrapper_kwargs["tavily_api_key"] = kwargs["tavily_api_key"]
-            if "api_base_url" in kwargs:
-                wrapper_kwargs["api_base_url"] = kwargs["api_base_url"]
+        wrapper_kwargs = {
+            key: kwargs[key]
+            for key in (
+                "tavily_api_key", "api_base_url", "client_name",
+                "project_id", "session_id", "human_id",
+            )
+            if key in kwargs
+        }
+        if wrapper_kwargs:
             kwargs["api_wrapper"] = TavilySearchAPIWrapper(**wrapper_kwargs)
 
         super().__init__(**kwargs)
@@ -381,6 +420,19 @@ class TavilySearch(BaseTool):  # type: ignore[override]
                     )
             
             # Execute search with parameters directly
+            for key in (
+                'include_domains_mode',
+                'include_published_date',
+                'filter_by_published_date',
+                'language',
+                'filter_by_language',
+                'safe_search',
+                'chunks_per_source',
+            ):
+                value = getattr(self, key)
+                if value is not None:
+                    kwargs[key] = value
+
             raw_results = self.api_wrapper.raw_results(
                 query=query,
                 include_domains=self.include_domains
@@ -428,11 +480,8 @@ class TavilySearch(BaseTool):  # type: ignore[override]
                 )
                 raise ToolException(error_message)
             return raw_results
-        except ToolException:
-            # Re-raise tool exceptions
-            raise
-        except Exception as e:
-            return {"error": e}
+        except TRANSPORT_ERRORS as e:
+            raise transport_error(e) from None
 
     async def _arun(
         self,
@@ -461,6 +510,19 @@ class TavilySearch(BaseTool):  # type: ignore[override]
                         f"The parameter '{param}' can only be set during instantiation, not during invocation. Please set it when creating the TavilySearch instance."
                     )
             
+            for key in (
+                'include_domains_mode',
+                'include_published_date',
+                'filter_by_published_date',
+                'language',
+                'filter_by_language',
+                'safe_search',
+                'chunks_per_source',
+            ):
+                value = getattr(self, key)
+                if value is not None:
+                    kwargs[key] = value
+
             raw_results = await self.api_wrapper.raw_results_async(
                 query=query,
                 include_domains=self.include_domains
@@ -508,8 +570,5 @@ class TavilySearch(BaseTool):  # type: ignore[override]
                 )
                 raise ToolException(error_message)
             return raw_results
-        except ToolException:
-            # Re-raise tool exceptions
-            raise
-        except Exception as e:
-            return {"error": e}
+        except TRANSPORT_ERRORS as e:
+            raise transport_error(e) from None

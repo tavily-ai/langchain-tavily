@@ -9,6 +9,7 @@ from langchain_core.callbacks import (
 from langchain_core.tools import BaseTool, ToolException
 from pydantic import BaseModel, ConfigDict, Field
 
+from langchain_tavily._errors import TRANSPORT_ERRORS, transport_error
 from langchain_tavily._utilities import TavilyExtractAPIWrapper
 
 
@@ -20,7 +21,17 @@ class TavilyExtractInput(BaseModel):
 
     model_config = ConfigDict(extra="allow")
 
-    urls: List[str] = Field(description="list of urls to extract")
+    chunks_per_source: Optional[int] = Field(
+        default=None,
+        description="Content chunks per source (1-5); requires query/instructions."
+    )
+
+    timeout: Optional[float] = Field(
+        default=None,
+        description='API extraction timeout in seconds (1-60).',
+    )
+
+    urls: List[str] = Field(min_length=1, max_length=20, description="One to twenty URLs to extract")
     extract_depth: Optional[Literal["basic", "advanced"]] = Field(
         default="basic",
         description="""Controls the thoroughness of web content extraction.
@@ -79,7 +90,6 @@ class TavilyExtract(BaseTool):  # type: ignore[override, override]
     )
 
     args_schema: Type[BaseModel] = TavilyExtractInput
-    handle_tool_error: bool = True
 
     # Default parameters
     extract_depth: Optional[Literal["basic", "advanced"]] = None
@@ -121,16 +131,20 @@ class TavilyExtract(BaseTool):  # type: ignore[override, override]
     
     Use this to limit the amount of content returned from each URL.
     """
+    timeout: Optional[float] = None
+
     apiwrapper: TavilyExtractAPIWrapper = Field(default_factory=TavilyExtractAPIWrapper)  # type: ignore[arg-type]
 
     def __init__(self, **kwargs: Any) -> None:
-        # Create apiwrapper with tavily_api_key and api_base_url if provided
-        if "tavily_api_key" in kwargs or "api_base_url" in kwargs:
-            wrapper_kwargs = {}
-            if "tavily_api_key" in kwargs:
-                wrapper_kwargs["tavily_api_key"] = kwargs["tavily_api_key"]
-            if "api_base_url" in kwargs:
-                wrapper_kwargs["api_base_url"] = kwargs["api_base_url"]
+        wrapper_kwargs = {
+            key: kwargs[key]
+            for key in (
+                "tavily_api_key", "api_base_url", "client_name",
+                "project_id", "session_id", "human_id",
+            )
+            if key in kwargs
+        }
+        if wrapper_kwargs:
             kwargs["apiwrapper"] = TavilyExtractAPIWrapper(**wrapper_kwargs)
         super().__init__(**kwargs)
 
@@ -140,6 +154,7 @@ class TavilyExtract(BaseTool):  # type: ignore[override, override]
         extract_depth: Optional[Literal["basic", "advanced"]] = None,
         include_images: Optional[bool] = None,
         query: Optional[str] = None,
+        chunks_per_source: Optional[int] = None,
         run_manager: Optional[CallbackManagerForToolRun] = None,
         **kwargs: Any,
     ) -> Dict[str, Any]:
@@ -156,6 +171,13 @@ class TavilyExtract(BaseTool):  # type: ignore[override, override]
                     )
             
             # Execute search with parameters directly
+            for key in (
+                'timeout',
+            ):
+                value = getattr(self, key)
+                if value is not None:
+                    kwargs[key] = value
+
             raw_results = self.apiwrapper.raw_results(
                 urls=urls,
                 extract_depth=self.extract_depth
@@ -168,7 +190,11 @@ class TavilyExtract(BaseTool):  # type: ignore[override, override]
                 format=self.format,
                 include_usage=self.include_usage,
                 query=self.query if self.query else query,
-                chunks_per_source=self.chunks_per_source,
+                chunks_per_source=(
+                    self.chunks_per_source
+                    if self.chunks_per_source is not None
+                    else chunks_per_source
+                ),
                 **kwargs,
             )
 
@@ -190,11 +216,8 @@ class TavilyExtract(BaseTool):  # type: ignore[override, override]
                 )
                 raise ToolException(error_message)
             return raw_results
-        except ToolException:
-            # Re-raise tool exceptions
-            raise
-        except Exception as e:
-            return {"error": e}
+        except TRANSPORT_ERRORS as e:
+            raise transport_error(e) from None
 
     async def _arun(
         self,
@@ -202,6 +225,7 @@ class TavilyExtract(BaseTool):  # type: ignore[override, override]
         extract_depth: Optional[Literal["basic", "advanced"]] = None,
         include_images: Optional[bool] = None,
         query: Optional[str] = None,
+        chunks_per_source: Optional[int] = None,
         run_manager: Optional[AsyncCallbackManagerForToolRun] = None,
         **kwargs: Any,
     ) -> Dict[str, Any]:
@@ -217,6 +241,13 @@ class TavilyExtract(BaseTool):  # type: ignore[override, override]
                         f"The parameter '{param}' can only be set during instantiation, not during invocation. Please set it when creating the TavilyExtract instance."
                     )
             
+            for key in (
+                'timeout',
+            ):
+                value = getattr(self, key)
+                if value is not None:
+                    kwargs[key] = value
+
             raw_results = await self.apiwrapper.raw_results_async(
                 urls=urls,
                 extract_depth=self.extract_depth
@@ -229,7 +260,11 @@ class TavilyExtract(BaseTool):  # type: ignore[override, override]
                 format=self.format,
                 include_usage=self.include_usage,
                 query=self.query if self.query else query,
-                chunks_per_source=self.chunks_per_source,
+                chunks_per_source=(
+                    self.chunks_per_source
+                    if self.chunks_per_source is not None
+                    else chunks_per_source
+                ),
                 **kwargs,
             )
 
@@ -249,8 +284,5 @@ class TavilyExtract(BaseTool):  # type: ignore[override, override]
                 )
                 raise ToolException(error_message)
             return raw_results
-        except ToolException:
-            # Re-raise tool exceptions
-            raise
-        except Exception as e:
-            return {"error": e}
+        except TRANSPORT_ERRORS as e:
+            raise transport_error(e) from None

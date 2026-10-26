@@ -9,6 +9,7 @@ from langchain_core.callbacks import (
 from langchain_core.tools import BaseTool, ToolException
 from pydantic import BaseModel, ConfigDict, Field
 
+from langchain_tavily._errors import TRANSPORT_ERRORS, transport_error
 from langchain_tavily._utilities import TavilyCrawlAPIWrapper
 
 
@@ -16,6 +17,16 @@ class TavilyCrawlInput(BaseModel):
     """Input for [TavilyCrawl]"""
 
     model_config = ConfigDict(extra="allow")
+
+    chunks_per_source: Optional[int] = Field(
+        default=None,
+        description="Content chunks per source (1-5); requires query/instructions."
+    )
+
+    timeout: Optional[float] = Field(
+        default=None,
+        description='API crawl timeout in seconds (10-150).',
+    )
 
     url: str = Field(description=("The root URL to begin the crawl."))
     max_depth: Optional[int] = Field(
@@ -194,7 +205,6 @@ class TavilyCrawl(BaseTool):  # type: ignore[override]
         """  # noqa: E501
 
     args_schema: Type[BaseModel] = TavilyCrawlInput
-    handle_tool_error: bool = True
 
     max_depth: Optional[int] = None
     """Max depth of the crawl. Defines how far from the base URL the crawler can explore.
@@ -299,16 +309,20 @@ class TavilyCrawl(BaseTool):  # type: ignore[override]
     Use this to limit the amount of content returned from each crawled URL.
     """
 
+    timeout: Optional[float] = None
+
     api_wrapper: TavilyCrawlAPIWrapper = Field(default_factory=TavilyCrawlAPIWrapper)  # type: ignore[arg-type]
 
     def __init__(self, **kwargs: Any) -> None:
-        # Create api_wrapper with tavily_api_key and api_base_url if provided
-        if "tavily_api_key" in kwargs or "api_base_url" in kwargs:
-            wrapper_kwargs = {}
-            if "tavily_api_key" in kwargs:
-                wrapper_kwargs["tavily_api_key"] = kwargs["tavily_api_key"]
-            if "api_base_url" in kwargs:
-                wrapper_kwargs["api_base_url"] = kwargs["api_base_url"]
+        wrapper_kwargs = {
+            key: kwargs[key]
+            for key in (
+                "tavily_api_key", "api_base_url", "client_name",
+                "project_id", "session_id", "human_id",
+            )
+            if key in kwargs
+        }
+        if wrapper_kwargs:
             kwargs["api_wrapper"] = TavilyCrawlAPIWrapper(**wrapper_kwargs)
 
         super().__init__(**kwargs)
@@ -342,6 +356,7 @@ class TavilyCrawl(BaseTool):  # type: ignore[override]
             ]
         ] = None,
         extract_depth: Optional[Literal["basic", "advanced"]] = None,
+        chunks_per_source: Optional[int] = None,
         run_manager: Optional[CallbackManagerForToolRun] = None,
         **kwargs: Any,
     ) -> Dict[str, Any]:
@@ -368,6 +383,13 @@ class TavilyCrawl(BaseTool):  # type: ignore[override]
                     )
             
             # Execute search with parameters directly
+            for key in (
+                'timeout',
+            ):
+                value = getattr(self, key)
+                if value is not None:
+                    kwargs[key] = value
+
             raw_results = self.api_wrapper.raw_results(
                 url=url,
                 max_depth=self.max_depth if self.max_depth else max_depth,
@@ -397,7 +419,11 @@ class TavilyCrawl(BaseTool):  # type: ignore[override]
                 include_favicon=self.include_favicon,
                 format=self.format,
                 include_usage=self.include_usage,
-                chunks_per_source=self.chunks_per_source,
+                chunks_per_source=(
+                    self.chunks_per_source
+                    if self.chunks_per_source is not None
+                    else chunks_per_source
+                ),
                 **kwargs,
             )
 
@@ -422,11 +448,8 @@ class TavilyCrawl(BaseTool):  # type: ignore[override]
                 )
                 raise ToolException(error_message)
             return raw_results
-        except ToolException:
-            # Re-raise tool exceptions
-            raise
-        except Exception as e:
-            return {"error": e}
+        except TRANSPORT_ERRORS as e:
+            raise transport_error(e) from None
 
     async def _arun(
         self,
@@ -457,6 +480,7 @@ class TavilyCrawl(BaseTool):  # type: ignore[override]
             ]
         ] = None,
         extract_depth: Optional[Literal["basic", "advanced"]] = None,
+        chunks_per_source: Optional[int] = None,
         run_manager: Optional[AsyncCallbackManagerForToolRun] = None,
         **kwargs: Any,
     ) -> Dict[str, Any]:
@@ -471,6 +495,13 @@ class TavilyCrawl(BaseTool):  # type: ignore[override]
                         f"The parameter '{param}' can only be set during instantiation, not during invocation. Please set it when creating the TavilyCrawl instance."
                     )
             
+            for key in (
+                'timeout',
+            ):
+                value = getattr(self, key)
+                if value is not None:
+                    kwargs[key] = value
+
             raw_results = await self.api_wrapper.raw_results_async(
                 url=url,
                 max_depth=self.max_depth if self.max_depth else max_depth,
@@ -500,7 +531,11 @@ class TavilyCrawl(BaseTool):  # type: ignore[override]
                 include_favicon=self.include_favicon,
                 format=self.format,
                 include_usage=self.include_usage,
-                chunks_per_source=self.chunks_per_source,
+                chunks_per_source=(
+                    self.chunks_per_source
+                    if self.chunks_per_source is not None
+                    else chunks_per_source
+                ),
                 **kwargs,
             )
 
@@ -522,8 +557,5 @@ class TavilyCrawl(BaseTool):  # type: ignore[override]
                 )
                 raise ToolException(error_message)
             return raw_results
-        except ToolException:
-            # Re-raise tool exceptions
-            raise
-        except Exception as e:
-            return {"error": e}
+        except TRANSPORT_ERRORS as e:
+            raise transport_error(e) from None

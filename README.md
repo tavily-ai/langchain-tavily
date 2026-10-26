@@ -32,6 +32,11 @@ if not os.environ.get("TAVILY_API_KEY"):
     os.environ["TAVILY_API_KEY"] = getpass.getpass("Tavily API key:\n")
 ```
 
+All tools accept optional `client_name`, `project_id`, `session_id`, and `human_id`
+constructor arguments. These are sent as request headers, not tool arguments.
+`client_name` defaults to `langchain-tavily`; direct HTTP requests use the `api`
+access source. `api_base_url` can point to a compatible proxy.
+
 ## Tavily Search
 
 Here we show how to instantiate an instance of the Tavily search tool. The tool accepts various parameters to customize the search. After instantiation we invoke the tool with a simple query. This tool allows you to complete search queries using Tavily's Search API endpoint.
@@ -52,6 +57,11 @@ The tool accepts various parameters during instantiation:
 - `time_range` (optional, str): The time range back from the current date to filter results - "day", "week", "month", or "year". Default is None.
 - `include_domains` (optional, List[str]): List of domains to specifically include. Default is None.
 - `exclude_domains` (optional, List[str]): List of domains to specifically exclude. Default is None.
+- `include_domains_mode` (optional, str): `restrict` (default API behavior) limits results to `include_domains`; `prefer` also allows other domains. Requires `include_domains`.
+- `language` and `filter_by_language`: Boost a language, or strictly filter to it when the flag is true.
+- `safe_search` (optional, bool): Filter unsafe results; unavailable with `fast` and `ultra-fast` depths.
+- `chunks_per_source` (optional, int): 1–3 chunks for `basic`, `advanced`, or `fast` search.
+- `include_published_date` (optional, bool, beta) and `filter_by_published_date` (optional, bool): Return estimated dates or remove undated/out-of-window results.
 - `country` (optional, str): Boost search results from a specific country. This will prioritize content from the selected country in the search results. Available only if topic is general.
 
 For a comprehensive overview of the available parameters, refer to the [Tavily Search API documentation](https://docs.tavily.com/documentation/api-reference/endpoint/search)
@@ -116,55 +126,56 @@ output:
 
 ### Agent Tool Calling
 
-We can use our tools directly with an agent executor by binding the tool to the agent. This gives the agent the ability to dynamically set the available arguments to the Tavily search tool.
-
-In the below example when we ask the agent to find "What is the most popular sport in the world? include only wikipedia sources" the agent will dynamically set the argments and invoke Tavily search tool : Invoking `tavily_search` with `{'query': 'most popular sport in the world', 'include_domains': ['wikipedia.org'], 'search_depth': 'basic'}`
+Use LangChain 1.x's `create_agent`. Set `TAVILY_API_KEY` and your model provider's
+`OPENAI_API_KEY` before running this example; install `langchain-openai` as well.
+The agent can choose the tool's invocation arguments. Constructor-only settings,
+such as `max_results`, stay under the application's control.
 
 ```python
-# !pip install -qU langchain langchain-openai langchain-tavily
-from typing import Any, Dict, Optional
-import datetime
-
-from langchain.agents import create_openai_tools_agent, AgentExecutor
+from langchain.agents import create_agent
 from langchain.chat_models import init_chat_model
-from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
-from langchain_openai import ChatOpenAI
 from langchain_tavily import TavilySearch
-from langchain.schema import HumanMessage, SystemMessage
 
-# Initialize LLM
 llm = init_chat_model(model="gpt-4o", model_provider="openai", temperature=0)
-
-# Initialize Tavily Search Tool
-tavily_search_tool = TavilySearch(
-    max_results=5,
-    topic="general",
-)
-
-# Set up Prompt with 'agent_scratchpad'
-today = datetime.datetime.today().strftime("%D")
-prompt = ChatPromptTemplate.from_messages([
-    ("system", f"""You are a helpful reaserch assistant, you will be given a query and you will need to
-    search the web for the most relevant information. The date today is {today}."""),
-    MessagesPlaceholder(variable_name="messages"),
-    MessagesPlaceholder(variable_name="agent_scratchpad"),  # Required for tool calls
-])
-
-# Create an agent that can use tools
-agent = create_openai_tools_agent(
-    llm=llm,
+tavily_search_tool = TavilySearch(max_results=5, topic="general")
+agent = create_agent(
+    model=llm,
     tools=[tavily_search_tool],
-    prompt=prompt
+    system_prompt="You are a research assistant. Use web sources and cite them.",
 )
-
-# Create an Agent Executor to handle tool execution
-agent_executor = AgentExecutor(agent=agent, tools=[tavily_search_tool], verbose=True)
-
-user_input =  "What is the most popular sport in the world? include only wikipedia sources"
-
-# Construct input properly as a dictionary
-response = agent_executor.invoke({"messages": [HumanMessage(content=user_input)]})
+response = agent.invoke({
+    "messages": [{
+        "role": "user",
+        "content": "What is the most popular sport in the world? Use Wikipedia sources.",
+    }]
+})
 ```
+
+### Error handling
+
+Tools raise errors by default. HTTP failures raise LangChain's `ToolException`
+with the status and server detail; transport failures raise a `ToolException`
+without request URLs or credentials. Invalid JSON responses and empty-result
+conditions also raise `ToolException`. Schema validation, constructor-only
+argument violations and unexpected programming errors propagate to the caller.
+This replaces the earlier `{"error": ...}` return value and automatic handling
+of empty results, so applications relying on those behaviors need to adapt.
+
+To let an agent observe a recoverable tool failure, explicitly set
+`handle_tool_error=True` when creating the tool. A ToolCall then receives a
+`ToolMessage` with `status="error"`; a plain `invoke` returns the error text.
+LangChain's custom string/callable handlers are also supported. This option does
+not suppress invalid invocation arguments or unexpected programming errors.
+Do not put secrets into custom handlers' messages.
+
+Set constructor-only parameters when creating the tool, for example
+`TavilySearch(max_results=5)`, then call `invoke({"query": "..."})`. Passing
+`max_results` again to `invoke` raises a clear `ValueError`, even if its value
+matches the constructor. No HTTP request is sent in that case.
+
+Research streaming returns an iterator. Errors encountered while consuming it
+raise to the consumer and require handling around iteration; they cannot be
+converted into a ToolMessage after the tool has already returned the iterator.
 
 ## Tavily Extract
 
@@ -222,6 +233,8 @@ output:
     'response_time': 0.79
 }
 ```
+
+Extract accepts `timeout` (1–60 seconds) and `chunks_per_source` (1–5 with `query`) at construction or invocation. These control the API operation, not the HTTP transport timeout.
 
 ## Tavily Crawl
 
@@ -374,6 +387,8 @@ output:
 }
 ```
 
+Crawl and Map accept an API `timeout` of 10–150 seconds at construction or invocation. Crawl also accepts `chunks_per_source` (1–5 with `instructions`).
+
 ## Tavily Research
 
 Here we show how to instantiate an instance of the Tavily Research tool. After instantiation we invoke the tool with a research task description. This tool allows you to create comprehensive research reports on any topic using Tavily's Research API endpoint.
@@ -383,8 +398,11 @@ Here we show how to instantiate an instance of the Tavily Research tool. After i
 The tool accepts various parameters during instantiation:
 
 - `model` (optional, str): The model used by the research agent. Can be "mini" (quick, surface-level), "pro" (comprehensive, in-depth), or "auto" (automatically determined). Default is "auto".
-- `output_schema` (optional, dict): JSON Schema dict for structured output format. Default is None (returns unstructured text content).
+- `output_schema` (optional, dict): JSON Schema dict for structured output. Include a `properties` object, a description for each property, and a non-empty `required` array. Default is None (returns unstructured text content).
 - `stream` (optional, bool): Whether to stream the research task results. Default is False.
+- `include_domains` / `exclude_domains` (optional, List[str]): Up to 20 domains each. Included domains are preferred, not a hard filter; excluded domains are blocked.
+- `output_length` (optional, str): `short`, `standard`, or `long`.
+- `files` (optional, List[dict]): Up to five attachments in the [Research API format](https://docs.tavily.com/documentation/api-reference/endpoint/research): `{"name": "context.md", "data": "<base64-encoded UTF-8 text>", "type": "base64"}` (`type` is optional). Filenames must end in `.txt`, `.md`, or `.json`. Validation counts whitespace-separated words and enforces 80,000 per file and combined; server validation remains authoritative. This tool accepts attachment contents and never reads local file paths.
 - `citation_format` (optional, str): Citation format for sources in the research report. Can be "numbered", "mla", "apa", or "chicago". Default is "numbered".
 
 For a comprehensive overview of the available parameters, refer to the [Tavily Research API documentation](https://docs.tavily.com/documentation/api-reference/endpoint/research)
@@ -404,8 +422,8 @@ tool = TavilyResearch(
 
 The Tavily research tool accepts the following arguments during invocation:
 
-- `input` (required): TThe research task or question to investigate.
-- The following arguments can also be set during invocation: `model`, `output_schema`, `stream`, and `citation_format`.
+- `input` (required): The research task or question to investigate.
+- The following arguments can also be set during invocation: `model`, `output_schema`, `stream`, `citation_format`, `include_domains`, `exclude_domains`, `output_length`, and `files`.
 
 NOTE: If you set an argument during instantiation this value will persist and overwrite the value passed during invocation.
 
@@ -432,7 +450,7 @@ output:
 
 ### Retrieving research results
 
-After creating a research task, you can retrieve the results using the `TavilyGetResearch` tool:
+After creating a research task, use `TavilyGetResearch` with its `request_id`. Pending results retain their task status; call it again later until completed or failed. Completed responses preserve content, sources and any usage metadata. `include_usage` is optional at construction or invocation; an explicit constructor value takes precedence, including `False`.
 
 ```python
 from langchain_tavily import TavilyGetResearch
@@ -442,7 +460,8 @@ get_research_tool = TavilyGetResearch()
 
 # Retrieve results using the request_id from the research task
 result = get_research_tool.invoke({
-    "request_id": "abc123-def456-ghi789"
+    "request_id": "abc123-def456-ghi789",
+    "include_usage": True,
 })
 ```
 
