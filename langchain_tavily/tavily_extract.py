@@ -9,6 +9,7 @@ from langchain_core.callbacks import (
 from langchain_core.tools import BaseTool, ToolException
 from pydantic import BaseModel, ConfigDict, Field
 
+from langchain_tavily._errors import TRANSPORT_ERRORS, transport_error
 from langchain_tavily._utilities import TavilyExtractAPIWrapper
 
 
@@ -89,7 +90,6 @@ class TavilyExtract(BaseTool):  # type: ignore[override, override]
     )
 
     args_schema: Type[BaseModel] = TavilyExtractInput
-    handle_tool_error: bool = True
 
     # Default parameters
     extract_depth: Optional[Literal["basic", "advanced"]] = None
@@ -216,11 +216,8 @@ class TavilyExtract(BaseTool):  # type: ignore[override, override]
                 )
                 raise ToolException(error_message)
             return raw_results
-        except ToolException:
-            # Re-raise tool exceptions
-            raise
-        except Exception as e:
-            return {"error": e}
+        except TRANSPORT_ERRORS as e:
+            raise transport_error(e) from None
 
     async def _arun(
         self,
@@ -287,8 +284,5 @@ class TavilyExtract(BaseTool):  # type: ignore[override, override]
                 )
                 raise ToolException(error_message)
             return raw_results
-        except ToolException:
-            # Re-raise tool exceptions
-            raise
-        except Exception as e:
-            return {"error": e}
+        except TRANSPORT_ERRORS as e:
+            raise transport_error(e) from None

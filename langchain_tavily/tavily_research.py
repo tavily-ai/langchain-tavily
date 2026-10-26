@@ -6,9 +6,10 @@ from langchain_core.callbacks import (
     AsyncCallbackManagerForToolRun,
     CallbackManagerForToolRun,
 )
-from langchain_core.tools import BaseTool, ToolException
+from langchain_core.tools import BaseTool
 from pydantic import BaseModel, ConfigDict, Field
 
+from langchain_tavily._errors import TRANSPORT_ERRORS, transport_error
 from langchain_tavily._utilities import TavilyResearchAPIWrapper
 
 class TavilyResearchInput(BaseModel):
@@ -126,7 +127,6 @@ class TavilyResearch(BaseTool):  # type: ignore[override, override]
     model_config = ConfigDict(populate_by_name=True)
 
     args_schema: Type[BaseModel] = TavilyResearchInput
-    handle_tool_error: bool = True
 
     # Default parameters
     research_model: Optional[Literal["mini", "pro", "auto"]] = Field(default="auto", alias="model")
@@ -222,11 +222,8 @@ class TavilyResearch(BaseTool):  # type: ignore[override, override]
             )
 
             return raw_results
-        except ToolException:
-            # Re-raise tool exceptions
-            raise
-        except Exception as e:
-            return {"error": str(e)}
+        except TRANSPORT_ERRORS as e:
+            raise transport_error(e) from None
 
     async def _arun(
         self,
@@ -275,14 +272,8 @@ class TavilyResearch(BaseTool):  # type: ignore[override, override]
                 **kwargs,
             )
             return raw_results
-        except ToolException:
-            # Re-raise tool exceptions
-            raise
-        except Exception as e:
-            is_streaming = stream if stream is not None else (self.stream_results if self.stream_results is not None else False)
-            if is_streaming:
-                raise
-            return {"error": str(e)}
+        except TRANSPORT_ERRORS as e:
+            raise transport_error(e) from None
 
 
 class TavilyGetResearch(BaseTool):  # type: ignore[override, override]
@@ -297,7 +288,6 @@ class TavilyGetResearch(BaseTool):  # type: ignore[override, override]
     )
 
     args_schema: Type[BaseModel] = TavilyGetResearchInput
-    handle_tool_error: bool = True
 
     api_wrapper: TavilyResearchAPIWrapper = Field(
         default_factory=TavilyResearchAPIWrapper
@@ -337,11 +327,8 @@ class TavilyGetResearch(BaseTool):  # type: ignore[override, override]
         try:
             raw_results = self.api_wrapper.get_research(request_id=request_id)
             return raw_results
-        except ToolException:
-            # Re-raise tool exceptions
-            raise
-        except Exception as e:
-            return {"error": str(e)}
+        except TRANSPORT_ERRORS as e:
+            raise transport_error(e) from None
 
     async def _arun(
         self,
@@ -353,9 +340,6 @@ class TavilyGetResearch(BaseTool):  # type: ignore[override, override]
         try:
             raw_results = await self.api_wrapper.get_research_async(request_id=request_id)
             return raw_results
-        except ToolException:
-            # Re-raise tool exceptions
-            raise
-        except Exception as e:
-            return {"error": str(e)}
+        except TRANSPORT_ERRORS as e:
+            raise transport_error(e) from None
 

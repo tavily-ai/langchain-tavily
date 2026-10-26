@@ -4,15 +4,22 @@ In order to set this up, follow instructions at:
 https://docs.tavily.com/docs/tavily-api/introduction
 """
 
-import json
 from typing import Any, AsyncGenerator, Dict, Generator, List, Literal, Optional, Union
 
 import aiohttp
-from aiohttp import ClientTimeout
 import requests
+from aiohttp import ClientTimeout
 from langchain_core.utils import get_from_dict_or_env
 from pydantic import BaseModel, ConfigDict, SecretStr, model_validator
 
+from langchain_tavily._errors import (
+    TRANSPORT_ERRORS,
+    response_error,
+    response_json,
+    sync_response_error,
+    sync_response_json,
+    transport_error,
+)
 
 TAVILY_API_URL: str = "https://api.tavily.com"
 
@@ -124,12 +131,10 @@ class TavilySearchAPIWrapper(BaseModel):
             headers=headers,
         )
         if response.status_code != 200:
-            detail = response.json().get("detail", {})
-            error_message = (
-                detail.get("error") if isinstance(detail, dict) else "Unknown error"
+            raise sync_response_error(
+                response, self.tavily_api_key.get_secret_value()
             )
-            raise ValueError(f"Error {response.status_code}: {error_message}")
-        return response.json()
+        return sync_response_json(response)
 
     async def raw_results_async(
         self,
@@ -195,11 +200,14 @@ class TavilySearchAPIWrapper(BaseModel):
                         data = await res.text()
                         return data
                     else:
-                        raise Exception(f"Error {res.status}: {res.reason}")
+                        raise response_error(
+                            res.status, await res.text(),
+                            self.tavily_api_key.get_secret_value(),
+                        )
 
         results_json_str = await fetch()
 
-        return json.loads(results_json_str)
+        return response_json(results_json_str)
 
 
 class TavilyExtractAPIWrapper(BaseModel):
@@ -268,12 +276,10 @@ class TavilyExtractAPIWrapper(BaseModel):
         )
 
         if response.status_code != 200:
-            detail = response.json().get("detail", {})
-            error_message = (
-                detail.get("error") if isinstance(detail, dict) else "Unknown error"
+            raise sync_response_error(
+                response, self.tavily_api_key.get_secret_value()
             )
-            raise ValueError(f"Error {response.status_code}: {error_message}")
-        return response.json()
+        return sync_response_json(response)
 
     async def raw_results_async(
         self,
@@ -320,11 +326,14 @@ class TavilyExtractAPIWrapper(BaseModel):
                         data = await res.text()
                         return data
                     else:
-                        raise Exception(f"Error {res.status}: {res.reason}")
+                        raise response_error(
+                            res.status, await res.text(),
+                            self.tavily_api_key.get_secret_value(),
+                        )
 
         results_json_str = await fetch()
 
-        return json.loads(results_json_str)
+        return response_json(results_json_str)
 
 
 class TavilyCrawlAPIWrapper(BaseModel):
@@ -425,12 +434,10 @@ class TavilyCrawlAPIWrapper(BaseModel):
         )
 
         if response.status_code != 200:
-            detail = response.json().get("detail", {})
-            error_message = (
-                detail.get("error") if isinstance(detail, dict) else "Unknown error"
+            raise sync_response_error(
+                response, self.tavily_api_key.get_secret_value()
             )
-            raise ValueError(f"Error {response.status_code}: {error_message}")
-        return response.json()
+        return sync_response_json(response)
 
     async def raw_results_async(
         self,
@@ -509,11 +516,14 @@ class TavilyCrawlAPIWrapper(BaseModel):
                         data = await res.text()
                         return data
                     else:
-                        raise Exception(f"Error {res.status}: {res.reason}")
+                        raise response_error(
+                            res.status, await res.text(),
+                            self.tavily_api_key.get_secret_value(),
+                        )
 
         results_json_str = await fetch()
 
-        return json.loads(results_json_str)
+        return response_json(results_json_str)
 
 
 class TavilyMapAPIWrapper(BaseModel):
@@ -604,12 +614,10 @@ class TavilyMapAPIWrapper(BaseModel):
         )
 
         if response.status_code != 200:
-            detail = response.json().get("detail", {})
-            error_message = (
-                detail.get("error") if isinstance(detail, dict) else "Unknown error"
+            raise sync_response_error(
+                response, self.tavily_api_key.get_secret_value()
             )
-            raise ValueError(f"Error {response.status_code}: {error_message}")
-        return response.json()
+        return sync_response_json(response)
 
     async def raw_results_async(
         self,
@@ -677,11 +685,14 @@ class TavilyMapAPIWrapper(BaseModel):
                         data = await res.text()
                         return data
                     else:
-                        raise Exception(f"Error {res.status}: {res.reason}")
+                        raise response_error(
+                            res.status, await res.text(),
+                            self.tavily_api_key.get_secret_value(),
+                        )
 
         results_json_str = await fetch()
 
-        return json.loads(results_json_str)
+        return response_json(results_json_str)
 
 
 class TavilyResearchAPIWrapper(BaseModel):
@@ -745,17 +756,20 @@ class TavilyResearchAPIWrapper(BaseModel):
                 stream=True,
             )
             if response.status_code != 200:
-                detail = response.json().get("detail", {})
-                error_message = (
-                    detail.get("error") if isinstance(detail, dict) else "Unknown error"
-                )
-                raise ValueError(f"Error {response.status_code}: {error_message}")
+                try:
+                    raise sync_response_error(
+                        response, self.tavily_api_key.get_secret_value()
+                    )
+                finally:
+                    response.close()
             
             def stream_generator() -> Generator[bytes, None, None]:
                 try:
                     for chunk in response.iter_content(chunk_size=None):
                         if chunk:
                             yield chunk
+                except TRANSPORT_ERRORS as e:
+                    raise transport_error(e) from None
                 finally:
                     response.close()
             
@@ -768,12 +782,10 @@ class TavilyResearchAPIWrapper(BaseModel):
                 headers=headers,
             )
             if response.status_code not in (200, 201):
-                detail = response.json().get("detail", {})
-                error_message = (
-                    detail.get("error") if isinstance(detail, dict) else "Unknown error"
+                raise sync_response_error(
+                    response, self.tavily_api_key.get_secret_value()
                 )
-                raise ValueError(f"Error {response.status_code}: {error_message}")
-            return response.json()
+            return sync_response_json(response)
 
     async def raw_results_async(
         self,
@@ -816,13 +828,16 @@ class TavilyResearchAPIWrapper(BaseModel):
                         ) as res:
                             if res.status != 200:
                                 error_text = await res.text()
-                                raise Exception(f"Error {res.status}: {error_text}")
+                                raise response_error(
+                                    res.status, error_text,
+                                    self.tavily_api_key.get_secret_value(),
+                                )
                             
                             async for chunk in res.content.iter_any():
                                 if chunk:
                                     yield chunk
-                except Exception as e:
-                    raise Exception(f"Error during research stream: {str(e)}")
+                except TRANSPORT_ERRORS as e:
+                    raise transport_error(e) from None
             
             return stream_generator()
         
@@ -836,11 +851,14 @@ class TavilyResearchAPIWrapper(BaseModel):
                         data = await res.text()
                         return data
                     else:
-                        raise Exception(f"Error {res.status}: {res.reason}")
+                        raise response_error(
+                            res.status, await res.text(),
+                            self.tavily_api_key.get_secret_value(),
+                        )
 
         results_json_str = await fetch()
 
-        return json.loads(results_json_str)
+        return response_json(results_json_str)
 
     def get_research(
         self,
@@ -858,12 +876,10 @@ class TavilyResearchAPIWrapper(BaseModel):
             headers=headers,
         )
         if response.status_code not in [200, 202]:
-            detail = response.json().get("detail", {})
-            error_message = (
-                detail.get("error") if isinstance(detail, dict) else "Unknown error"
+            raise sync_response_error(
+                response, self.tavily_api_key.get_secret_value()
             )
-            raise ValueError(f"Error {response.status_code}: {error_message}")
-        return response.json()
+        return sync_response_json(response)
 
     async def get_research_async(
         self,
@@ -881,12 +897,9 @@ class TavilyResearchAPIWrapper(BaseModel):
             ) as res:
                 if res.status in [200, 202]:
                     data = await res.text()
-                    return json.loads(data)
+                    return response_json(data)
                 else:
-                    detail = await res.json()
-                    error_message = (
-                        detail.get("detail", {}).get("error")
-                        if isinstance(detail, dict)
-                        else "Unknown error"
+                    raise response_error(
+                        res.status, await res.text(),
+                        self.tavily_api_key.get_secret_value(),
                     )
-                    raise Exception(f"Error {res.status}: {error_message}")

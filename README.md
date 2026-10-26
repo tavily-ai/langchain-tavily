@@ -126,55 +126,56 @@ output:
 
 ### Agent Tool Calling
 
-We can use our tools directly with an agent executor by binding the tool to the agent. This gives the agent the ability to dynamically set the available arguments to the Tavily search tool.
-
-In the below example when we ask the agent to find "What is the most popular sport in the world? include only wikipedia sources" the agent will dynamically set the argments and invoke Tavily search tool : Invoking `tavily_search` with `{'query': 'most popular sport in the world', 'include_domains': ['wikipedia.org'], 'search_depth': 'basic'}`
+Use LangChain 1.x's `create_agent`. Set `TAVILY_API_KEY` and your model provider's
+`OPENAI_API_KEY` before running this example; install `langchain-openai` as well.
+The agent can choose the tool's invocation arguments. Constructor-only settings,
+such as `max_results`, stay under the application's control.
 
 ```python
-# !pip install -qU langchain langchain-openai langchain-tavily
-from typing import Any, Dict, Optional
-import datetime
-
-from langchain.agents import create_openai_tools_agent, AgentExecutor
+from langchain.agents import create_agent
 from langchain.chat_models import init_chat_model
-from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
-from langchain_openai import ChatOpenAI
 from langchain_tavily import TavilySearch
-from langchain.schema import HumanMessage, SystemMessage
 
-# Initialize LLM
 llm = init_chat_model(model="gpt-4o", model_provider="openai", temperature=0)
-
-# Initialize Tavily Search Tool
-tavily_search_tool = TavilySearch(
-    max_results=5,
-    topic="general",
-)
-
-# Set up Prompt with 'agent_scratchpad'
-today = datetime.datetime.today().strftime("%D")
-prompt = ChatPromptTemplate.from_messages([
-    ("system", f"""You are a helpful reaserch assistant, you will be given a query and you will need to
-    search the web for the most relevant information. The date today is {today}."""),
-    MessagesPlaceholder(variable_name="messages"),
-    MessagesPlaceholder(variable_name="agent_scratchpad"),  # Required for tool calls
-])
-
-# Create an agent that can use tools
-agent = create_openai_tools_agent(
-    llm=llm,
+tavily_search_tool = TavilySearch(max_results=5, topic="general")
+agent = create_agent(
+    model=llm,
     tools=[tavily_search_tool],
-    prompt=prompt
+    system_prompt="You are a research assistant. Use web sources and cite them.",
 )
-
-# Create an Agent Executor to handle tool execution
-agent_executor = AgentExecutor(agent=agent, tools=[tavily_search_tool], verbose=True)
-
-user_input =  "What is the most popular sport in the world? include only wikipedia sources"
-
-# Construct input properly as a dictionary
-response = agent_executor.invoke({"messages": [HumanMessage(content=user_input)]})
+response = agent.invoke({
+    "messages": [{
+        "role": "user",
+        "content": "What is the most popular sport in the world? Use Wikipedia sources.",
+    }]
+})
 ```
+
+### Error handling
+
+Tools raise errors by default. HTTP failures raise LangChain's `ToolException`
+with the status and server detail; transport failures raise a `ToolException`
+without request URLs or credentials. Invalid JSON responses and empty-result
+conditions also raise `ToolException`. Schema validation, constructor-only
+argument violations and unexpected programming errors propagate to the caller.
+This replaces the earlier `{"error": ...}` return value and automatic handling
+of empty results, so applications relying on those behaviors need to adapt.
+
+To let an agent observe a recoverable tool failure, explicitly set
+`handle_tool_error=True` when creating the tool. A ToolCall then receives a
+`ToolMessage` with `status="error"`; a plain `invoke` returns the error text.
+LangChain's custom string/callable handlers are also supported. This option does
+not suppress invalid invocation arguments or unexpected programming errors.
+Do not put secrets into custom handlers' messages.
+
+Set constructor-only parameters when creating the tool, for example
+`TavilySearch(max_results=5)`, then call `invoke({"query": "..."})`. Passing
+`max_results` again to `invoke` raises a clear `ValueError`, even if its value
+matches the constructor. No HTTP request is sent in that case.
+
+Research streaming returns an iterator. Errors encountered while consuming it
+raise to the consumer and require handling around iteration; they cannot be
+converted into a ToolMessage after the tool has already returned the iterator.
 
 ## Tavily Extract
 
