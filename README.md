@@ -398,7 +398,7 @@ Here we show how to instantiate an instance of the Tavily Research tool. After i
 The tool accepts various parameters during instantiation:
 
 - `model` (optional, str): The model used by the research agent. Can be "mini" (quick, surface-level), "pro" (comprehensive, in-depth), or "auto" (automatically determined). Default is "auto".
-- `output_schema` (optional, dict): JSON Schema dict for structured output format. Default is None (returns unstructured text content).
+- `output_schema` (optional, dict): JSON Schema dict for structured output. Include a `properties` object, a description for each property, and a non-empty `required` array. Default is None (returns unstructured text content).
 - `stream` (optional, bool): Whether to stream the research task results. Default is False.
 - `include_domains` / `exclude_domains` (optional, List[str]): Up to 20 domains each. Included domains are preferred, not a hard filter; excluded domains are blocked.
 - `output_length` (optional, str): `short`, `standard`, or `long`.

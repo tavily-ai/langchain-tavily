@@ -122,7 +122,7 @@ class TavilyResearchInput(BaseModel):
         description="""A JSON Schema object that defines the structure of the research output. 
         
         When provided, the research response will be structured to match this schema, ensuring a predictable and validated output shape. 
-        Must include a 'properties' field, and may optionally include 'required' field.
+        Include 'properties' with a description for each property and a non-empty 'required' array.
         
         Example:
 
