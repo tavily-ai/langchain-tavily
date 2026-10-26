@@ -19,6 +19,23 @@ class TavilyResearchInput(BaseModel):
 
     model_config = ConfigDict(extra="allow")
 
+    include_domains: Optional[List[str]] = Field(
+        default=None,
+        description='Prefer these domains (up to 20); this is not a hard filter.',
+    )
+    exclude_domains: Optional[List[str]] = Field(
+        default=None,
+        description='Exclude these domains (up to 20).',
+    )
+    output_length: Optional[Literal["short", "standard", "long"]] = Field(
+        default=None,
+        description='Length of the generated report.',
+    )
+    files: Optional[List[Dict[str, Any]]] = Field(
+        default=None,
+        description='Supporting files in the API file format.',
+    )
+
     input: str = Field(
         description="The research task or question to investigate."
     )
@@ -68,7 +85,7 @@ class TavilyResearchInput(BaseModel):
         """,  # noqa: E501
     )
     stream: Optional[bool] = Field(
-        default=False,
+        default=None,
         description="""Whether to stream the research results as they are generated. 
         When 'true', returns a Server-Sent Events (SSE) stream.
         
@@ -106,6 +123,8 @@ class TavilyResearch(BaseTool):  # type: ignore[override, override]
         "Input should be a research task or question to investigate."
     )
 
+    model_config = ConfigDict(populate_by_name=True)
+
     args_schema: Type[BaseModel] = TavilyResearchInput
     handle_tool_error: bool = True
 
@@ -115,12 +134,14 @@ class TavilyResearch(BaseTool):  # type: ignore[override, override]
     
     Default is 'auto'
     """
-    research_output_schema: Optional[Dict[str, Any]] = None
+    research_output_schema: Optional[Dict[str, Any]] = Field(
+        default=None, alias="output_schema"
+    )
     """A JSON Schema object that defines the structure of the research output.
     
     Default is None
     """
-    stream_results: Optional[bool] = None
+    stream_results: Optional[bool] = Field(default=None, alias="stream")
     """Whether to stream the research results as they are generated. When 'true', returns a Server-Sent Events (SSE) stream
     
     Default is False
@@ -130,18 +151,25 @@ class TavilyResearch(BaseTool):  # type: ignore[override, override]
     
     Default is "numbered"
     """
+    include_domains: Optional[List[str]] = None
+    exclude_domains: Optional[List[str]] = None
+    output_length: Optional[Literal["short", "standard", "long"]] = None
+    files: Optional[List[Dict[str, Any]]] = None
+
     api_wrapper: TavilyResearchAPIWrapper = Field(
         default_factory=TavilyResearchAPIWrapper
     )  # type: ignore[arg-type]
 
     def __init__(self, **kwargs: Any) -> None:
-        # Create api_wrapper with tavily_api_key and api_base_url if provided
-        if "tavily_api_key" in kwargs or "api_base_url" in kwargs:
-            wrapper_kwargs = {}
-            if "tavily_api_key" in kwargs:
-                wrapper_kwargs["tavily_api_key"] = kwargs["tavily_api_key"]
-            if "api_base_url" in kwargs:
-                wrapper_kwargs["api_base_url"] = kwargs["api_base_url"]
+        wrapper_kwargs = {
+            key: kwargs[key]
+            for key in (
+                "tavily_api_key", "api_base_url", "client_name",
+                "project_id", "session_id", "human_id",
+            )
+            if key in kwargs
+        }
+        if wrapper_kwargs:
             kwargs["api_wrapper"] = TavilyResearchAPIWrapper(**wrapper_kwargs)
 
         super().__init__(**kwargs)
@@ -172,6 +200,16 @@ class TavilyResearch(BaseTool):  # type: ignore[override, override]
         try:
             is_streaming = stream if stream is not None else (self.stream_results if self.stream_results is not None else False)
             
+            for key in (
+                'include_domains',
+                'exclude_domains',
+                'output_length',
+                'files',
+            ):
+                value = getattr(self, key)
+                if value is not None:
+                    kwargs[key] = value
+
             raw_results = self.api_wrapper.raw_results(
                 input=input,
                 research_model=research_model if research_model is not None else self.research_model,
@@ -216,6 +254,16 @@ class TavilyResearch(BaseTool):  # type: ignore[override, override]
         try:
             is_streaming = stream if stream is not None else (self.stream_results if self.stream_results is not None else False)
             
+            for key in (
+                'include_domains',
+                'exclude_domains',
+                'output_length',
+                'files',
+            ):
+                value = getattr(self, key)
+                if value is not None:
+                    kwargs[key] = value
+
             raw_results = await self.api_wrapper.raw_results_async(
                 input=input,
                 research_model=research_model if research_model is not None else self.research_model,
@@ -256,13 +304,15 @@ class TavilyGetResearch(BaseTool):  # type: ignore[override, override]
     )  # type: ignore[arg-type]
 
     def __init__(self, **kwargs: Any) -> None:
-        # Create api_wrapper with tavily_api_key and api_base_url if provided
-        if "tavily_api_key" in kwargs or "api_base_url" in kwargs:
-            wrapper_kwargs = {}
-            if "tavily_api_key" in kwargs:
-                wrapper_kwargs["tavily_api_key"] = kwargs["tavily_api_key"]
-            if "api_base_url" in kwargs:
-                wrapper_kwargs["api_base_url"] = kwargs["api_base_url"]
+        wrapper_kwargs = {
+            key: kwargs[key]
+            for key in (
+                "tavily_api_key", "api_base_url", "client_name",
+                "project_id", "session_id", "human_id",
+            )
+            if key in kwargs
+        }
+        if wrapper_kwargs:
             kwargs["api_wrapper"] = TavilyResearchAPIWrapper(**wrapper_kwargs)
 
         super().__init__(**kwargs)

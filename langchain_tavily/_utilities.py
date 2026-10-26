@@ -17,11 +17,38 @@ from pydantic import BaseModel, ConfigDict, SecretStr, model_validator
 TAVILY_API_URL: str = "https://api.tavily.com"
 
 
+def _request_headers(
+    api_key: SecretStr,
+    client_name: str,
+    project_id: Optional[str],
+    session_id: Optional[str],
+    human_id: Optional[str],
+) -> Dict[str, str]:
+    headers = {
+        "Authorization": f"Bearer {api_key.get_secret_value()}",
+        "Content-Type": "application/json",
+        "X-Client-Source": "api",
+        "X-Client-Name": client_name,
+    }
+    for name, value in (
+        ("X-Project-ID", project_id),
+        ("X-Session-Id", session_id),
+        ("X-Human-Id", human_id),
+    ):
+        if value is not None:
+            headers[name] = value
+    return headers
+
+
 class TavilySearchAPIWrapper(BaseModel):
     """Wrapper for Tavily Search API."""
 
     tavily_api_key: SecretStr
     api_base_url: Optional[str] = None
+    client_name: str = "langchain-tavily"
+    project_id: Optional[str] = None
+    session_id: Optional[str] = None
+    human_id: Optional[str] = None
 
     model_config = ConfigDict(
         extra="forbid",
@@ -85,11 +112,10 @@ class TavilySearchAPIWrapper(BaseModel):
         # Remove None values
         params = {k: v for k, v in params.items() if v is not None}
 
-        headers = {
-            "Authorization": f"Bearer {self.tavily_api_key.get_secret_value()}",
-            "Content-Type": "application/json",
-            "X-Client-Source": "langchain-tavily",
-        }
+        headers = _request_headers(
+            self.tavily_api_key, self.client_name, self.project_id,
+            self.session_id, self.human_id,
+        )
         base_url = self.api_base_url or TAVILY_API_URL
         response = requests.post(
             # type: ignore
@@ -156,11 +182,10 @@ class TavilySearchAPIWrapper(BaseModel):
             # Remove None values
             params = {k: v for k, v in params.items() if v is not None}
 
-            headers = {
-                "Authorization": f"Bearer {self.tavily_api_key.get_secret_value()}",
-                "Content-Type": "application/json",
-                "X-Client-Source": "langchain-tavily",
-            }
+            headers = _request_headers(
+                self.tavily_api_key, self.client_name, self.project_id,
+                self.session_id, self.human_id,
+            )
             base_url = self.api_base_url or TAVILY_API_URL
             async with aiohttp.ClientSession() as session:
                 async with session.post(
@@ -182,6 +207,10 @@ class TavilyExtractAPIWrapper(BaseModel):
 
     tavily_api_key: SecretStr
     api_base_url: Optional[str] = None
+    client_name: str = "langchain-tavily"
+    project_id: Optional[str] = None
+    session_id: Optional[str] = None
+    human_id: Optional[str] = None
 
     model_config = ConfigDict(
         extra="forbid",
@@ -225,11 +254,10 @@ class TavilyExtractAPIWrapper(BaseModel):
         # Remove None values
         params = {k: v for k, v in params.items() if v is not None}
 
-        headers = {
-            "Authorization": f"Bearer {self.tavily_api_key.get_secret_value()}",
-            "Content-Type": "application/json",
-            "X-Client-Source": "langchain-tavily",
-        }
+        headers = _request_headers(
+            self.tavily_api_key, self.client_name, self.project_id,
+            self.session_id, self.human_id,
+        )
 
         base_url = self.api_base_url or TAVILY_API_URL
         response = requests.post(
@@ -278,11 +306,10 @@ class TavilyExtractAPIWrapper(BaseModel):
             # Remove None values
             params = {k: v for k, v in params.items() if v is not None}
 
-            headers = {
-                "Authorization": f"Bearer {self.tavily_api_key.get_secret_value()}",
-                "Content-Type": "application/json",
-                "X-Client-Source": "langchain-tavily",
-            }
+            headers = _request_headers(
+                self.tavily_api_key, self.client_name, self.project_id,
+                self.session_id, self.human_id,
+            )
 
             base_url = self.api_base_url or TAVILY_API_URL
             async with aiohttp.ClientSession() as session:
@@ -305,6 +332,10 @@ class TavilyCrawlAPIWrapper(BaseModel):
 
     tavily_api_key: SecretStr
     api_base_url: Optional[str] = None
+    client_name: str = "langchain-tavily"
+    project_id: Optional[str] = None
+    session_id: Optional[str] = None
+    human_id: Optional[str] = None
 
     model_config = ConfigDict(
         extra="forbid",
@@ -380,11 +411,10 @@ class TavilyCrawlAPIWrapper(BaseModel):
         # Remove None values
         params = {k: v for k, v in params.items() if v is not None}
 
-        headers = {
-            "Authorization": f"Bearer {self.tavily_api_key.get_secret_value()}",
-            "Content-Type": "application/json",
-            "X-Client-Source": "langchain-tavily",
-        }
+        headers = _request_headers(
+            self.tavily_api_key, self.client_name, self.project_id,
+            self.session_id, self.human_id,
+        )
 
         base_url = self.api_base_url or TAVILY_API_URL
         response = requests.post(
@@ -465,11 +495,10 @@ class TavilyCrawlAPIWrapper(BaseModel):
             # Remove None values
             params = {k: v for k, v in params.items() if v is not None}
 
-            headers = {
-                "Authorization": f"Bearer {self.tavily_api_key.get_secret_value()}",
-                "Content-Type": "application/json",
-                "X-Client-Source": "langchain-tavily",
-            }
+            headers = _request_headers(
+                self.tavily_api_key, self.client_name, self.project_id,
+                self.session_id, self.human_id,
+            )
 
             base_url = self.api_base_url or TAVILY_API_URL
             async with aiohttp.ClientSession() as session:
@@ -492,6 +521,10 @@ class TavilyMapAPIWrapper(BaseModel):
 
     tavily_api_key: SecretStr
     api_base_url: Optional[str] = None
+    client_name: str = "langchain-tavily"
+    project_id: Optional[str] = None
+    session_id: Optional[str] = None
+    human_id: Optional[str] = None
 
     model_config = ConfigDict(
         extra="forbid",
@@ -557,11 +590,10 @@ class TavilyMapAPIWrapper(BaseModel):
         # Remove None values
         params = {k: v for k, v in params.items() if v is not None}
 
-        headers = {
-            "Authorization": f"Bearer {self.tavily_api_key.get_secret_value()}",
-            "Content-Type": "application/json",
-            "X-Client-Source": "langchain-tavily",
-        }
+        headers = _request_headers(
+            self.tavily_api_key, self.client_name, self.project_id,
+            self.session_id, self.human_id,
+        )
 
         base_url = self.api_base_url or TAVILY_API_URL
         response = requests.post(
@@ -632,11 +664,10 @@ class TavilyMapAPIWrapper(BaseModel):
             # Remove None values
             params = {k: v for k, v in params.items() if v is not None}
 
-            headers = {
-                "Authorization": f"Bearer {self.tavily_api_key.get_secret_value()}",
-                "Content-Type": "application/json",
-                "X-Client-Source": "langchain-tavily",
-            }
+            headers = _request_headers(
+                self.tavily_api_key, self.client_name, self.project_id,
+                self.session_id, self.human_id,
+            )
             base_url = self.api_base_url or TAVILY_API_URL
             async with aiohttp.ClientSession() as session:
                 async with session.post(
@@ -658,6 +689,10 @@ class TavilyResearchAPIWrapper(BaseModel):
 
     tavily_api_key: SecretStr
     api_base_url: Optional[str] = None
+    client_name: str = "langchain-tavily"
+    project_id: Optional[str] = None
+    session_id: Optional[str] = None
+    human_id: Optional[str] = None
 
     model_config = ConfigDict(
         extra="forbid",
@@ -695,11 +730,10 @@ class TavilyResearchAPIWrapper(BaseModel):
         # Remove None values
         params = {k: v for k, v in params.items() if v is not None}
 
-        headers = {
-            "Authorization": f"Bearer {self.tavily_api_key.get_secret_value()}",
-            "Content-Type": "application/json",
-            "X-Client-Source": "langchain-tavily",
-        }
+        headers = _request_headers(
+            self.tavily_api_key, self.client_name, self.project_id,
+            self.session_id, self.human_id,
+        )
         base_url = self.api_base_url or TAVILY_API_URL
         
         if stream:
@@ -733,7 +767,7 @@ class TavilyResearchAPIWrapper(BaseModel):
                 json=params,
                 headers=headers,
             )
-            if response.status_code != 200:
+            if response.status_code not in (200, 201):
                 detail = response.json().get("detail", {})
                 error_message = (
                     detail.get("error") if isinstance(detail, dict) else "Unknown error"
@@ -764,11 +798,10 @@ class TavilyResearchAPIWrapper(BaseModel):
         # Remove None values
         params = {k: v for k, v in params.items() if v is not None}
 
-        headers = {
-            "Authorization": f"Bearer {self.tavily_api_key.get_secret_value()}",
-            "Content-Type": "application/json",
-            "X-Client-Source": "langchain-tavily",
-        }
+        headers = _request_headers(
+            self.tavily_api_key, self.client_name, self.project_id,
+            self.session_id, self.human_id,
+        )
 
         base_url = self.api_base_url or TAVILY_API_URL
         
@@ -799,7 +832,7 @@ class TavilyResearchAPIWrapper(BaseModel):
                 async with session.post(
                     f"{base_url}/research", json=params, headers=headers
                 ) as res:
-                    if res.status == 200:
+                    if res.status in (200, 201):
                         data = await res.text()
                         return data
                     else:
@@ -814,11 +847,10 @@ class TavilyResearchAPIWrapper(BaseModel):
         request_id: str,
     ) -> Dict[str, Any]:
         """Get research results by request_id."""
-        headers = {
-            "Authorization": f"Bearer {self.tavily_api_key.get_secret_value()}",
-            "Content-Type": "application/json",
-            "X-Client-Source": "langchain-tavily",
-        }
+        headers = _request_headers(
+            self.tavily_api_key, self.client_name, self.project_id,
+            self.session_id, self.human_id,
+        )
         base_url = self.api_base_url or TAVILY_API_URL
         response = requests.get(
             # type: ignore
@@ -838,11 +870,10 @@ class TavilyResearchAPIWrapper(BaseModel):
         request_id: str,
     ) -> Dict[str, Any]:
         """Get research results by request_id asynchronously."""
-        headers = {
-            "Authorization": f"Bearer {self.tavily_api_key.get_secret_value()}",
-            "Content-Type": "application/json",
-            "X-Client-Source": "langchain-tavily",
-        }
+        headers = _request_headers(
+            self.tavily_api_key, self.client_name, self.project_id,
+            self.session_id, self.human_id,
+        )
         base_url = self.api_base_url or TAVILY_API_URL
         async with aiohttp.ClientSession() as session:
             async with session.get(

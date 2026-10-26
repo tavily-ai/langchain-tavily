@@ -32,6 +32,11 @@ if not os.environ.get("TAVILY_API_KEY"):
     os.environ["TAVILY_API_KEY"] = getpass.getpass("Tavily API key:\n")
 ```
 
+All tools accept optional `client_name`, `project_id`, `session_id`, and `human_id`
+constructor arguments. These are sent as request headers, not tool arguments.
+`client_name` defaults to `langchain-tavily`; direct HTTP requests use the `api`
+access source. `api_base_url` can point to a compatible proxy.
+
 ## Tavily Search
 
 Here we show how to instantiate an instance of the Tavily search tool. The tool accepts various parameters to customize the search. After instantiation we invoke the tool with a simple query. This tool allows you to complete search queries using Tavily's Search API endpoint.
@@ -52,6 +57,11 @@ The tool accepts various parameters during instantiation:
 - `time_range` (optional, str): The time range back from the current date to filter results - "day", "week", "month", or "year". Default is None.
 - `include_domains` (optional, List[str]): List of domains to specifically include. Default is None.
 - `exclude_domains` (optional, List[str]): List of domains to specifically exclude. Default is None.
+- `include_domains_mode` (optional, str): `restrict` (default API behavior) limits results to `include_domains`; `prefer` also allows other domains. Requires `include_domains`.
+- `language` and `filter_by_language`: Boost a language, or strictly filter to it when the flag is true.
+- `safe_search` (optional, bool): Filter unsafe results; unavailable with `fast` and `ultra-fast` depths.
+- `chunks_per_source` (optional, int): 1–3 chunks for `basic`, `advanced`, or `fast` search.
+- `include_published_date` (optional, bool, beta) and `filter_by_published_date` (optional, bool): Return estimated dates or remove undated/out-of-window results.
 - `country` (optional, str): Boost search results from a specific country. This will prioritize content from the selected country in the search results. Available only if topic is general.
 
 For a comprehensive overview of the available parameters, refer to the [Tavily Search API documentation](https://docs.tavily.com/documentation/api-reference/endpoint/search)
@@ -223,6 +233,8 @@ output:
 }
 ```
 
+Extract accepts `timeout` (1–60 seconds) and `chunks_per_source` (1–5 with `query`) at construction or invocation. These control the API operation, not the HTTP transport timeout.
+
 ## Tavily Crawl
 
 Here we show how to instantiate an instance of the Tavily crawl tool. After instantiation we invoke the tool with a URL. This tool allows you to crawl websites using Tavily's Crawl API endpoint.
@@ -374,6 +386,8 @@ output:
 }
 ```
 
+Crawl and Map accept an API `timeout` of 10–150 seconds at construction or invocation. Crawl also accepts `chunks_per_source` (1–5 with `instructions`).
+
 ## Tavily Research
 
 Here we show how to instantiate an instance of the Tavily Research tool. After instantiation we invoke the tool with a research task description. This tool allows you to create comprehensive research reports on any topic using Tavily's Research API endpoint.
@@ -385,6 +399,9 @@ The tool accepts various parameters during instantiation:
 - `model` (optional, str): The model used by the research agent. Can be "mini" (quick, surface-level), "pro" (comprehensive, in-depth), or "auto" (automatically determined). Default is "auto".
 - `output_schema` (optional, dict): JSON Schema dict for structured output format. Default is None (returns unstructured text content).
 - `stream` (optional, bool): Whether to stream the research task results. Default is False.
+- `include_domains` / `exclude_domains` (optional, List[str]): Up to 20 domains each. Included domains are preferred, not a hard filter; excluded domains are blocked.
+- `output_length` (optional, str): `short`, `standard`, or `long`.
+- `files` (optional, List[dict]): Supporting files in the [Research API format](https://docs.tavily.com/documentation/api-reference/endpoint/research).
 - `citation_format` (optional, str): Citation format for sources in the research report. Can be "numbered", "mla", "apa", or "chicago". Default is "numbered".
 
 For a comprehensive overview of the available parameters, refer to the [Tavily Research API documentation](https://docs.tavily.com/documentation/api-reference/endpoint/research)
