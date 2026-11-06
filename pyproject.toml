@@ -17,8 +17,8 @@ disallow_untyped_defs = "True"
 
 [tool.poetry.dependencies]
 python = ">=3.10,<4.0"
-langchain-core = "==1.4.6"
-langchain = "==1.3.9"
+langchain-core = "==1.7.6"
+langchain = "==1.4.9"
 aiohttp = "^3.11.14"
 requests = "^2.32.3"
 
