@@ -385,10 +385,10 @@ class TavilyCrawl(BaseTool):  # type: ignore[override]
                 if self.exclude_domains
                 else exclude_domains,
                 allow_external=self.allow_external
-                if self.allow_external
+                if self.allow_external is not None
                 else allow_external,
                 include_images=self.include_images
-                if self.include_images
+                if self.include_images is not None
                 else include_images,
                 categories=self.categories if self.categories else categories,
                 extract_depth=self.extract_depth
@@ -488,10 +488,10 @@ class TavilyCrawl(BaseTool):  # type: ignore[override]
                 if self.exclude_domains
                 else exclude_domains,
                 allow_external=self.allow_external
-                if self.allow_external
+                if self.allow_external is not None
                 else allow_external,
                 include_images=self.include_images
-                if self.include_images
+                if self.include_images is not None
                 else include_images,
                 categories=self.categories if self.categories else categories,
                 extract_depth=self.extract_depth

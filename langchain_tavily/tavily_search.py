@@ -391,7 +391,7 @@ class TavilySearch(BaseTool):  # type: ignore[override]
                 else exclude_domains,
                 search_depth=self.search_depth if self.search_depth else search_depth,
                 include_images=self.include_images
-                if self.include_images
+                if self.include_images is not None
                 else include_images,
                 time_range=self.time_range if self.time_range else time_range,
                 topic=self.topic if self.topic else topic,
@@ -471,7 +471,7 @@ class TavilySearch(BaseTool):  # type: ignore[override]
                 else exclude_domains,
                 search_depth=self.search_depth if self.search_depth else search_depth,
                 include_images=self.include_images
-                if self.include_images
+                if self.include_images is not None
                 else include_images,
                 time_range=self.time_range if self.time_range else time_range,
                 topic=self.topic if self.topic else topic,

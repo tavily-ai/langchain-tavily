@@ -162,7 +162,7 @@ class TavilyExtract(BaseTool):  # type: ignore[override, override]
                 if self.extract_depth
                 else extract_depth,
                 include_images=self.include_images
-                if self.include_images
+                if self.include_images is not None
                 else include_images,
                 include_favicon=self.include_favicon,
                 format=self.format,
@@ -223,7 +223,7 @@ class TavilyExtract(BaseTool):  # type: ignore[override, override]
                 if self.extract_depth
                 else extract_depth,
                 include_images=self.include_images
-                if self.include_images
+                if self.include_images is not None
                 else include_images,
                 include_favicon=self.include_favicon,
                 format=self.format,

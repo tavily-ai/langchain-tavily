@@ -343,7 +343,7 @@ class TavilyMap(BaseTool):  # type: ignore[override]
                 if self.exclude_domains
                 else exclude_domains,
                 allow_external=self.allow_external
-                if self.allow_external
+                if self.allow_external is not None
                 else allow_external,
                 categories=self.categories if self.categories else categories,
                 include_usage=self.include_usage,
@@ -435,7 +435,7 @@ class TavilyMap(BaseTool):  # type: ignore[override]
                 if self.exclude_domains
                 else exclude_domains,
                 allow_external=self.allow_external
-                if self.allow_external
+                if self.allow_external is not None
                 else allow_external,
                 categories=self.categories if self.categories else categories,
                 include_usage=self.include_usage,
